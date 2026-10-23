@@ -18,9 +18,7 @@ export function HowToSteps({
             >
               {i + 1}
             </span>
-            <span className="pt-1 text-text">
-              {s}
-            </span>
+            <span className="pt-1 text-text">{s}</span>
           </li>
         ))}
       </ol>

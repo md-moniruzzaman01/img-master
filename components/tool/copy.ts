@@ -33,8 +33,7 @@ export const copy = {
   resizedToTarget: (w: number, h: number, targetKB: number) =>
     `Resized to ${w} × ${h} px to reach ${targetText(targetKB)}.`,
   resized: (w: number, h: number) => `Resized to ${w} × ${h} px.`, // invented (max width)
-  bigImage:
-    'This photo is very large, so we reduced its dimensions first to keep your phone fast.',
+  bigImage: 'This photo is very large, so we reduced its dimensions first to keep your phone fast.',
   flattened: 'Transparent areas were filled with your background color.', // invented
   notSmaller: "We couldn't make this file smaller. Try JPG or WebP, or a lower quality.", // invented
   animationDropped: 'This was an animation. We kept the first frame.', // invented
@@ -47,9 +46,9 @@ export const copy = {
   smallestReached: (bytes: number) => `The smallest we could reach was ${formatBytes(bytes)}.`, // invented
   notAnImage: "We can't open this file. Try a JPG, PNG or WebP image.",
   tooMany: (max: number) => `You can add up to ${max} images at once. We took the first ${max}.`,
-  webpUnsupported:
-    "Your browser can't save WebP files yet. Try Chrome or Firefox, or choose JPG.",
-  outOfMemory: 'This photo is too large for your device right now. Close other apps or tabs and try again.', // invented
+  webpUnsupported: "Your browser can't save WebP files yet. Try Chrome or Firefox, or choose JPG.",
+  outOfMemory:
+    'This photo is too large for your device right now. Close other apps or tabs and try again.', // invented
   unknownError: 'Something went wrong with this image. Please try again.', // invented
   engineLoadFailed: "We couldn't start the image tool. Check your connection and reload the page.", // invented
 
@@ -64,6 +63,7 @@ export const copy = {
   savedIos: 'Ready — use Share to save to Photos',
 
   results: 'Results',
+  resultsPlaceholder: 'Your images will show here',
   moreOptions: 'More options',
   optionsChanged: 'Your new options are ready.', // invented
   applyTo: (n: number) => `Apply to ${n} images`, // invented

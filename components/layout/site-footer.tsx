@@ -23,7 +23,10 @@ export function SiteFooter({ groups }: { groups: ToolNavGroup[] }) {
             <nav key={g.category} aria-label={`${g.label} tools`}>
               <h2 className="mb-1 type-caption tracking-wide text-muted uppercase">
                 {g.hubHref ? (
-                  <Link href={g.hubHref} className="inline-flex min-h-12 items-center hover:text-text lg:min-h-10">
+                  <Link
+                    href={g.hubHref}
+                    className="inline-flex min-h-12 items-center hover:text-text lg:min-h-10"
+                  >
                     {g.label}
                   </Link>
                 ) : (

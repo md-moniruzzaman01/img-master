@@ -51,6 +51,7 @@ export function ResultCard({
   showDownload,
   onDownload,
   reserve,
+  ghost = false,
 }: {
   item: ResultItem;
   /** Output name, unique within the batch (defaults to the engine's name). */
@@ -65,6 +66,8 @@ export function ResultCard({
   onDownload: () => void;
   /** What the skeleton should hold space for (DESIGN.md §8: no shift when results land). */
   reserve?: CardReserve;
+  /** Invisible stand-in that holds the idle placeholder's height (no QA hooks). */
+  ghost?: boolean;
 }) {
   const { status, result: r, file } = item;
   const busy = status === 'queued' || status === 'processing';
@@ -85,7 +88,7 @@ export function ResultCard({
   return (
     <article
       ref={ref}
-      data-testid="result-card"
+      data-testid={ghost ? undefined : 'result-card'}
       data-status={status}
       data-input-bytes={file.size}
       data-output-bytes={r?.outputBytes}
@@ -119,7 +122,11 @@ export function ResultCard({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p data-testid="file-name" className="truncate font-semibold text-text" title={name}>
+        <p
+          data-testid={ghost ? undefined : 'file-name'}
+          className="truncate font-semibold text-text"
+          title={name}
+        >
           {name}
         </p>
 

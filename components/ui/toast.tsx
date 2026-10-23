@@ -15,13 +15,7 @@ export interface ToastMessage {
  * screen readers pick up new messages; it hides itself after 3 s.
  * Sits above the sticky action bar on mobile.
  */
-export function Toast({
-  message,
-  onDone,
-}: {
-  message: ToastMessage | null;
-  onDone: () => void;
-}) {
+export function Toast({ message, onDone }: { message: ToastMessage | null; onDone: () => void }) {
   useEffect(() => {
     if (!message) return;
     const t = setTimeout(onDone, 3000);
