@@ -184,6 +184,10 @@ constants: Q_MAX = 0.92, Q_FLOOR = 0.45, Q_HARD_FLOOR = 0.15,
 8. Stop at MAX_ENCODES total and return the best result under target, or throw.
 ```
 
+Approved changes (owner, 2026-10-23):
+- **Probe before step 1:** for inputs over 2 MP, first encode a ~1 MP copy at Q_MAX. If a conservative estimate from it (× pixel ratio × 0.3) is still over the target, skip the full-size check. The probe counts toward MAX_ENCODES and is never returned as a result.
+- **Faster shrinking in step 5:** scale by `min(SCALE_STEP, √(target / bytes))` instead of always SCALE_STEP, clamped so the short side stays ≥ MIN_SIDE.
+
 Notes:
 - Report progress after each encode (`stage: 'search'`, ratio = encodes / MAX_ENCODES as an upper bound).
 - Check the cancel flag between encodes.

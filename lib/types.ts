@@ -131,7 +131,8 @@ export type EngineNote =
   | 'downscaled-for-memory' // input over the pixel cap, reduced before processing
   | 'transparency-flattened' // alpha filled with the background color for JPG
   | 'already-small' // input was already under target; returned a clean re-encode
-  | 'animation-dropped'; // animated input, first frame used
+  | 'animation-dropped' // animated input, first frame used
+  | 'not-smaller'; // compress: no smaller version was possible (output ≥ input size)
 
 export interface EngineResult {
   blob: Blob;

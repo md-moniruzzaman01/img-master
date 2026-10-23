@@ -19,7 +19,7 @@ Read these before starting any task:
 3. **Tool first.** On every tool page the file picker is visible without scrolling on a 360×640 screen.
 4. **Static HTML.** Every page is statically generated, and its text content is in the HTML (not rendered only by client JavaScript).
 5. **One source of truth for pages.** `lib/tools/registry.ts` (structure) plus `content/pages/*.ts` (text). Never hard-code a tool page.
-6. **Performance budget.** First-load JavaScript on a tool page ≤ 90 KB gzipped (the worker and any lazy encoders don't count). Lighthouse mobile ≥ 95 in every category.
+6. **Performance budget.** Lighthouse mobile ≥ 95 in every category is the hard gate. Our own first-load JavaScript on a tool page (everything except the Next.js/React framework chunks and the `noModule` polyfill) ≤ 30 KB gzipped; the worker and any lazy encoders don't count. (Changed from "all first-load JS ≤ 90 KB" with owner approval on 2026-10-23: the Next.js 16 + React 19 framework alone is about 135 KB gzipped.)
 7. **No new dependency without asking the owner.**
    - Allowed runtime: `next`, `react`, `react-dom`, `fflate`.
    - Allowed dev: `typescript`, `tailwindcss` and its PostCSS plugin, `eslint` + Next config, `prettier`, `vitest`, `@playwright/test`, `@axe-core/playwright`, `@lhci/cli`.
