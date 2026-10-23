@@ -13,7 +13,7 @@ import {
   toPlainText,
 } from '@/lib/seo/metadata';
 import { siteConfig } from '@/lib/site-config';
-import { getBreadcrumbs, getLiveToolPage, getLiveTools, tools } from '@/lib/tools';
+import { getBreadcrumbs, getLiveToolPage, getLiveTools, getToolContent, tools } from '@/lib/tools';
 
 const origin = siteConfig.url.replace(/\/+$/, '');
 const live = getLiveTools().map((t) => getLiveToolPage(t.slug));
@@ -38,7 +38,7 @@ describe('absoluteUrl', () => {
   it('builds canonical URLs without trailing slashes', () => {
     expect(absoluteUrl('/webp-to-jpg')).toBe(`${origin}/webp-to-jpg`);
     expect(absoluteUrl('webp-to-jpg/')).toBe(`${origin}/webp-to-jpg`);
-    expect(absoluteUrl('/')).toBe(`${origin}/`);
+    expect(absoluteUrl('/')).toBe(origin);
   });
 
   it('turns inline syntax into plain text', () => {
@@ -137,12 +137,38 @@ describe('sitemap and robots', () => {
 
   it('lists exactly home, every live tool and the legal pages', () => {
     const expected = [
-      `${origin}/`,
+      origin,
       ...getLiveTools().map((t) => `${origin}/${t.slug}`),
       ...Object.keys(legalContent).map((s) => `${origin}/${s}`),
     ];
     expect([...urls].sort()).toEqual([...expected].sort());
     expect(new Set(urls).size).toBe(urls.length);
+  });
+
+  it('uses one home URL form in the sitemap, canonical and og:url (QA-07)', () => {
+    const m = buildPageMetadata({ title: 'Home | Img Master', description: 'x', path: '/' });
+    expect(urls).toContain(origin);
+    expect(urls).not.toContain(`${origin}/`);
+    expect(m.alternates?.canonical).toBe(origin);
+    expect((m.openGraph as { url?: string }).url).toBe(origin);
+  });
+
+  it('gives site pages the shared Open Graph and Twitter image (QA-05)', () => {
+    const m = buildPageMetadata({ title: 'About | Img Master', description: 'x', path: '/about' });
+    const og = (m.openGraph as { images?: { url: string }[] }).images ?? [];
+    const tw = (m.twitter as { images?: { url: string }[] }).images ?? [];
+    expect(og[0]?.url).toBe(`${origin}/opengraph-image`);
+    expect(tw[0]?.url).toBe(`${origin}/opengraph-image`);
+  });
+
+  it('leaves tool pages to their own opengraph-image file', () => {
+    for (const tool of getLiveTools()) {
+      const content = getToolContent(tool.slug);
+      if (!content) continue;
+      const m = buildToolMetadata(tool, content);
+      expect((m.openGraph as { images?: unknown }).images, tool.slug).toBeUndefined();
+      expect((m.twitter as { images?: unknown }).images, tool.slug).toBeUndefined();
+    }
   });
 
   it('never lists draft tools', () => {

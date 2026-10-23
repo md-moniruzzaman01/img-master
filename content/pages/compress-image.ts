@@ -50,7 +50,7 @@ export const content: ToolContent = {
           [
             '[Compress image to 50KB](/compress-image-to-50kb)',
             'Under 50KB',
-            'Passport-style photos for applications',
+            'Profile photos for online forms',
           ],
           [
             '[Compress image to 100KB](/compress-image-to-100kb)',

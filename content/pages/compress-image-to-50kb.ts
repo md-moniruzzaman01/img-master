@@ -29,7 +29,7 @@ export const content: ToolContent = {
     {
       heading: 'Why so many forms ask for a 50KB photo',
       paragraphs: [
-        'If you need to compress an image to 50KB, an online form is probably the reason. Application, admission and job websites store a lot of photos, so they set a small size limit. 50KB is a common one for a passport-style photo. The exact rule is different for each form, so always read the instructions on the form itself.',
+        'If you need to compress an image to 50KB, an online form is probably the reason. Application, admission and job websites store a lot of photos, so they set a small size limit. Many forms set a limit such as 50KB for a photo. The exact rule is different for each form, so always read the instructions on the form itself.',
         'This page gives you a JPG that is under the limit. JPG is the format that nearly every form accepts.',
       ],
     },
