@@ -1,15 +1,283 @@
-/* Phase 0 placeholder. ui-builder owns this file and adds the design tokens (DESIGN.md §2). */
+/* Img Master design tokens and base styles (docs/DESIGN.md §2). Owned by ui-builder.
+   Components use the Tailwind names (bg-surface, text-muted…), never raw hex. */
 @import 'tailwindcss';
 
-body {
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    'Noto Sans',
-    'Noto Sans Bengali',
-    Arial,
-    sans-serif;
+/* Desktop-only affordances (drag and drop, paste) key off a fine pointer. */
+@custom-variant fine-pointer (@media (pointer: fine));
+
+/* ── Color tokens ─────────────────────────────────────────────────── */
+:root {
+  color-scheme: light dark;
+
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-2: #eef0f4;
+  --border: #e2e5eb;
+  /* Not in DESIGN.md: input/switch outlines need 3:1 against the page (WCAG 1.4.11). */
+  --border-strong: #7c8595;
+  --text: #0f172a;
+  --text-muted: #5b6474;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --on-primary: #ffffff;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --focus: #4338ca;
+
+  --scrim: rgb(15 23 42 / 0.5);
+  --shadow-color: rgb(15 23 42 / 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0d12;
+    --surface: #151821;
+    --surface-2: #1d2130;
+    --border: #2a2f3d;
+    --border-strong: #6b7387;
+    --text: #e8eaf0;
+    --text-muted: #9aa3b5;
+    --primary: #818cf8;
+    --primary-hover: #a5b4fc;
+    --on-primary: #0b0d12;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --focus: #a5b4fc;
+
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-color: rgb(0 0 0 / 0.5);
+  }
+}
+
+/* ── Tailwind theme mapping ───────────────────────────────────────── */
+@theme inline {
+  /* Only our tokens exist as colors: no stray palette colors in components. */
+  --color-*: initial;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+  --color-scrim: var(--scrim);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Bengali',
+    Arial, sans-serif;
+
+  --radius-card: 12px;
+  --radius-control: 10px;
+
+  --shadow-raised: 0 -4px 16px var(--shadow-color);
+  --shadow-sheet: 0 8px 32px var(--shadow-color);
+  --shadow-toast: 0 4px 16px var(--shadow-color);
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ── Type scale (mobile → desktop ≥ 1024px) ──────────────────────── */
+@utility type-h1 {
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  @media (width >= 64rem) {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+}
+@utility type-h2 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 650;
+  @media (width >= 64rem) {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+@utility type-h3 {
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  @media (width >= 64rem) {
+    font-size: 1.125rem;
+    line-height: 1.625rem;
+  }
+}
+@utility type-body {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  @media (width >= 64rem) {
+    line-height: 1.625rem;
+  }
+}
+@utility type-small {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+@utility type-caption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+}
+
+/* Transparent images sit on a checkerboard. */
+@utility checkerboard {
+  background-color: var(--bg);
+  background-image: conic-gradient(
+    var(--surface-2) 25%,
+    transparent 0 50%,
+    var(--surface-2) 0 75%,
+    transparent 0
+  );
+  background-size: 16px 16px;
+}
+
+/* Horizontal scrollers fade at the trailing edge on mobile. */
+@utility fade-end {
+  mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  @media (width >= 40rem) {
+    mask-image: none;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Range slider (components/ui/slider.tsx) ─────────────────────── */
+@layer components {
+  .im-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      var(--primary) var(--pct, 50%),
+      var(--surface-2) var(--pct, 50%)
+    );
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  .im-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -9px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--primary);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .im-range::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface-2);
+  }
+  .im-range::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--primary);
+  }
+  .im-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--primary);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    overflow-wrap: break-word;
+  }
+
+  @media (width >= 64rem) {
+    body {
+      line-height: 1.625rem;
+    }
+  }
+
+  /* Inputs never smaller than 16px (prevents iOS zoom on focus). */
+  input,
+  select,
+  textarea {
+    font-size: max(1rem, 1em);
+  }
+
+  /* Focus ring on keyboard focus only. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* While the sticky action bar is on screen (mobile), keep the page end reachable. */
+  html.has-action-bar body {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+  @media (width >= 48rem) {
+    html.has-action-bar body {
+      padding-bottom: 0;
+    }
+  }
+
+  html.sheet-open {
+    overflow: hidden;
+  }
+
+  dialog {
+    color: inherit;
+  }
+
+  summary {
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-duration: 0s !important;
+      animation-duration: 0s !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
