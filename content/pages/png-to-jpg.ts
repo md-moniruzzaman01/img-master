@@ -23,12 +23,13 @@ export const content: ToolContent = {
     'It turns into a JPG right away. Transparent parts become white unless you pick a color.',
     'Download the JPG, or share it to another app.',
   ],
+  howToHeading: 'How to convert PNG to JPG',
   sections: [
     {
       heading: 'Why change PNG to JPG',
       paragraphs: [
         'Phones save screenshots as PNG, and some apps export pictures as PNG too. For photos, PNG files can be very large. Converting PNG to JPG usually makes the file much smaller, and JPG is the format most online forms ask for.',
-        'If a form says "JPG or JPEG only", this is the fix. Your image is converted on your own device and is not uploaded.',
+        'If a form says "JPG or JPEG only", this is the fix.',
       ],
     },
     {
@@ -53,7 +54,7 @@ export const content: ToolContent = {
   faqs: [
     {
       q: 'How do I convert a PNG to JPG on my phone?',
-      a: 'Open this page, tap Choose images and select the PNG. It becomes a JPG immediately. Tap Download, and the JPG is saved to your phone.',
+      a: 'Open this page, tap Choose images and select the PNG. It becomes a JPG immediately. Tap Download, and the JPG is saved to your phone. The PNG never leaves your device.',
     },
     {
       q: 'Why did my transparent background turn white?',
@@ -80,5 +81,5 @@ export const content: ToolContent = {
     'png-to-webp',
     'png-to-ico',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

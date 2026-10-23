@@ -26,6 +26,7 @@ export const content: ToolContent = {
     'It starts shrinking at once and stops just under 200KB.',
     'Look at the before and after sizes, then download or share it.',
   ],
+  howToHeading: 'How to compress an image to 200KB',
   sections: [
     {
       heading: 'Is 200KB enough for a good photo?',
@@ -78,7 +79,7 @@ export const content: ToolContent = {
     },
     {
       q: 'What happens to the location data in my photo?',
-      a: 'It is removed. Saving a new file drops the hidden details your camera adds, such as GPS location and the phone model. Your photo is also never uploaded, so it stays on your device.',
+      a: 'It is removed. Saving a new file drops the hidden details your camera adds, such as GPS location and the phone model. Your photo also never leaves your device.',
     },
   ],
   related: [
@@ -88,5 +89,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'jpg-to-webp',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

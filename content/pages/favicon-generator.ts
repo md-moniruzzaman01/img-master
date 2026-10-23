@@ -23,11 +23,12 @@ export const content: ToolContent = {
     'Check the preview in the browser tab and on the phone home screen.',
     'Download the ZIP, or copy the HTML snippet and add it to your site.',
   ],
+  howToHeading: 'How to use the favicon generator',
   sections: [
     {
       heading: 'What this favicon generator makes',
       paragraphs: [
-        'A favicon is the small icon shown in a browser tab, in bookmarks and on a phone home screen. One image is not enough for all of these places, so this favicon generator makes a full set from your picture. Your image stays on your device while it works.',
+        'A favicon is the small icon shown in a browser tab, in bookmarks and on a phone home screen. One image is not enough for all of these places, so this favicon generator makes a full set from your picture.',
         'The ZIP file contains the files below. A README.txt inside the ZIP repeats the HTML snippet, and the snippet is also shown on the page with a Copy button.',
       ],
       table: {
@@ -79,7 +80,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is my logo uploaded to a server?',
-      a: 'No. The icons are drawn by your browser, on your device. Nothing is sent to us or to any other service.',
+      a: 'No. The icons are drawn by your browser, so your logo never leaves your device. Nothing is sent to us or to any other service.',
     },
     {
       q: 'How do I add the favicon to my website?',
@@ -101,5 +102,5 @@ export const content: ToolContent = {
     'image-converter',
     'compress-image',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

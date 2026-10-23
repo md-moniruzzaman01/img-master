@@ -2,9 +2,9 @@
 import type { ToolContent } from '@/lib/types';
 import { toPlainText } from '@/lib/seo/url';
 
-/** All text shown below the tool (how it works, sections, tips, FAQs), as plain text. */
+/** All text shown below the tool (how-to heading and steps, sections, tips, FAQs), as plain text. */
 export function belowToolText(c: ToolContent): string {
-  const parts: string[] = [...c.howTo];
+  const parts: string[] = [...(c.howToHeading ? [c.howToHeading] : []), ...c.howTo];
   for (const s of c.sections) {
     parts.push(s.heading, ...s.paragraphs, ...(s.list ?? []));
     if (s.table) {
@@ -70,4 +70,10 @@ const LINK = /\[[^\]]+\]\(([^)]+)\)/g;
 export function allLinks(c: ToolContent): string[] {
   const tableCells = c.sections.flatMap((s) => (s.table ? s.table.rows.flat() : []));
   return [...inlineLinks(c), ...tableCells.flatMap((t) => [...t.matchAll(LINK)].map((m) => m[1]))];
+}
+
+/** True when the text is exactly one sentence ending in a full stop (no inner sentence breaks). */
+export function isOneSentence(text: string): boolean {
+  const t = text.trim();
+  return /[.]$/.test(t) && !/[.!?:;]\s+[A-Z0-9]/.test(t.slice(0, -1));
 }

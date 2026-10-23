@@ -23,6 +23,7 @@ export const content: ToolContent = {
     'It is changed to JPG the moment you pick it.',
     'Tap Download to keep the JPG, or Share to send it on.',
   ],
+  howToHeading: 'How to convert WebP to JPG',
   sections: [
     {
       heading: 'Why you got a WebP file',
@@ -84,5 +85,5 @@ export const content: ToolContent = {
     'compress-image-to-50kb',
     'jpg-to-webp',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

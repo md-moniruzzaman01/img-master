@@ -18,12 +18,13 @@ export const content: ToolContent = {
   description:
     'Reduce image file size by picking a target like 50KB or a quality level. Works with JPG, PNG and WebP on any phone. Free, private, no signup.',
   h1: 'Compress Image',
-  subtitle: 'Compress images to any size or quality you choose, free and without uploading them.',
+  subtitle: 'Compress images to an exact size like 100KB, or pick a quality level instead.',
   howTo: [
     'Choose your images. JPG, PNG, WebP and most other photos work.',
     'Pick a size such as 100KB, or switch to a quality level.',
     'Download the smaller file, or every file together as a ZIP.',
   ],
+  howToHeading: 'How to compress an image',
   sections: [
     {
       heading: 'Compress by size or by quality',
@@ -109,7 +110,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is it safe to compress private photos here?',
-      a: 'Yes. Compression runs in your own browser. Your photos are not uploaded, so they stay on your device.',
+      a: 'Yes. Compression runs in your own browser, so your photos never leave your device.',
     },
   ],
   related: [
@@ -120,5 +121,5 @@ export const content: ToolContent = {
     'image-converter',
     'png-to-jpg',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

@@ -25,6 +25,7 @@ export const content: ToolContent = {
     'The 50KB target is already on, so compression starts right away.',
     'Check the new size and dimensions, then tap Download or Share.',
   ],
+  howToHeading: 'How to compress an image to 50KB',
   sections: [
     {
       heading: 'Why so many forms ask for a 50KB photo',
@@ -34,7 +35,7 @@ export const content: ToolContent = {
       ],
     },
     {
-      heading: 'How to compress a photo to 50KB and keep your face clear',
+      heading: 'Take a photo that stays clear at 50KB',
       paragraphs: [
         'At 50KB there is enough room for a sharp face if the photo is simple. A plain photo spends its bytes on your face instead of on the background.',
       ],
@@ -83,7 +84,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Does the website keep a copy of my photo?',
-      a: 'No. Your photo is processed inside your browser and is never sent to us. When you close the page, the result is gone unless you downloaded it.',
+      a: 'No. Your photo is processed inside your browser and never leaves your device. When you close the page, the result is gone unless you downloaded it.',
     },
   ],
   related: [
@@ -93,5 +94,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'webp-to-jpg',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

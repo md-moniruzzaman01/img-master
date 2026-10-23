@@ -21,6 +21,7 @@ export const content: ToolContent = {
     'They are converted to WebP at once, at quality 90 unless you change it.',
     'Download all of them as a ZIP, or each file on its own.',
   ],
+  howToHeading: 'How to convert PNG to WebP',
   sections: [
     {
       heading: 'Why convert PNG to WebP for a website',
@@ -66,7 +67,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is there a limit on the number of files?',
-      a: `You can convert up to ${siteConfig.maxFiles} images in one batch, and there is no daily limit. The files are converted on your device, so nothing is uploaded.`,
+      a: `You can convert up to ${siteConfig.maxFiles} images in one batch, and there is no daily limit. The files are converted in your browser, so they never leave your device.`,
     },
   ],
   related: [
@@ -77,5 +78,5 @@ export const content: ToolContent = {
     'compress-image',
     'favicon-generator',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

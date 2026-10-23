@@ -22,6 +22,7 @@ export const content: ToolContent = {
     'The PNG is created as soon as the file is picked.',
     'Save it with Download. Picked several? Use Download all for a ZIP.',
   ],
+  howToHeading: 'How to convert JPG to PNG',
   sections: [
     {
       heading: 'Reasons to convert JPG to PNG',
@@ -51,7 +52,7 @@ export const content: ToolContent = {
     },
   ],
   tips: [
-    'Your photo is converted on your device. It is never uploaded.',
+    'The conversion runs in your browser, so your photo never leaves your device.',
     'Converting several photos? Pick them together. Each one keeps its name, so **holiday.jpg** becomes **holiday.png**.',
     'Picked a PNG by mistake? Use [PNG to JPG](/png-to-jpg) to go the other way.',
   ],
@@ -78,5 +79,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['png-to-jpg', 'webp-to-png', 'image-converter', 'compress-image', 'jpg-to-webp'],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

@@ -24,6 +24,7 @@ export const content: ToolContent = {
     'The 20KB size is already selected, so it starts shrinking at once.',
     'Tap Download to save the JPG, or Share to send it to another app.',
   ],
+  howToHeading: 'How to compress an image to 20KB',
   sections: [
     {
       heading: 'What fits in 20KB',
@@ -76,7 +77,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is my signature uploaded anywhere?',
-      a: 'No. The picture is processed by the browser on your own phone or computer. Nothing is sent to a server, which matters for something as personal as a signature.',
+      a: 'No. The browser on your own phone or computer does the work, so the picture never leaves your device. That matters for something as personal as a signature.',
     },
   ],
   related: [
@@ -86,5 +87,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'webp-to-jpg',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

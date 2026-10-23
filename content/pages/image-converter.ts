@@ -23,6 +23,7 @@ export const content: ToolContent = {
     'Pick JPG, PNG or WebP under Convert to.',
     'Download each converted file, or all of them as a ZIP.',
   ],
+  howToHeading: 'How to convert images online',
   sections: [
     {
       heading: 'Formats this image converter supports',
@@ -84,7 +85,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Are my images uploaded for conversion?',
-      a: 'No. The conversion is done by your browser on your device. No image is sent to our server or to any other service.',
+      a: 'No. Your browser does the conversion, so your images never leave your device. Nothing is sent to our server or to any other service.',
     },
   ],
   related: [
@@ -95,5 +96,5 @@ export const content: ToolContent = {
     'webp-to-png',
     'compress-image',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

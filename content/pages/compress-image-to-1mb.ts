@@ -24,6 +24,7 @@ export const content: ToolContent = {
     'The tool brings each file under 1MB on its own. There is nothing to set.',
     'Tap Download to save the smaller copy next to your original.',
   ],
+  howToHeading: 'How to compress an image to 1MB',
   sections: [
     {
       heading: 'What 1MB means when you compress an image',
@@ -73,7 +74,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Does my photo get uploaded to make it smaller?',
-      a: 'No. Your browser does the work on your own device. The photo is never sent to Img Master or anyone else.',
+      a: 'No. Your browser does the work, so the photo never leaves your device. It is not sent to Img Master or anyone else.',
     },
   ],
   related: [
@@ -83,5 +84,5 @@ export const content: ToolContent = {
     'jpg-to-webp',
     'image-converter',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

@@ -11,7 +11,7 @@ export const dynamic = 'force-static';
 
 export default async function Image() {
   return new ImageResponse(
-    <OgCard heading={homeContent.h1} tagline="Compress · Convert · No upload" />,
+    <OgCard heading={homeContent.h1} tagline="Compress · Convert · Favicons" />,
     { ...OG_SIZE },
   );
 }

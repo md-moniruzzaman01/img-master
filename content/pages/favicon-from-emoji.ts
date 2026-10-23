@@ -15,17 +15,18 @@ export const content: ToolContent = {
   description:
     'Pick one emoji and turn it into a website favicon with ICO, PNG and SVG files. Choose a background and shape, then download. Free, no upload.',
   h1: 'Favicon from Emoji',
-  subtitle: 'Make a favicon from emoji in a minute: pick one emoji, choose a shape and download.',
+  subtitle: 'Make a favicon from emoji by picking one emoji, a background color and a shape.',
   howTo: [
     'Open your emoji keyboard and type or paste one emoji.',
     'Choose a background color or transparent, and a shape.',
     'Download the ZIP, or copy the HTML snippet.',
   ],
+  howToHeading: 'How to make a favicon from an emoji',
   sections: [
     {
-      heading: 'How to make a favicon from an emoji',
+      heading: 'Using an emoji as your site icon',
       paragraphs: [
-        'An emoji is already a small, colorful picture, which makes it a good fit for a tab icon. Use it for a test site, a class project, a side project or a personal page. The emoji is drawn on your device, so nothing is uploaded.',
+        'An emoji is already a small, colorful picture, which makes it a good fit for a tab icon. Use it for a test site, a class project, a side project or a personal page.',
         'This page has no emoji menu. Use the emoji keyboard on your phone, or on a computer press the emoji shortcut of your system, then paste one emoji into the box. Choose one symbol only.',
       ],
     },
@@ -66,9 +67,9 @@ export const content: ToolContent = {
     },
     {
       q: 'Is the emoji sent to a server?',
-      a: 'No. Everything happens in your browser. No emoji and no file leaves your device.',
+      a: 'No. Everything happens in your browser, so the emoji and your files never leave your device.',
     },
   ],
   related: ['favicon-generator', 'favicon-from-text', 'png-to-ico', 'image-converter'],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

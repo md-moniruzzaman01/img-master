@@ -25,6 +25,7 @@ export const content: ToolContent = {
     'Each photo is compressed to below 500KB as soon as you pick it.',
     'Download them one at a time, or all at once in a ZIP file.',
   ],
+  howToHeading: 'How to compress an image to 500KB',
   sections: [
     {
       heading: 'Where a 500KB limit shows up',
@@ -75,7 +76,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Are my photos sent to a server?',
-      a: 'No. All the work happens in your browser, on your device. Your photos are not uploaded anywhere.',
+      a: 'No. All the work happens in your browser, so your photos never leave your device.',
     },
   ],
   related: [
@@ -85,5 +86,5 @@ export const content: ToolContent = {
     'jpg-to-webp',
     'png-to-webp',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

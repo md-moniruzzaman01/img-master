@@ -22,11 +22,12 @@ export const content: ToolContent = {
     'Pick the weight, text color, background color and shape. Watch the live preview.',
     'Download the ZIP, or copy the HTML snippet.',
   ],
+  howToHeading: 'How to make a favicon from text',
   sections: [
     {
       heading: 'Make a favicon from text without a logo',
       paragraphs: [
-        'A new blog or small project often has no logo. A letter on a colored background is a quick way to have an icon that people can find among their tabs. This page draws it for you, inside your browser, and nothing is uploaded.',
+        'A new blog or small project often has no logo. A letter on a colored background is a quick way to have an icon that people can find among their tabs. This page draws it for you in a few taps.',
         'You can use one to three characters. You can choose one of three font weights, the text color, the background color and the shape: square, rounded or circle. The padding control sets how much space surrounds the letters.',
       ],
     },
@@ -52,6 +53,7 @@ export const content: ToolContent = {
   ],
   tips: [
     'Match the background color to your site header, so the tab and the page look like one brand.',
+    'The icon is drawn in your browser, so your text and files never leave your device.',
   ],
   faqs: [
     {
@@ -76,5 +78,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['favicon-generator', 'favicon-from-emoji', 'png-to-ico', 'image-converter'],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

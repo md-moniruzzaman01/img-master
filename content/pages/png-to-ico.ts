@@ -23,11 +23,12 @@ export const content: ToolContent = {
     'The tool builds the ICO file right away.',
     'Download it, and rename it favicon.ico if you need that name.',
   ],
+  howToHeading: 'How to convert PNG to ICO',
   sections: [
     {
       heading: 'What a PNG to ICO converter does',
       paragraphs: [
-        'ICO is an icon format from Windows. One ICO file can hold several pictures of the same icon at different sizes. A PNG to ICO converter reads your PNG, makes smaller copies and puts them in one file. Your PNG is not uploaded.',
+        'ICO is an icon format from Windows. One ICO file can hold several pictures of the same icon at different sizes. A PNG to ICO converter reads your PNG, makes smaller copies and puts them in one file.',
         'This tool writes 16, 32 and 48 pixel versions. When your PNG is at least 256 pixels wide, it adds a 256 pixel version too. The download is named after your PNG, with the ending .ico.',
       ],
     },
@@ -71,7 +72,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is my PNG uploaded to make the ICO?',
-      a: 'No. Your browser builds the ICO on your own device. The PNG is not sent to us or to any other service.',
+      a: 'No. Your browser builds the ICO, so the PNG never leaves your device. It is not sent to us or to any other service.',
     },
   ],
   related: [
@@ -81,5 +82,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'png-to-webp',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

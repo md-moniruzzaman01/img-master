@@ -18,12 +18,13 @@ export const content: ToolContent = {
   description:
     'Make any photo or document scan smaller than 100KB on your phone. Text stays readable, hidden photo data is removed, and nothing is uploaded. Free.',
   h1: 'Compress Image to 100KB',
-  subtitle: 'Reduce a photo or scanned page to under 100KB with readable text, on your own device.',
+  subtitle: 'Reduce a photo or scanned page to under 100KB and keep the text readable.',
   howTo: [
     'Choose one or more images, such as a photo of a certificate.',
     'Each one is compressed to under 100KB without any extra taps.',
     'Save the result with Download, or attach it somewhere else with Share.',
   ],
+  howToHeading: 'How to compress an image to 100KB',
   sections: [
     {
       heading: 'When to compress an image to 100KB',
@@ -75,7 +76,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is it safe to compress my ID card here?',
-      a: 'Your image is processed only in your browser. It is not uploaded, not saved on a server, and not seen by anyone else.',
+      a: 'Yes. Your image is processed only in your browser, so it never leaves your device. It is not saved on a server or seen by anyone else.',
     },
   ],
   related: [
@@ -85,5 +86,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'image-converter',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

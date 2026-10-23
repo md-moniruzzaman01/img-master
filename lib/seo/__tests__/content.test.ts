@@ -10,6 +10,7 @@ import {
   belowToolText,
   containsKeyword,
   inlineLinks,
+  isOneSentence,
   overlap,
   shingles,
   wordCount,
@@ -101,8 +102,29 @@ describe('tool page content', () => {
     expect(containsKeyword(intro, c.primaryKeyword), `${slug} subtitle/intro`).toBe(true);
     // An H2 carries the keyword's distinctive words ("50kb", "webp … jpg", "converter").
     const key = c.primaryKeyword.split(' ').filter((w) => !['to', 'image', 'online'].includes(w));
-    const hit = c.sections.some((s) => key.every((w) => s.heading.toLowerCase().includes(w)));
+    // The how-to heading counts as an H2 too (it is rendered above the steps).
+    const h2s = [c.howToHeading ?? '', ...c.sections.map((s) => s.heading)];
+    const hit = h2s.some((h) => key.every((w) => h.toLowerCase().includes(w)));
     expect(hit, `${slug} H2 with ${key.join(' + ')}`).toBe(true);
+  });
+
+  it.each(pages)('%s: subtitle is one sentence', (slug, c) => {
+    expect(isOneSentence(c.subtitle), `${slug} subtitle: ${c.subtitle}`).toBe(true);
+  });
+
+  it.each(pages)('%s: has a page-specific how-to heading (≤ 70 chars)', (slug, c) => {
+    expect(c.howToHeading, `${slug} howToHeading`).toBeTruthy();
+    expect(c.howToHeading!.length).toBeLessThanOrEqual(70);
+    expect(c.howToHeading).not.toBe('How it works');
+    const others = c.sections.map((s) => s.heading.toLowerCase());
+    expect(others, `${slug} how-to heading repeats a section heading`).not.toContain(
+      c.howToHeading!.toLowerCase(),
+    );
+  });
+
+  it('how-to headings are unique across pages', () => {
+    const hs = pages.map(([, c]) => (c.howToHeading ?? '').toLowerCase());
+    expect(new Set(hs).size).toBe(hs.length);
   });
 
   it.each(pages)('%s: 400–800 words below the tool', (_slug, c) => {
@@ -163,9 +185,19 @@ describe('home and legal content', () => {
     expect(homeContent.title.length).toBeLessThanOrEqual(60);
     expect(homeContent.description.length).toBeGreaterThanOrEqual(120);
     expect(homeContent.description.length).toBeLessThanOrEqual(155);
-    expect(homeContent.subtitle.length).toBeLessThanOrEqual(100);
+    expect(homeContent.subtitle.length).toBeLessThanOrEqual(90);
+    expect(isOneSentence(homeContent.subtitle)).toBe(true);
     expect(homeContent.faqs).toHaveLength(4);
-    expect(homeContent.trustItems.length).toBeGreaterThan(0);
+  });
+
+  it('home H1 is exactly the owner-approved line', () => {
+    expect(homeContent.h1).toBe('Free Image Tools. No Upload. No Signup.');
+  });
+
+  it('home "How it works" mentions privacy once, with the picker wording', () => {
+    const text = homeContent.howItWorks.paragraphs.join(' ');
+    expect(text.match(/never leaves? your device/g) ?? []).toHaveLength(1);
+    expect(text).not.toMatch(/uploaded|private/i);
   });
 
   it.each(Object.values(legalContent).map((c) => [c.slug, c] as const))(

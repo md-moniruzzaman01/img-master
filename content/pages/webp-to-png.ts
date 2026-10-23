@@ -21,6 +21,7 @@ export const content: ToolContent = {
     'Each one is saved as a PNG straight away, with no settings to change.',
     'Download the PNG files one by one or in a single ZIP.',
   ],
+  howToHeading: 'How to convert WebP to PNG',
   sections: [
     {
       heading: 'When WebP to PNG is the right choice',
@@ -72,9 +73,9 @@ export const content: ToolContent = {
     },
     {
       q: 'Do I need an account to convert files?',
-      a: 'No. There is no signup and no daily limit. Open the page, pick your images and download the PNG files. They are made on your device, not on a server.',
+      a: 'No. There is no signup and no daily limit. Open the page, pick your images and download the PNG files. They are made in your browser and never leave your device.',
     },
   ],
   related: ['webp-to-jpg', 'png-to-webp', 'image-converter', 'jpg-to-png', 'compress-image'],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };

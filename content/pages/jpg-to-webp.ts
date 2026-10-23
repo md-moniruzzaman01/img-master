@@ -22,6 +22,7 @@ export const content: ToolContent = {
     'Each photo is saved as WebP right after you pick it.',
     'Use Download all to get one ZIP with every WebP file.',
   ],
+  howToHeading: 'How to convert JPG to WebP',
   sections: [
     {
       heading: 'Who needs JPG to WebP',
@@ -63,7 +64,7 @@ export const content: ToolContent = {
     },
     {
       q: "Does the WebP keep my photo's location data?",
-      a: 'No. The new WebP file is saved without hidden data such as GPS location or camera details. That is useful before you publish photos online. The photos are also never uploaded during conversion.',
+      a: 'No. The new WebP file is saved without hidden data such as GPS location or camera details. That is useful before you publish photos online. The photos also never leave your device during conversion.',
     },
     {
       q: 'Can I set a file size instead of a quality?',
@@ -77,5 +78,5 @@ export const content: ToolContent = {
     'image-converter',
     'compress-image',
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-24',
 };
