@@ -1,14 +1,9 @@
-import type { ReactNode } from 'react';
-
 /**
- * Empty space where results will appear (DESIGN.md §3.1). Its height comes
- * from an invisible copy of one finished result (children), so picking a file
- * replaces it in place with no layout shift. Visually empty on purpose.
+ * Where results will appear (DESIGN.md §3.1). It takes no height of its own:
+ * the tool column (`Container size="tool"`) fills the first screen, so the
+ * content after the tool starts at the fold and results land without moving
+ * anything in view. Kept as an empty marker for tests.
  */
-export function ResultsPlaceholder({ children }: { children: ReactNode }) {
-  return (
-    <div data-testid="results-placeholder" aria-hidden="true" className="invisible grid gap-4">
-      {children}
-    </div>
-  );
+export function ResultsPlaceholder() {
+  return <div data-testid="results-placeholder" aria-hidden="true" />;
 }

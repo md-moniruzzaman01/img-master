@@ -132,48 +132,56 @@ export function FaviconPreview({
         {t.previewDescription}
       </p>
 
-      <div className="relative mt-3">
-        <div className={cx('grid gap-3', empty && 'opacity-40')}>
+      <div className="mt-3">
+        <div className="grid gap-3">
+          {/* The tabs stay drawn (with an empty icon slot) so the box reads as a preview. */}
           <div className="grid grid-cols-2 gap-2">
             <TabMock scheme="light" src={p?.[16]} loading={loading} />
             <TabMock scheme="dark" src={p?.[16]} loading={loading} />
           </div>
 
-          <div className="flex items-end gap-3">
-            <div className="shrink-0">
-              <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-surface">
-                <Icon
-                  src={p?.[180]}
-                  size={52}
-                  loading={loading}
-                  className="rounded-[22%] object-cover"
-                />
+          {/* Until there is an icon, this row is held empty (same height) and the
+              hint sits in its place, so nothing overlaps and nothing moves later. */}
+          <div className="relative">
+            <div className={cx('flex items-end gap-3', empty && 'invisible')}>
+              <div className="shrink-0">
+                <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-surface">
+                  <Icon
+                    src={p?.[180]}
+                    size={52}
+                    loading={loading}
+                    className="rounded-[22%] object-cover"
+                  />
+                </div>
+                <p className="mt-1 type-caption text-muted">{t.homeScreen}</p>
               </div>
-              <p className="mt-1 type-caption text-muted">{t.homeScreen}</p>
+              <div className="min-w-0 flex-1">
+                <ul
+                  aria-label={t.realSizes}
+                  className="flex h-[72px] items-end justify-between gap-1.5"
+                >
+                  {SIZES.map((s) => (
+                    <li key={s} className="flex flex-col items-center gap-1">
+                      <span className="checkerboard block rounded-[4px] border border-border">
+                        <Icon src={p?.[s]} size={SHOWN[s]} loading={loading} />
+                      </span>
+                      <span className="type-caption tabular-nums text-muted">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 type-caption text-muted">{t.realSizes}</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <ul
-                aria-label={t.realSizes}
-                className="flex h-[72px] items-end justify-between gap-1.5"
+            {empty && (
+              <p
+                data-testid="favicon-preview-empty"
+                className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-surface px-4 text-center text-text"
               >
-                {SIZES.map((s) => (
-                  <li key={s} className="flex flex-col items-center gap-1">
-                    <span className="checkerboard block rounded-[4px] border border-border">
-                      <Icon src={p?.[s]} size={SHOWN[s]} loading={loading} />
-                    </span>
-                    <span className="type-caption tabular-nums text-muted">{s}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-1 type-caption text-muted">{t.realSizes}</p>
-            </div>
+                {emptyText ?? t.previewEmpty}
+              </p>
+            )}
           </div>
         </div>
-        {empty && (
-          <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-muted">
-            {emptyText ?? t.previewEmpty}
-          </p>
-        )}
       </div>
     </section>
   );

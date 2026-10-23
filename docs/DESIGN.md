@@ -58,7 +58,7 @@ No other colors (neutral grays for control outlines, loading skeletons and the f
 ### Layout widths and breakpoints
 
 - Breakpoints: base 360px, `sm` 640px, `md` 768px, `lg` 1024px.
-- Tool column max width 640px, text max width 680px, home grid max width 1024px, all centered.
+- Tool column and text column both max 680px (same left edge), home grid max width 1024px, all centered.
 - Every page stays one column up to `lg`. The home tool grid goes 1 → 2 → 3 columns.
 
 ### Touch and focus
@@ -88,8 +88,8 @@ Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `cu
 │    device                          │  button (above the fold at 360×640)
 │ Target  (20KB)(50KB●)(100KB)(200…→ │  Options come after the privacy line
 │ ▸ More options                     │
-│                                    │  Results placeholder: empty reserved
-│                                    │  space, one result tall (no CLS)
+│                                    │  Tool column fills the first screen
+│                                    │  (min-height, so results never shift)
 ├────────────────────────────────────┤  ↓ replaced in place after picking
 │ Results                            │
 │ ┌────────────────────────────────┐ │  ResultCard: white, 1px border, 8px

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { iconButtonClasses } from '@/components/ui/icon-button';
+import { ChevronDownIcon } from '@/components/ui/icons';
 
 /**
  * Mobile menu (DESIGN.md §4.2) on a native <details>: it opens and closes
@@ -9,10 +10,31 @@ import { iconButtonClasses } from '@/components/ui/icon-button';
  * With JavaScript it also closes on Esc (focus back on the button), on a link
  * tap, and on a tap outside. The panel overlays the page below the header,
  * so opening it never moves the layout. Hidden from 768px (desktop links).
+ * On short screens where the panel scrolls, a fade with "More below" sits on
+ * its bottom edge until the end is reached (QA-22).
  */
 export function MenuDisclosure({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDetailsElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [more, setMore] = useState(false);
+
+  // "More below" cue: shown while part of the panel is out of view.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!open || !panel) {
+      setMore(false);
+      return;
+    }
+    const check = () => setMore(panel.scrollTop + panel.clientHeight < panel.scrollHeight - 8);
+    check();
+    panel.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      panel.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -43,7 +65,11 @@ export function MenuDisclosure({ children }: { children: ReactNode }) {
         if ((e.target as HTMLElement).closest('a') && ref.current) ref.current.open = false;
       }}
     >
-      <summary aria-label="Menu" aria-expanded={open} className={`-mr-3 list-none ${iconButtonClasses}`}>
+      <summary
+        aria-label="Menu"
+        aria-expanded={open}
+        className={`-mr-3 list-none ${iconButtonClasses}`}
+      >
         <svg
           width="24"
           height="24"
@@ -59,8 +85,23 @@ export function MenuDisclosure({ children }: { children: ReactNode }) {
           <path className="hidden group-open:block" d="M6 6l12 12M18 6 6 18" />
         </svg>
       </summary>
-      <div className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-52px)] overflow-y-auto overscroll-contain border-b border-border bg-bg">
+      <div
+        ref={panelRef}
+        className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-52px)] overflow-y-auto overscroll-contain border-b border-border bg-bg"
+      >
         {children}
+        {more && (
+          <div
+            aria-hidden="true"
+            data-testid="menu-more"
+            className="pointer-events-none sticky bottom-0 -mt-14 flex h-14 items-end justify-center bg-linear-to-t from-bg from-40% to-transparent pb-1.5"
+          >
+            <span className="flex items-center gap-1 type-caption text-muted">
+              More below
+              <ChevronDownIcon size={20} className="size-4" />
+            </span>
+          </div>
+        )}
       </div>
     </details>
   );

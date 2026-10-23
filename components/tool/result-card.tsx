@@ -71,7 +71,6 @@ export function ResultCard({
   shareSupported = false,
   onShared,
   reserve,
-  ghost = false,
   summary,
   meta,
 }: {
@@ -94,8 +93,6 @@ export function ResultCard({
   onShared?: () => void;
   /** What the skeleton should hold space for (DESIGN.md §8: no shift when results land). */
   reserve?: CardReserve;
-  /** Invisible stand-in that holds the idle placeholder's height (no QA hooks). */
-  ghost?: boolean;
 }) {
   const { status, result: r, file } = item;
   const busy = status === 'queued' || status === 'processing';
@@ -123,7 +120,7 @@ export function ResultCard({
   return (
     <article
       ref={ref}
-      data-testid={ghost ? undefined : 'result-card'}
+      data-testid="result-card"
       data-status={status}
       data-input-bytes={file.size}
       data-output-bytes={r?.outputBytes}
@@ -157,7 +154,7 @@ export function ResultCard({
 
         <div className="min-w-0 flex-1">
           <p
-            data-testid={ghost ? undefined : 'file-name'}
+            data-testid="file-name"
             className="truncate leading-6 font-semibold text-text"
             title={name}
           >
@@ -218,7 +215,10 @@ export function ResultCard({
           {notes.map(({ n, text, warn }) => (
             <p
               key={n}
-              className={cx('flex items-start gap-1.5 type-small', warn ? 'text-text' : 'text-muted')}
+              className={cx(
+                'flex items-start gap-1.5 type-small',
+                warn ? 'text-text' : 'text-muted',
+              )}
             >
               {warn ? (
                 <AlertIcon size={20} className="size-4 shrink-0 translate-y-0.5" />

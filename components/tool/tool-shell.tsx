@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -107,13 +106,6 @@ function mayHaveAlpha(file: File): boolean {
   return /^image\/(png|webp|gif|avif)$/.test(file.type);
 }
 
-/** Stand-in item for the idle placeholder's invisible card (never processed). */
-const GHOST_ITEM: ResultItem = {
-  id: -1,
-  file: { name: ' ', size: 0, type: '' } as File,
-  status: 'queued',
-};
-
 function isIOS(): boolean {
   const n = navigator;
   return /iP(hone|ad|od)/.test(n.userAgent) || (n.platform === 'MacIntel' && n.maxTouchPoints > 1);
@@ -158,8 +150,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   const savedRef = useRef(false);
   const timerRef = useRef<number | undefined>(undefined);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const regionRef = useRef<HTMLDivElement>(null);
-  const floorRef = useRef(0);
 
   const revokeAll = useCallback(() => {
     for (const u of urlsRef.current) URL.revokeObjectURL(u);
@@ -462,29 +452,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     share: shareSupported,
   });
 
-  // Idle placeholder (DESIGN.md §3.1): an invisible copy of one finished
-  // result, so picking a file replaces it in place. Converters from formats
-  // that can be transparent (and the "any" hub) expect the background field.
-  const ghostAlpha =
-    kind === 'convert' &&
-    (tool.preset.from === 'any' || /^(png|webp|gif|avif)$/.test(tool.preset.from ?? ''));
-  const ghostBackground = ghostAlpha && outputsJpegFor(options);
-  const ghostReserve = { note: usesTarget(options) || ghostBackground, share: shareSupported };
-
-  // The placeholder's height stays as a floor once results show, so a result
-  // shorter than the guess (e.g. a JPG on a WebP page) never pulls content up.
-  const idle = items.length === 0;
-  useLayoutEffect(() => {
-    const el = regionRef.current;
-    if (!el) return;
-    if (idle) {
-      el.style.minHeight = '';
-      floorRef.current = el.offsetHeight;
-    } else if (floorRef.current) {
-      el.style.minHeight = `${floorRef.current}px`;
-    }
-  });
-
   async function downloadAll() {
     setZipping(true);
     try {
@@ -694,7 +661,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         </div>
       )}
 
-      <div ref={regionRef} className="grid gap-4 [&>*]:min-w-0">
+      <div className="grid gap-4 [&>*]:min-w-0">
         {m > 0 ? (
           <>
             <ResultList headingRef={headingRef} status={statusSlot}>
@@ -734,25 +701,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
             </div>
           </>
         ) : (
-          <ResultsPlaceholder>
-            <ResultList ghost>
-              <li>
-                <ResultCard
-                  ghost
-                  item={GHOST_ITEM}
-                  noteText={() => null}
-                  onDownload={() => {}}
-                  reserve={ghostReserve}
-                />
-              </li>
-            </ResultList>
-            {ghostBackground && <BackgroundField value={options.background} onChange={() => {}} />}
-            <div>
-              <Button variant="ghost" disabled className="-ml-4">
-                {copy.again(verb)}
-              </Button>
-            </div>
-          </ResultsPlaceholder>
+          <ResultsPlaceholder />
         )}
       </div>
 

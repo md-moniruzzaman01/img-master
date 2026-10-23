@@ -26,13 +26,6 @@ type Notice = 'too-many' | 'engine' | null;
 
 let toastSeq = 0;
 
-/** Stand-in item for the idle placeholder's invisible card (never processed). */
-const GHOST_ITEM: ResultItem = {
-  id: -1,
-  file: { name: ' ', size: 0, type: '' } as File,
-  status: 'queued',
-};
-
 const isPng = (f: File) => f.type === 'image/png' || (f.type === '' && /\.png$/i.test(f.name));
 
 /** PNG → .ico converter (CONTRACTS.md §5): one result card per file, same pattern as converters. */
@@ -328,24 +321,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
             </div>
           </>
         ) : (
-          <ResultsPlaceholder>
-            <ResultList ghost>
-              <li>
-                <ResultCard
-                  ghost
-                  item={GHOST_ITEM}
-                  noteText={noteText}
-                  onDownload={() => {}}
-                  reserve={{ note: false, share: false }}
-                />
-              </li>
-            </ResultList>
-            <div>
-              <Button variant="ghost" disabled className="-ml-4">
-                {t.icoAnother}
-              </Button>
-            </div>
-          </ResultsPlaceholder>
+          <ResultsPlaceholder />
         )}
       </div>
 
