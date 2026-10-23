@@ -102,11 +102,7 @@ export async function gotoTool(page: Page, slug: string): Promise<void> {
 }
 
 /** Picks files through the real <input type=file> and waits until processing ends. */
-export async function pickAndWait(
-  page: Page,
-  files: PickInput,
-  timeout = 120_000,
-): Promise<void> {
+export async function pickAndWait(page: Page, files: PickInput, timeout = 120_000): Promise<void> {
   await page.getByTestId('file-input').setInputFiles(files);
   await page.waitForTimeout(150); // let React start the new run (a previous run may still read 'done')
   await waitDone(page, timeout);
@@ -114,7 +110,11 @@ export async function pickAndWait(
 
 export async function waitDone(page: Page, timeout = 120_000): Promise<void> {
   await expect(shell(page)).toHaveAttribute('data-state', /^(done|partial|error)$/, { timeout });
-  await expect(page.locator('[data-testid=result-card][data-status=queued], [data-testid=result-card][data-status=processing]')).toHaveCount(0, { timeout });
+  await expect(
+    page.locator(
+      '[data-testid=result-card][data-status=queued], [data-testid=result-card][data-status=processing]',
+    ),
+  ).toHaveCount(0, { timeout });
 }
 
 /** Clicks a download control and returns the saved bytes and suggested name. */
@@ -136,10 +136,18 @@ export async function openMoreOptions(page: Page): Promise<void> {
 // ── Bytes and decoding ───────────────────────────────────────────────────
 
 export function sniff(bytes: Buffer): Fmt | 'gif' | 'bmp' | 'zip' | 'unknown' {
-  if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpeg';
-  if (bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])))
+  if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)
+    return 'jpeg';
+  if (
+    bytes.length > 8 &&
+    bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  )
     return 'png';
-  if (bytes.length > 12 && bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP')
+  if (
+    bytes.length > 12 &&
+    bytes.subarray(0, 4).toString('latin1') === 'RIFF' &&
+    bytes.subarray(8, 12).toString('latin1') === 'WEBP'
+  )
     return 'webp';
   if (bytes.subarray(0, 3).toString('latin1') === 'GIF') return 'gif';
   if (bytes.subarray(0, 2).toString('latin1') === 'BM') return 'bmp';
@@ -241,7 +249,8 @@ export async function watchCsp(page: Page): Promise<string[]> {
   const violations: string[] = [];
   page.on('console', (m) => {
     const t = m.text();
-    if (/content security policy|refused to (load|connect|execute|apply|create)/i.test(t)) violations.push(t.slice(0, 300));
+    if (/content security policy|refused to (load|connect|execute|apply|create)/i.test(t))
+      violations.push(t.slice(0, 300));
   });
   page.on('pageerror', (e) => {
     if (/content security policy/i.test(e.message)) violations.push(e.message.slice(0, 300));

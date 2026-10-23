@@ -74,9 +74,17 @@ for (const slug of TOOL_SLUGS) {
     const vh = page.viewportSize()?.height ?? 640;
     expect(box).not.toBeNull();
     expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.y + box!.height, `bottom ${box!.y + box!.height} vs viewport ${vh}`).toBeLessThanOrEqual(vh);
+    expect(
+      box!.y + box!.height,
+      `bottom ${box!.y + box!.height} vs viewport ${vh}`,
+    ).toBeLessThanOrEqual(vh);
     expect(box!.height).toBeGreaterThanOrEqual(48);
-    logMetric('picker-position.ndjson', { slug, project: test.info().project.name, bottom: box!.y + box!.height, vh });
+    logMetric('picker-position.ndjson', {
+      slug,
+      project: test.info().project.name,
+      bottom: box!.y + box!.height,
+      vh,
+    });
   });
 }
 
@@ -87,7 +95,13 @@ for (const slug of TOOL_SLUGS) {
     const header = await interactive(page, 'header');
     const crumbs = await interactive(page, 'nav[aria-label=Breadcrumb]');
     const small = [...tool, ...header].filter((t) => t.h < 47.5 || t.w < 47.5);
-    logMetric('tap-targets.ndjson', { slug, project: test.info().project.name, count: tool.length + header.length, small, crumbs });
+    logMetric('tap-targets.ndjson', {
+      slug,
+      project: test.info().project.name,
+      count: tool.length + header.length,
+      small,
+      crumbs,
+    });
     expect(small, JSON.stringify(small)).toEqual([]);
     const smallCrumbs = crumbs.filter((t) => t.h < 47.5);
     expect(smallCrumbs, JSON.stringify(smallCrumbs)).toEqual([]);
@@ -112,8 +126,11 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', '
     expect(barTargets.length).toBeGreaterThan(0);
     for (const t of barTargets) expect(t.h, t.text).toBeGreaterThanOrEqual(48);
     // 8px gap between neighbours inside the bar.
-    const row = barTargets.filter((t) => Math.abs(t.y - barTargets[0].y) < 4).sort((a, c) => a.x - c.x);
-    for (let i = 1; i < row.length; i++) expect(row[i].x - (row[i - 1].x + row[i - 1].w)).toBeGreaterThanOrEqual(8);
+    const row = barTargets
+      .filter((t) => Math.abs(t.y - barTargets[0].y) < 4)
+      .sort((a, c) => a.x - c.x);
+    for (let i = 1; i < row.length; i++)
+      expect(row[i].x - (row[i - 1].x + row[i - 1].w)).toBeGreaterThanOrEqual(8);
 
     // The bar must not hide the end of the page: scroll to the bottom, then the
     // last footer link must be above the bar and actually hit-testable.
@@ -139,7 +156,9 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', '
   });
 }
 
-test('tools sheet: opens as a bottom sheet, items >= 48px, no horizontal scroll', async ({ page }) => {
+test('tools sheet: opens as a bottom sheet, items >= 48px, no horizontal scroll', async ({
+  page,
+}) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Tools' }).click();
   const dialog = page.getByRole('dialog', { name: 'All tools' });
@@ -186,7 +205,10 @@ for (const slug of ['/', '/compress-image-to-50kb', '/webp-to-jpg', '/compress-i
 }
 
 for (const slug of ['compress-image-to-50kb', 'webp-to-jpg']) {
-  test(`CLS when results appear stays under 0.05 (Chromium): /${slug}`, async ({ page, browserName }) => {
+  test(`CLS when results appear stays under 0.05 (Chromium): /${slug}`, async ({
+    page,
+    browserName,
+  }) => {
     test.skip(browserName !== 'chromium', 'layout-shift entries are Chromium-only');
     await trackCls(page);
     await gotoTool(page, slug);
@@ -199,7 +221,9 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg']) {
   });
 }
 
-test('tool works with the visible label tapped (no hidden-input dependency) and focus lands on Results', async ({ page }) => {
+test('tool works with the visible label tapped (no hidden-input dependency) and focus lands on Results', async ({
+  page,
+}) => {
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   const focused = await page.evaluate(() => document.activeElement?.textContent?.trim());

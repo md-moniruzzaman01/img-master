@@ -19,7 +19,10 @@ test.beforeAll(ensureFixtures);
 const ANALYTICS_HOST = process.env.NEXT_PUBLIC_ANALYTICS_HOST ?? '';
 
 for (const slug of TOOL_SLUGS) {
-  test(`privacy: no upload, no third party, no CSP violation on /${slug}`, async ({ page, baseURL }) => {
+  test(`privacy: no upload, no third party, no CSP violation on /${slug}`, async ({
+    page,
+    baseURL,
+  }) => {
     test.setTimeout(180_000);
     const net = recordNetwork(page.context());
     const csp = await watchCsp(page);
@@ -43,14 +46,22 @@ for (const slug of TOOL_SLUGS) {
     const bad = net.filter((e) => {
       if (e.origin === 'blob:' || e.origin === 'data:' || e.origin === 'about:') return false;
       const external = e.host !== ownHost && !(ANALYTICS_HOST && e.host === ANALYTICS_HOST);
-      return external || !['GET', 'HEAD', 'OPTIONS'].includes(e.method) || e.bodyBytes > 1024 || e.url.length > 1000;
+      return (
+        external ||
+        !['GET', 'HEAD', 'OPTIONS'].includes(e.method) ||
+        e.bodyBytes > 1024 ||
+        e.url.length > 1000
+      );
     });
     expect(bad, `unexpected requests:\n${JSON.stringify(bad, null, 1)}`).toEqual([]);
     expect(csp, 'CSP violations').toEqual([]);
   });
 }
 
-test('privacy: compress-to-size with 12 MP photo keeps every request same-origin GET', async ({ page, baseURL }) => {
+test('privacy: compress-to-size with 12 MP photo keeps every request same-origin GET', async ({
+  page,
+  baseURL,
+}) => {
   test.setTimeout(180_000);
   const net = recordNetwork(page.context());
   const csp = await watchCsp(page);
@@ -58,13 +69,18 @@ test('privacy: compress-to-size with 12 MP photo keeps every request same-origin
   await pickAndWait(page, fixture('photo-12mp.jpg'));
   const own = new URL(baseURL ?? 'http://localhost:4173').host;
   const bad = net.filter(
-    (e) => !['blob:', 'data:', 'about:'].includes(e.origin) && (e.host !== own || !['GET', 'HEAD'].includes(e.method) || e.bodyBytes > 0),
+    (e) =>
+      !['blob:', 'data:', 'about:'].includes(e.origin) &&
+      (e.host !== own || !['GET', 'HEAD'].includes(e.method) || e.bodyBytes > 0),
   );
   expect(bad).toEqual([]);
   expect(csp).toEqual([]);
 });
 
-test('privacy: converters, same check on every converter page with its own input', async ({ page, baseURL }) => {
+test('privacy: converters, same check on every converter page with its own input', async ({
+  page,
+  baseURL,
+}) => {
   test.setTimeout(240_000);
   const net = recordNetwork(page.context());
   const csp = await watchCsp(page);
@@ -74,14 +90,22 @@ test('privacy: converters, same check on every converter page with its own input
     await pickAndWait(page, fixture(c.input));
   }
   const bad = net.filter(
-    (e) => !['blob:', 'data:', 'about:'].includes(e.origin) && (e.host !== own || !['GET', 'HEAD'].includes(e.method) || e.bodyBytes > 0),
+    (e) =>
+      !['blob:', 'data:', 'about:'].includes(e.origin) &&
+      (e.host !== own || !['GET', 'HEAD'].includes(e.method) || e.bodyBytes > 0),
   );
   expect(bad).toEqual([]);
   expect(csp).toEqual([]);
 });
 
 test('privacy: CSP and security headers are served on pages and assets', async ({ request }) => {
-  for (const path of ['/', '/compress-image-to-50kb', '/webp-to-jpg', '/privacy', '/does-not-exist']) {
+  for (const path of [
+    '/',
+    '/compress-image-to-50kb',
+    '/webp-to-jpg',
+    '/privacy',
+    '/does-not-exist',
+  ]) {
     const res = await request.get(path);
     const h = res.headers();
     const csp = h['content-security-policy'] ?? '';

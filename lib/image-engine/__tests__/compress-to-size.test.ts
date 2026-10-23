@@ -22,8 +22,8 @@ interface Call {
   bytes: number;
 }
 
-function fakeEncoder(model: (w: number, h: number, q: number) => number = (w, h, q) =>
-  Math.round(300 + w * h * f(q)),
+function fakeEncoder(
+  model: (w: number, h: number, q: number) => number = (w, h, q) => Math.round(300 + w * h * f(q)),
 ) {
   const calls: Call[] = [];
   const encode: Encoder = async (w, h, q) => {
@@ -56,7 +56,13 @@ describe('target math', () => {
 describe('searchToSize', () => {
   it('returns at Q_MAX in one encode when already small enough', async () => {
     const { encode, calls } = fakeEncoder();
-    const r = await searchToSize({ width: 200, height: 200, targetBytes: 49_500, keepDimensions: false, encode });
+    const r = await searchToSize({
+      width: 200,
+      height: 200,
+      targetBytes: 49_500,
+      keepDimensions: false,
+      encode,
+    });
     expect(calls).toHaveLength(1);
     expect(r.quality).toBe(Q_MAX);
     expect(r.width).toBe(200);
@@ -80,7 +86,13 @@ describe('searchToSize', () => {
           const targetBytes = targetBytesFor(kb);
           const { encode, calls } = fakeEncoder();
           try {
-            const r = await searchToSize({ width: w, height: h, targetBytes, keepDimensions, encode });
+            const r = await searchToSize({
+              width: w,
+              height: h,
+              targetBytes,
+              keepDimensions,
+              encode,
+            });
             expect(r.bytes).toBeLessThanOrEqual(targetBytes);
             expect(r.width).toBeLessThanOrEqual(w);
             expect(r.height).toBeLessThanOrEqual(h);
@@ -100,7 +112,13 @@ describe('searchToSize', () => {
     const H = 800;
     // Pick a target that is feasible at full size at quality ~0.7.
     const targetBytes = Math.round(300 + W * H * f(0.7));
-    const r = await searchToSize({ width: W, height: H, targetBytes, keepDimensions: true, encode });
+    const r = await searchToSize({
+      width: W,
+      height: H,
+      targetBytes,
+      keepDimensions: true,
+      encode,
+    });
     expect(r.bytes).toBeLessThanOrEqual(targetBytes);
     expect(r.quality).toBeLessThanOrEqual(0.7);
     expect(r.quality).toBeGreaterThanOrEqual(0.68);
@@ -113,7 +131,13 @@ describe('searchToSize', () => {
     // Fits at full size around quality 0.8 (step 2 only shrinks when the target
     // is below ~45% of the Q_MAX size).
     const targetBytes = Math.round(300 + W * H * f(0.8));
-    const r = await searchToSize({ width: W, height: H, targetBytes, keepDimensions: false, encode });
+    const r = await searchToSize({
+      width: W,
+      height: H,
+      targetBytes,
+      keepDimensions: false,
+      encode,
+    });
     expect(r.width).toBe(W);
     expect(r.height).toBe(H);
     expect(r.scale).toBe(1);
@@ -142,7 +166,13 @@ describe('searchToSize', () => {
   it('never scales with keepDimensions', async () => {
     const { encode, calls } = fakeEncoder();
     const targetBytes = Math.round(300 + 2000 * 1500 * f(0.3)); // needs hard-floor quality
-    const r = await searchToSize({ width: 2000, height: 1500, targetBytes, keepDimensions: true, encode });
+    const r = await searchToSize({
+      width: 2000,
+      height: 1500,
+      targetBytes,
+      keepDimensions: true,
+      encode,
+    });
     // Only the first call may be the small probe; every candidate is full size.
     expect(calls.slice(1).every((c) => c.w === 2000 && c.h === 1500)).toBe(true);
     expect(r.width).toBe(2000);
@@ -152,7 +182,13 @@ describe('searchToSize', () => {
 
   it('skips the full-size quick check when the probe shows it cannot pass', async () => {
     const { encode, calls } = fakeEncoder();
-    const r = await searchToSize({ width: 4000, height: 3000, targetBytes: 49_500, keepDimensions: false, encode });
+    const r = await searchToSize({
+      width: 4000,
+      height: 3000,
+      targetBytes: 49_500,
+      keepDimensions: false,
+      encode,
+    });
     expect(r.bytes).toBeLessThanOrEqual(49_500);
     expect(calls[0].w * calls[0].h).toBeLessThanOrEqual(PROBE_PIXELS * 1.01);
     expect(calls.some((c) => c.w === 4000)).toBe(false);
@@ -161,7 +197,13 @@ describe('searchToSize', () => {
   it('still finds a full-size Q_MAX result when the probe is inconclusive', async () => {
     const { encode, calls } = fakeEncoder();
     const targetBytes = Math.round(300 + 4000 * 3000 * f(Q_MAX)) + 10;
-    const r = await searchToSize({ width: 4000, height: 3000, targetBytes, keepDimensions: false, encode });
+    const r = await searchToSize({
+      width: 4000,
+      height: 3000,
+      targetBytes,
+      keepDimensions: false,
+      encode,
+    });
     expect(r.width).toBe(4000);
     expect(r.quality).toBe(Q_MAX);
     expect(calls).toHaveLength(2);
@@ -169,7 +211,13 @@ describe('searchToSize', () => {
 
   it('throws TARGET_UNREACHABLE with the smallest size achieved', async () => {
     const { encode, calls } = fakeEncoder();
-    const err = await searchToSize({ width: 4000, height: 3000, targetBytes: 500, keepDimensions: false, encode }).then(
+    const err = await searchToSize({
+      width: 4000,
+      height: 3000,
+      targetBytes: 500,
+      keepDimensions: false,
+      encode,
+    }).then(
       () => null,
       (e: unknown) => e,
     );
@@ -186,7 +234,13 @@ describe('searchToSize', () => {
   it('throws TARGET_UNREACHABLE with keepDimensions when even the hard floor is too big', async () => {
     const { encode, calls } = fakeEncoder();
     await expect(
-      searchToSize({ width: 4000, height: 3000, targetBytes: targetBytesFor(50), keepDimensions: true, encode }),
+      searchToSize({
+        width: 4000,
+        height: 3000,
+        targetBytes: targetBytesFor(50),
+        keepDimensions: true,
+        encode,
+      }),
     ).rejects.toMatchObject({
       name: 'EngineError',
       code: 'TARGET_UNREACHABLE',
@@ -197,7 +251,13 @@ describe('searchToSize', () => {
 
   it('never upscales a source smaller than MIN_SIDE', async () => {
     const { encode, calls } = fakeEncoder();
-    await searchToSize({ width: 120, height: 90, targetBytes: 2_000, keepDimensions: false, encode }).catch(() => null);
+    await searchToSize({
+      width: 120,
+      height: 90,
+      targetBytes: 2_000,
+      keepDimensions: false,
+      encode,
+    }).catch(() => null);
     expect(calls.every((c) => c.w <= 120 && c.h <= 90)).toBe(true);
   });
 
@@ -211,7 +271,13 @@ describe('searchToSize', () => {
       const { encode, calls } = fakeEncoder((w, h, q) => 300 + w * h * f(q) * (0.5 + rand() * 1.5));
       const targetBytes = targetBytesFor([10, 20, 50, 100][i % 4]);
       try {
-        const r = await searchToSize({ width: 3000, height: 2000, targetBytes, keepDimensions: i % 5 === 0, encode });
+        const r = await searchToSize({
+          width: 3000,
+          height: 2000,
+          targetBytes,
+          keepDimensions: i % 5 === 0,
+          encode,
+        });
         expect(r.bytes).toBeLessThanOrEqual(targetBytes);
       } catch (e) {
         expect((e as EngineError).code).toBe('TARGET_UNREACHABLE');
@@ -223,7 +289,13 @@ describe('searchToSize', () => {
   it('stops at MAX_ENCODES with an encoder that never fits', async () => {
     const { encode, calls } = fakeEncoder(() => 1e9);
     await expect(
-      searchToSize({ width: 4000, height: 3000, targetBytes: 49_500, keepDimensions: false, encode }),
+      searchToSize({
+        width: 4000,
+        height: 3000,
+        targetBytes: 49_500,
+        keepDimensions: false,
+        encode,
+      }),
     ).rejects.toMatchObject({ code: 'TARGET_UNREACHABLE', detail: { smallestBytes: 1e9 } });
     expect(calls.length).toBeLessThanOrEqual(MAX_ENCODES);
   });

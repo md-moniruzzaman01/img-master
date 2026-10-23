@@ -20,11 +20,25 @@ export function FilePicker({
   disabled,
   onFiles,
   onWarmUp,
+  accept = 'image/*',
+  multiple = true,
+  label,
+  hint,
+  desktopHint,
 }: {
   inputId: string;
   maxFiles: number;
   disabled?: boolean;
   onFiles: (files: File[]) => void;
+  /** File types for the picker (default: any image). */
+  accept?: string;
+  /** False: a single file; extras from drop or paste are ignored. */
+  multiple?: boolean;
+  /** Overrides for the button and hint text (favicon tools). */
+  label?: string;
+  hint?: string;
+  /** Second hint shown on desktop; `null` hides it. */
+  desktopHint?: string | null;
   /** Called on first intent (pointer down, focus) to start loading the engine. */
   onWarmUp?: () => void;
 }) {
@@ -32,8 +46,8 @@ export function FilePicker({
   const [dragOver, setDragOver] = useState(false);
   const onFilesRef = useRef(onFiles);
   useEffect(() => {
-    onFilesRef.current = onFiles;
-  }, [onFiles]);
+    onFilesRef.current = multiple ? onFiles : (files) => onFiles(files.slice(0, 1));
+  }, [onFiles, multiple]);
 
   // A file chosen before hydration is still sitting in the input.
   useEffect(() => {
@@ -65,7 +79,7 @@ export function FilePicker({
     setDragOver(false);
     if (disabled) return;
     const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) onFiles(files);
+    if (files.length > 0) onFilesRef.current(files);
   }
 
   return (
@@ -99,27 +113,29 @@ export function FilePicker({
         )}
       >
         <UploadIcon size={20} />
-        {dragOver ? copy.dropHere : copy.pickerButton}
+        {dragOver ? copy.dropHere : (label ?? copy.pickerButton)}
         <input
           ref={inputRef}
           id={inputId}
           data-testid="file-input"
           type="file"
-          accept="image/*"
-          multiple
+          accept={accept}
+          multiple={multiple}
           disabled={disabled}
           onFocus={onWarmUp}
           onChange={(e) => {
             const files = Array.from(e.target.files ?? []);
             e.target.value = '';
-            if (files.length > 0) onFiles(files);
+            if (files.length > 0) onFilesRef.current(files);
           }}
           className="sr-only"
         />
       </label>
-      <p className="type-small text-muted">
-        {copy.pickerHintMobile(maxFiles)}
-        <span className="hidden fine-pointer:block">{copy.pickerHintDesktop}</span>
+      <p className="max-w-full type-small text-muted">
+        <span className="block truncate">{hint ?? copy.pickerHintMobile(maxFiles)}</span>
+        {desktopHint !== null && (
+          <span className="hidden fine-pointer:block">{desktopHint ?? copy.pickerHintDesktop}</span>
+        )}
       </p>
     </div>
   );

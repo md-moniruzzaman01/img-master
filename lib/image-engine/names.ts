@@ -18,7 +18,10 @@ export function sanitizeBase(fileName: string): string {
     .replace(/[^\p{L}\p{M}\p{N}_-]+/gu, '-')
     .replace(/-{2,}/g, '-')
     .replace(/^[-_]+|[-_]+$/g, '');
-  const cut = Array.from(clean).slice(0, MAX_BASE).join('').replace(/[-_]+$/, '');
+  const cut = Array.from(clean)
+    .slice(0, MAX_BASE)
+    .join('')
+    .replace(/[-_]+$/, '');
   return cut || 'image';
 }
 

@@ -115,11 +115,16 @@ for (const sp of SIZE_PAGES) {
 }
 if (realList.length === 0) {
   test('compress-to-size: real photos in e2e/fixtures/real', () => {
-    test.skip(true, 'e2e/fixtures/real/ is empty; real-photo runs are skipped until the owner adds files');
+    test.skip(
+      true,
+      'e2e/fixtures/real/ is empty; real-photo runs are skipped until the owner adds files',
+    );
   });
 }
 
-test('compress-to-size: changing the target chip re-runs and respects the new size', async ({ page }) => {
+test('compress-to-size: changing the target chip re-runs and respects the new size', async ({
+  page,
+}) => {
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   const a = await cardData(cards(page).first());
@@ -165,9 +170,13 @@ async function checkConvert(page: Page, input: string, to: Fmt, expectBase?: str
   if (to === 'webp' && d.status === 'failed') {
     // Allowed only as the documented message, never a broken file.
     expect(d.error).toBe('ENCODE_UNSUPPORTED');
-    await expect(page.getByTestId('error-banner')).toContainText("Your browser can't save WebP files yet");
+    await expect(page.getByTestId('error-banner')).toContainText(
+      "Your browser can't save WebP files yet",
+    );
     await expect(page.getByTestId('download')).toHaveCount(0);
-    test.info().annotations.push({ type: 'webp-output', description: 'ENCODE_UNSUPPORTED message shown' });
+    test
+      .info()
+      .annotations.push({ type: 'webp-output', description: 'ENCODE_UNSUPPORTED message shown' });
     return null;
   }
   expect(d.status).toBe('success');
@@ -234,7 +243,9 @@ test('converter webp-to-png keeps transparency', async ({ page }) => {
   expect(r?.dec.minAlpha).toBeLessThan(10);
 });
 
-test('converter png-to-webp: transparent PNG keeps alpha when WebP is supported', async ({ page }) => {
+test('converter png-to-webp: transparent PNG keeps alpha when WebP is supported', async ({
+  page,
+}) => {
   await gotoTool(page, 'png-to-webp');
   const r = await checkConvert(page, 'transparent.png', 'webp');
   if (r) expect(r.dec.minAlpha).toBeLessThan(10);
@@ -271,7 +282,9 @@ test('image-converter: GIF (first frame, note) and BMP inputs', async ({ page })
   const g = await cardData(cards(page).first());
   expect(g.status).toBe('success');
   expect(g.notes).toContain('animation-dropped');
-  await expect(cards(page).first()).toContainText('This was an animation. We kept the first frame.');
+  await expect(cards(page).first()).toContainText(
+    'This was an animation. We kept the first frame.',
+  );
   await pickAndWait(page, fixture('sample.bmp'));
   const b = await cardData(cards(page).first());
   expect(b.status).toBe('success');
@@ -338,7 +351,9 @@ test('batch of 10 converted to PNG: ZIP names and types', async ({ page }) => {
   await pickAndWait(page, files);
   const { bytes } = await downloadVia(page, page.getByTestId('download-all'));
   const zip = unzipSync(new Uint8Array(bytes));
-  expect(Object.keys(zip).sort()).toEqual(Array.from({ length: 10 }, (_, i) => `pic${i}.png`).sort());
+  expect(Object.keys(zip).sort()).toEqual(
+    Array.from({ length: 10 }, (_, i) => `pic${i}.png`).sort(),
+  );
   for (const data of Object.values(zip)) expect(sniff(Buffer.from(data))).toBe('png');
 });
 
@@ -356,7 +371,9 @@ for (const bad of ['corrupt.jpg', 'not-an-image.png', 'empty.jpg']) {
   });
 }
 
-test('edge: good and bad file together -> partial, good one still downloadable', async ({ page }) => {
+test('edge: good and bad file together -> partial, good one still downloadable', async ({
+  page,
+}) => {
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, [fixture('corrupt.jpg'), fixture('photo-2mp.jpg')]);
   await expect(page.getByTestId('tool-shell')).toHaveAttribute('data-state', 'partial');
@@ -424,7 +441,9 @@ test('edge: 21 files -> first 20 are taken, with the "too many" message', async 
   );
 });
 
-test('edge: unreachable target -> honest message, next-size button, works after "allow smaller"', async ({ page }) => {
+test('edge: unreachable target -> honest message, next-size button, works after "allow smaller"', async ({
+  page,
+}) => {
   test.setTimeout(180_000);
   await gotoTool(page, 'compress-image-to-20kb');
   await openMoreOptions(page);
@@ -474,12 +493,20 @@ test('edge: a second batch replaces the first (no stale cards)', async ({ page }
   await expect(cards(page)).toHaveCount(2);
 });
 
-test('engine: Web Worker is used where OffscreenCanvas exists, main-thread fallback otherwise', async ({ page, browserName }) => {
+test('engine: Web Worker is used where OffscreenCanvas exists, main-thread fallback otherwise', async ({
+  page,
+  browserName,
+}) => {
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   const hasOffscreen = await page.evaluate(() => typeof OffscreenCanvas !== 'undefined');
   const workers = page.workers().length;
-  test.info().annotations.push({ type: 'engine-path', description: `${browserName}: OffscreenCanvas=${hasOffscreen}, workers=${workers}` });
+  test
+    .info()
+    .annotations.push({
+      type: 'engine-path',
+      description: `${browserName}: OffscreenCanvas=${hasOffscreen}, workers=${workers}`,
+    });
   if (hasOffscreen) expect(workers).toBeGreaterThan(0);
   else expect(workers).toBe(0);
   const d = await cardData(cards(page).first());

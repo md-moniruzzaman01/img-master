@@ -52,8 +52,14 @@ export function ResultCard({
   onDownload,
   reserve,
   ghost = false,
+  summary,
+  meta,
 }: {
   item: ResultItem;
+  /** Replaces the "before → after" line (for outputs where savings make no sense). */
+  summary?: string;
+  /** Replaces the "W × H px · FORMAT" line. */
+  meta?: string;
   /** Output name, unique within the batch (defaults to the engine's name). */
   fileName?: string;
   /** Turns an engine note into a sentence (needs the tool's target). */
@@ -162,13 +168,13 @@ export function ResultCard({
         {status === 'success' && r && (
           <>
             <p className="mt-0.5 tabular-nums text-text">
-              {p > 0 && (
+              {!summary && p > 0 && (
                 <CheckIcon size={20} className="mr-1 inline size-4 align-[-2px] text-success" />
               )}
-              {copy.successLine(r.inputBytes, r.outputBytes)}
+              {summary ?? copy.successLine(r.inputBytes, r.outputBytes)}
             </p>
             <p className="type-small tabular-nums text-muted">
-              {r.width} × {r.height} px · {FORMAT_LABEL[r.format]}
+              {meta ?? `${r.width} × ${r.height} px · ${FORMAT_LABEL[r.format]}`}
             </p>
             {r.notes.map((n) => {
               const text = noteText(n, r);

@@ -66,10 +66,7 @@ function loadHeaderRules() {
 const headerRules = loadHeaderRules();
 
 function headersFor(pathname) {
-  return Object.assign(
-    {},
-    ...headerRules.filter((r) => r.re.test(pathname)).map((r) => r.headers),
-  );
+  return Object.assign({}, ...headerRules.filter((r) => r.re.test(pathname)).map((r) => r.headers));
 }
 
 function resolveFile(urlPath) {

@@ -11,11 +11,25 @@ const BUDGET_BYTES = 30 * 1024;
 
 // A chunk is "ours" when it contains one of our own UI strings; anything else
 // (react-dom, Next router/runtime, turbopack runtime, polyfills) is framework.
-const OURS = [/Choose images/, /aria-haspopup/, /All tools/, /Nothing is uploaded/, /compressToSize/, /transparency-flattened|Transparent areas/];
+const OURS = [
+  /Choose images/,
+  /aria-haspopup/,
+  /All tools/,
+  /Nothing is uploaded/,
+  /compressToSize/,
+  /transparency-flattened|Transparent areas/,
+];
 
 for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
   test(`first-load JS: ${path}`, async ({ page }) => {
-    const scripts: { url: string; raw: number; gz: number; gz9: number; ours: boolean; polyfill: boolean }[] = [];
+    const scripts: {
+      url: string;
+      raw: number;
+      gz: number;
+      gz9: number;
+      ours: boolean;
+      polyfill: boolean;
+    }[] = [];
     page.on('response', async (res) => {
       const url = res.url();
       if (!/\.js(\?|$)/.test(url)) return;
@@ -49,7 +63,10 @@ for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
       frameworkGz: total - ours,
       files: scripts.map((s) => `${s.url} ${s.gz}${s.ours ? ' OURS' : ''}`),
     });
-    if (path !== '/') expect(ours, `our first-load JS ${ours} B gz vs budget ${BUDGET_BYTES}`).toBeLessThanOrEqual(BUDGET_BYTES);
+    if (path !== '/')
+      expect(ours, `our first-load JS ${ours} B gz vs budget ${BUDGET_BYTES}`).toBeLessThanOrEqual(
+        BUDGET_BYTES,
+      );
     void ALL_PATHS;
   });
 }

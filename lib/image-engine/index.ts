@@ -35,8 +35,10 @@ function makeFavicons(src: FaviconSource): JobHandle<FaviconPackage> {
 export const imageEngine: ImageEngine = {
   compressToSize: (file, opts, onProgress) =>
     submit<EngineResult>('compressToSize', file, { ...opts }, onProgress),
-  convert: (file, opts, onProgress) => submit<EngineResult>('convert', file, { ...opts }, onProgress),
-  compress: (file, opts, onProgress) => submit<EngineResult>('compress', file, { ...opts }, onProgress),
+  convert: (file, opts, onProgress) =>
+    submit<EngineResult>('convert', file, { ...opts }, onProgress),
+  compress: (file, opts, onProgress) =>
+    submit<EngineResult>('compress', file, { ...opts }, onProgress),
   pngToIco: (file) => submit<EngineResult>('pngToIco', file, {}),
   makeFavicons,
   zip: async (files) => (await import('./zip')).zipFiles(files),

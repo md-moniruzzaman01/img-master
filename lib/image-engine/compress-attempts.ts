@@ -6,7 +6,9 @@ export const RETRY_STEPS = [0.1, 0.2, 0.3];
 export const RETRY_MIN_QUALITY = 0.3;
 
 /** Encodes the (already rendered) image at a quality; `undefined` means lossless. */
-export type AttemptEncoder<T extends { size: number }> = (quality: number | undefined) => Promise<T>;
+export type AttemptEncoder<T extends { size: number }> = (
+  quality: number | undefined,
+) => Promise<T>;
 
 export interface AttemptResult<T> {
   out: T;

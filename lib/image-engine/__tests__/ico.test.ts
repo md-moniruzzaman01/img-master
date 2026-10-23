@@ -41,7 +41,9 @@ describe('writeIco', () => {
       expect(e.bpp).toBe(32);
       expect(e.size).toBe(images[i].png.length);
       expect(e.offset).toBe(offset);
-      expect(Array.from(out.subarray(e.offset, e.offset + e.size))).toEqual(Array.from(images[i].png));
+      expect(Array.from(out.subarray(e.offset, e.offset + e.size))).toEqual(
+        Array.from(images[i].png),
+      );
       offset += e.size;
     });
     expect(out.length).toBe(offset);

@@ -15,14 +15,16 @@ const ascii = (b: Uint8Array, at: number, len: number) =>
 
 export function sniffFormat(b: Uint8Array): SniffedKind {
   if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'jpeg';
-  if (b.length >= 4 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'png';
+  if (b.length >= 4 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47)
+    return 'png';
   if (ascii(b, 0, 4) === 'RIFF' && ascii(b, 8, 4) === 'WEBP') return 'webp';
   if (ascii(b, 0, 4) === 'GIF8') return 'gif';
   if (ascii(b, 0, 2) === 'BM') return 'bmp';
   if (ascii(b, 4, 4) === 'ftyp') {
     const brand = ascii(b, 8, 4);
     if (brand === 'avif' || brand === 'avis') return 'avif';
-    if (['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'mif1', 'msf1'].includes(brand)) return 'heic';
+    if (['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'mif1', 'msf1'].includes(brand))
+      return 'heic';
   }
   return 'unknown';
 }
@@ -30,7 +32,8 @@ export function sniffFormat(b: Uint8Array): SniffedKind {
 const u16be = (b: Uint8Array, i: number) => (b[i] << 8) | b[i + 1];
 const u16le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8);
 const u24le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8) | (b[i + 2] << 16);
-const u32be = (b: Uint8Array, i: number) => ((b[i] << 24) >>> 0) + ((b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]);
+const u32be = (b: Uint8Array, i: number) =>
+  ((b[i] << 24) >>> 0) + ((b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]);
 
 export interface HeaderInfo {
   width: number;
@@ -52,7 +55,11 @@ export function readHeader(b: Uint8Array, kind: SniffedKind): HeaderInfo | null 
       case 'bmp': {
         if (b.length < 26) return null;
         const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
-        return { width: Math.abs(dv.getInt32(18, true)), height: Math.abs(dv.getInt32(22, true)), orientation: 1 };
+        return {
+          width: Math.abs(dv.getInt32(18, true)),
+          height: Math.abs(dv.getInt32(22, true)),
+          orientation: 1,
+        };
       }
       case 'webp': {
         const chunk = ascii(b, 12, 4);
@@ -62,7 +69,11 @@ export function readHeader(b: Uint8Array, kind: SniffedKind): HeaderInfo | null 
           return { width: u16le(b, 26) & 0x3fff, height: u16le(b, 28) & 0x3fff, orientation: 1 };
         if (chunk === 'VP8L' && b.length >= 25) {
           const bits = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24);
-          return { width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1, orientation: 1 };
+          return {
+            width: (bits & 0x3fff) + 1,
+            height: ((bits >>> 14) & 0x3fff) + 1,
+            orientation: 1,
+          };
         }
         return null;
       }
@@ -176,7 +187,9 @@ function countGifFrames(b: Uint8Array, stopAt: number): number {
 
 /** EXIF orientations 5–8 swap width and height. */
 export function orientedSize(h: HeaderInfo): { width: number; height: number } {
-  return h.orientation >= 5 ? { width: h.height, height: h.width } : { width: h.width, height: h.height };
+  return h.orientation >= 5
+    ? { width: h.height, height: h.width }
+    : { width: h.width, height: h.height };
 }
 
 export interface Decoded {
@@ -235,7 +248,11 @@ export async function decodeImage(file: Blob, maxPixels: number): Promise<Decode
   // Ask the decoder for a smaller bitmap when the header says it's too big.
   let resizeWidth: number | undefined;
   if (header && header.width * header.height > maxPixels) {
-    resizeWidth = fitPixels(orientedSize(header).width, orientedSize(header).height, maxPixels).width;
+    resizeWidth = fitPixels(
+      orientedSize(header).width,
+      orientedSize(header).height,
+      maxPixels,
+    ).width;
   }
 
   let source: DrawSource;

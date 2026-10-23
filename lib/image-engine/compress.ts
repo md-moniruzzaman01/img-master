@@ -14,7 +14,11 @@ export function sameFormatFor(kind: SniffedKind, hasAlpha: boolean): ImageFormat
   return hasAlpha ? 'png' : 'jpeg';
 }
 
-export async function compressJob(file: File, opts: CompressOptions, ctx: JobContext): Promise<EngineResult> {
+export async function compressJob(
+  file: File,
+  opts: CompressOptions,
+  ctx: JobContext,
+): Promise<EngineResult> {
   const explicit = opts.format && opts.format !== 'same' ? opts.format : null;
   if (explicit) await assertFormatSupported(explicit);
   ctx.progress('decode', 0);
@@ -39,7 +43,11 @@ export async function compressJob(file: File, opts: CompressOptions, ctx: JobCon
     const target = canvas;
     // Not smaller than the input? Try a few lower qualities; else return the smallest
     // (still re-encoded, so metadata is gone) with the 'not-smaller' note.
-    const { out: blob, quality, notSmaller } = await runCompressAttempts(
+    const {
+      out: blob,
+      quality,
+      notSmaller,
+    } = await runCompressAttempts(
       (q) => encodeCanvas(target, format, q),
       startQ,
       file.size,

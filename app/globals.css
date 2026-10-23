@@ -51,6 +51,27 @@
   }
 }
 
+/* Mock browser tabs show both color schemes whatever the visitor uses:
+   same tokens, pinned to one scheme (favicon preview only). */
+.pin-light {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-2: #eef0f4;
+  --border: #e2e5eb;
+  --text: #0f172a;
+  --text-muted: #5b6474;
+}
+.pin-dark {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --surface: #151821;
+  --surface-2: #1d2130;
+  --border: #2a2f3d;
+  --text: #e8eaf0;
+  --text-muted: #9aa3b5;
+}
+
 /* ── Tailwind theme mapping ───────────────────────────────────────── */
 @theme inline {
   /* Only our tokens exist as colors: no stray palette colors in components. */
@@ -249,7 +270,14 @@
   html.has-action-bar body {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
+  /* Focused or scrolled-to controls stay clear of the fixed bar (WCAG 2.4.11). */
+  html.has-action-bar {
+    scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
   @media (width >= 48rem) {
+    html.has-action-bar {
+      scroll-padding-bottom: 0;
+    }
     html.has-action-bar body {
       padding-bottom: 0;
     }

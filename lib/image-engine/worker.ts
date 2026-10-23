@@ -23,7 +23,10 @@ scope.onmessage = (ev) => {
   if (msg.type === 'probe') {
     void (async () => {
       const workerCanvas = await probeOffscreen();
-      const result: ProbeResult = { workerCanvas, encodeWebp: workerCanvas && (await canEncodeWebp()) };
+      const result: ProbeResult = {
+        workerCanvas,
+        encodeWebp: workerCanvas && (await canEncodeWebp()),
+      };
       post({ id: msg.id, type: 'done', result });
     })();
     return;

@@ -9,6 +9,7 @@ import { RelatedTools } from '@/components/content/related-tools';
 import { RichText } from '@/components/content/rich-text';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Container } from '@/components/layout/container';
+import { FaviconShell } from '@/components/favicon/favicon-shell';
 import { ToolShell } from '@/components/tool/tool-shell';
 import { toolJsonLd } from '@/lib/seo/jsonld';
 import { buildToolMetadata } from '@/lib/seo/metadata';
@@ -42,7 +43,7 @@ export default async function ToolPage({ params }: PageProps<'/[slug]'>) {
       <Container size="tool">
         <Breadcrumbs items={getBreadcrumbs(slug)} />
         <PageIntro h1={content.h1} subtitle={content.subtitle} />
-        <ToolShell tool={tool} />
+        {tool.category === 'favicon' ? <FaviconShell tool={tool} /> : <ToolShell tool={tool} />}
       </Container>
       <Container size="text">
         <HowToSteps steps={content.howTo} />

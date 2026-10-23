@@ -43,7 +43,17 @@ describe('xmlEscape and colors', () => {
   });
   it('accepts only hex colors', () => {
     for (const c of ['#fff', '#FFFF', '#1a73e8', '#1a73e8ff']) expect(isSafeColor(c)).toBe(true);
-    for (const c of ['red', '#12', '#12345', '#ggg', 'url(#x)', '#fff" onload="x', 'transparent', 1, null])
+    for (const c of [
+      'red',
+      '#12',
+      '#12345',
+      '#ggg',
+      'url(#x)',
+      '#fff" onload="x',
+      'transparent',
+      1,
+      null,
+    ])
       expect(isSafeColor(c)).toBe(false);
   });
 });
@@ -68,7 +78,9 @@ describe('buildSvg', () => {
     expect(() => buildSvg({ ...base, color: 'red' })).toThrow();
   });
   it('draws shapes', () => {
-    expect(buildSvg({ ...base, shape: 'circle' })).toContain('<circle cx="256" cy="256" r="256" fill="#112233"/>');
+    expect(buildSvg({ ...base, shape: 'circle' })).toContain(
+      '<circle cx="256" cy="256" r="256" fill="#112233"/>',
+    );
     expect(buildSvg({ ...base, shape: 'rounded' })).toContain('rx="102.4"');
     expect(buildSvg({ ...base, shape: 'square' })).not.toContain('rx=');
     expect(buildSvg({ ...base, background: 'transparent' })).not.toMatch(/<rect|<circle/);
@@ -90,7 +102,13 @@ describe('normalizeSpec', () => {
   it('rejects empty text and emoji with a helpful message', () => {
     const empties = [
       text({ text: '   ' }),
-      { mode: 'emoji', emoji: '', background: '#fff', shape: 'square', padding: 10 } as WireFaviconSource,
+      {
+        mode: 'emoji',
+        emoji: '',
+        background: '#fff',
+        shape: 'square',
+        padding: 10,
+      } as WireFaviconSource,
     ];
     for (const src of empties) {
       let err: unknown;
@@ -107,7 +125,13 @@ describe('normalizeSpec', () => {
     expect(() => normalizeSpec(text({ color: 'red' }))).toThrow();
     expect(() => normalizeSpec(text({ background: 'transparent' }))).toThrow();
     expect(() =>
-      normalizeSpec({ mode: 'emoji', emoji: '\u{1F600}', background: '"><x', shape: 'square', padding: 5 }),
+      normalizeSpec({
+        mode: 'emoji',
+        emoji: '\u{1F600}',
+        background: '"><x',
+        shape: 'square',
+        padding: 5,
+      }),
     ).toThrow();
   });
   it('allows transparent for emoji and image, and clamps numbers', () => {
@@ -131,7 +155,10 @@ describe('normalizeSpec', () => {
     expect(i.zoom).toBe(4);
     expect(i.padding).toBe(0);
     expect(i.shape).toBe('square');
-    expect(normalizeSpec({ mode: 'image', zoom: NaN, padding: 5, background: '#fff', shape: 'square' }).zoom).toBe(1);
+    expect(
+      normalizeSpec({ mode: 'image', zoom: NaN, padding: 5, background: '#fff', shape: 'square' })
+        .zoom,
+    ).toBe(1);
   });
 });
 
@@ -153,7 +180,9 @@ describe('package files, snippet, manifest, README', () => {
   });
   it('builds the snippet per mode', () => {
     expect(buildSnippet('image')).not.toContain('svg');
-    expect(buildSnippet('text')).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+    expect(buildSnippet('text')).toContain(
+      '<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
+    );
     expect(buildSnippet('text')).not.toContain('<!--');
     for (const m of ['image', 'text', 'emoji'] as const) {
       expect(buildSnippet(m)).toContain('<link rel="icon" href="/favicon.ico" sizes="48x48">');
@@ -169,7 +198,13 @@ describe('package files, snippet, manifest, README', () => {
     expect(m.background_color).toBe('#1a73e8');
   });
   it('uses white for transparent backgrounds and a neutral name for images', () => {
-    const spec = normalizeSpec({ mode: 'image', zoom: 1, padding: 0, background: 'transparent', shape: 'square' });
+    const spec = normalizeSpec({
+      mode: 'image',
+      zoom: 1,
+      padding: 0,
+      background: 'transparent',
+      shape: 'square',
+    });
     const m = JSON.parse(buildManifest(spec));
     expect(m.theme_color).toBe('#ffffff');
     expect(m.name).toBe('Favicon');

@@ -37,7 +37,10 @@ export function shapeInset(shape: FaviconShape): number {
 }
 
 /** Square content box (inside the padding) centered in the icon. */
-export function contentBox(size: number, paddingPercent: number): { x: number; y: number; side: number } {
+export function contentBox(
+  size: number,
+  paddingPercent: number,
+): { x: number; y: number; side: number } {
   const side = Math.max(1, size * (1 - 2 * paddingFraction(paddingPercent)));
   return { x: (size - side) / 2, y: (size - side) / 2, side };
 }

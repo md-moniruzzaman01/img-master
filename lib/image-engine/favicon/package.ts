@@ -29,11 +29,15 @@ export interface FaviconSpec {
 
 const SHAPES: readonly FaviconShape[] = ['square', 'rounded', 'circle'];
 
-type Segmenter = new (l?: string, o?: object) => { segment(s: string): Iterable<{ segment: string }> };
+type Segmenter = new (
+  l?: string,
+  o?: object,
+) => { segment(s: string): Iterable<{ segment: string }> };
 
 function segments(s: string): string[] {
   const Seg = (Intl as { Segmenter?: Segmenter }).Segmenter;
-  if (Seg) return Array.from(new Seg(undefined, { granularity: 'grapheme' }).segment(s), (x) => x.segment);
+  if (Seg)
+    return Array.from(new Seg(undefined, { granularity: 'grapheme' }).segment(s), (x) => x.segment);
   return Array.from(s);
 }
 
@@ -42,7 +46,10 @@ const CONTROL = /[\u0000-\u001F\u007F￾￿]/g;
 function cleanColor(c: unknown, what: string, allowTransparent: boolean): string {
   if (allowTransparent && c === 'transparent') return 'transparent';
   if (isSafeColor(c)) return c;
-  throw new EngineError('DECODE_FAILED', `The ${what} color is not valid. Use a hex color like #1a73e8.`);
+  throw new EngineError(
+    'DECODE_FAILED',
+    `The ${what} color is not valid. Use a hex color like #1a73e8.`,
+  );
 }
 
 /** Validates and clamps user input. Throws EngineError(DECODE_FAILED) with a helpful message. */
@@ -62,7 +69,13 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
     };
   }
   if (src.mode === 'text') {
-    const text = segments(String(src.text ?? '').replace(CONTROL, '').trim()).slice(0, 3).join('');
+    const text = segments(
+      String(src.text ?? '')
+        .replace(CONTROL, '')
+        .trim(),
+    )
+      .slice(0, 3)
+      .join('');
     if (!text) throw new EngineError('DECODE_FAILED', 'Type 1 to 3 characters for the icon.');
     const w = src.fontWeight === 400 || src.fontWeight === 800 ? src.fontWeight : 600;
     return {
@@ -77,7 +90,11 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
     };
   }
   if (src.mode === 'emoji') {
-    const first = segments(String(src.emoji ?? '').replace(CONTROL, '').trim())[0];
+    const first = segments(
+      String(src.emoji ?? '')
+        .replace(CONTROL, '')
+        .trim(),
+    )[0];
     if (!first) throw new EngineError('DECODE_FAILED', 'Type or paste one emoji for the icon.');
     return {
       mode: 'emoji',
@@ -149,7 +166,9 @@ export function buildManifest(spec: FaviconSpec): string {
 
 export function buildReadme(mode: FaviconMode, snippet: string): string {
   const svgLine =
-    mode === 'image' ? '' : 'favicon.svg                   Sharp icon at any size. Used by modern browsers.\n';
+    mode === 'image'
+      ? ''
+      : 'favicon.svg                   Sharp icon at any size. Used by modern browsers.\n';
   return `Your favicon package
 ====================
 

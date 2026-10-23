@@ -19,19 +19,96 @@ interface CanvasJob {
 
 const JOBS: CanvasJob[] = [
   // ~3 MB, 12 MP, phone-photo-like (gradients, shapes, mild noise)
-  { file: 'photo-12mp.jpg', width: 4000, height: 3000, mime: 'image/jpeg', quality: 0.92, kind: 'photo', noise: 0.1 },
-  { file: 'photo-2mp.jpg', width: 1600, height: 1200, mime: 'image/jpeg', quality: 0.9, kind: 'photo', noise: 0.08 },
-  { file: 'photo-small.jpg', width: 320, height: 240, mime: 'image/jpeg', quality: 0.3, kind: 'photo', noise: 0.02 },
-  { file: 'photo-2mp.png', width: 1600, height: 1200, mime: 'image/png', kind: 'photo', noise: 0.04 },
-  { file: 'photo-2mp.webp', width: 1600, height: 1200, mime: 'image/webp', quality: 0.85, kind: 'photo', noise: 0.06 },
+  {
+    file: 'photo-12mp.jpg',
+    width: 4000,
+    height: 3000,
+    mime: 'image/jpeg',
+    quality: 0.92,
+    kind: 'photo',
+    noise: 0.1,
+  },
+  {
+    file: 'photo-2mp.jpg',
+    width: 1600,
+    height: 1200,
+    mime: 'image/jpeg',
+    quality: 0.9,
+    kind: 'photo',
+    noise: 0.08,
+  },
+  {
+    file: 'photo-small.jpg',
+    width: 320,
+    height: 240,
+    mime: 'image/jpeg',
+    quality: 0.3,
+    kind: 'photo',
+    noise: 0.02,
+  },
+  {
+    file: 'photo-2mp.png',
+    width: 1600,
+    height: 1200,
+    mime: 'image/png',
+    kind: 'photo',
+    noise: 0.04,
+  },
+  {
+    file: 'photo-2mp.webp',
+    width: 1600,
+    height: 1200,
+    mime: 'image/webp',
+    quality: 0.85,
+    kind: 'photo',
+    noise: 0.06,
+  },
   { file: 'transparent.png', width: 800, height: 600, mime: 'image/png', kind: 'transparent' },
-  { file: 'transparent.webp', width: 800, height: 600, mime: 'image/webp', quality: 0.9, kind: 'transparent' },
+  {
+    file: 'transparent.webp',
+    width: 800,
+    height: 600,
+    mime: 'image/webp',
+    quality: 0.9,
+    kind: 'transparent',
+  },
   { file: 'tiny-40.png', width: 40, height: 40, mime: 'image/png', kind: 'photo', noise: 0.02 },
-  { file: 'tiny-40.jpg', width: 40, height: 40, mime: 'image/jpeg', quality: 0.9, kind: 'photo', noise: 0.02 },
-  { file: 'tall-1000x8000.jpg', width: 1000, height: 8000, mime: 'image/jpeg', quality: 0.9, kind: 'photo', noise: 0.06 },
-  { file: 'noise-1200.jpg', width: 1200, height: 1200, mime: 'image/jpeg', quality: 0.95, kind: 'noise' },
+  {
+    file: 'tiny-40.jpg',
+    width: 40,
+    height: 40,
+    mime: 'image/jpeg',
+    quality: 0.9,
+    kind: 'photo',
+    noise: 0.02,
+  },
+  {
+    file: 'tall-1000x8000.jpg',
+    width: 1000,
+    height: 8000,
+    mime: 'image/jpeg',
+    quality: 0.9,
+    kind: 'photo',
+    noise: 0.06,
+  },
+  {
+    file: 'noise-1200.jpg',
+    width: 1200,
+    height: 1200,
+    mime: 'image/jpeg',
+    quality: 0.95,
+    kind: 'noise',
+  },
   // 48 megapixels (over the 16.7 MP pixel cap)
-  { file: 'photo-48mp.jpg', width: 8000, height: 6000, mime: 'image/jpeg', quality: 0.85, kind: 'photo', noise: 0.08 },
+  {
+    file: 'photo-48mp.jpg',
+    width: 8000,
+    height: 6000,
+    mime: 'image/jpeg',
+    quality: 0.85,
+    kind: 'photo',
+    noise: 0.08,
+  },
   // wide, short signature-like scan (white paper, dark scribble)
   { file: 'signature.png', width: 900, height: 300, mime: 'image/png', kind: 'photo-alpha' },
 ];
@@ -75,7 +152,12 @@ async function renderInBrowser(job: CanvasJob): Promise<string> {
         ctx.moveTo(W * 0.08, H * 0.6);
         for (let i = 0; i < 40; i++) {
           const x = W * (0.08 + i * 0.022);
-          ctx.quadraticCurveTo(x + W * 0.01, H * (0.2 + rnd() * 0.6), x + W * 0.02, H * (0.4 + rnd() * 0.3));
+          ctx.quadraticCurveTo(
+            x + W * 0.01,
+            H * (0.2 + rnd() * 0.6),
+            x + W * 0.02,
+            H * (0.4 + rnd() * 0.3),
+          );
         }
         ctx.stroke();
       } else if (j.kind === 'transparent') {
@@ -111,7 +193,7 @@ async function renderInBrowser(job: CanvasJob): Promise<string> {
           ctx.beginPath();
           ctx.moveTo(0, H);
           for (let x = 0; x <= W; x += W / 12) {
-            ctx.lineTo(x, H * (0.55 + layer * 0.12) + Math.sin(x / W * 6 + layer) * H * 0.05);
+            ctx.lineTo(x, H * (0.55 + layer * 0.12) + Math.sin((x / W) * 6 + layer) * H * 0.05);
           }
           ctx.lineTo(W, H);
           ctx.closePath();
@@ -366,6 +448,9 @@ export async function generateFixtures(dir: string): Promise<void> {
     garbage[i] = s & 255;
   }
   write('corrupt.jpg', Buffer.concat([jpegStart, garbage]));
-  write('not-an-image.png', Buffer.from('This is a plain text file renamed to .png.\n'.repeat(40), 'utf8'));
+  write(
+    'not-an-image.png',
+    Buffer.from('This is a plain text file renamed to .png.\n'.repeat(40), 'utf8'),
+  );
   write('empty.jpg', Buffer.alloc(0));
 }

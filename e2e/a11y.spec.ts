@@ -2,7 +2,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ensureFixtures, fixture } from './helpers/fixtures';
-import { ALL_PATHS, TOOL_SLUGS, cards, gotoTool, logMetric, openMoreOptions, pickAndWait } from './helpers/tool';
+import {
+  ALL_PATHS,
+  TOOL_SLUGS,
+  cards,
+  gotoTool,
+  logMetric,
+  openMoreOptions,
+  pickAndWait,
+} from './helpers/tool';
 
 test.beforeAll(ensureFixtures);
 
@@ -14,13 +22,22 @@ async function axe(page: Page, label: string) {
   logMetric('axe.ndjson', {
     label,
     project: test.info().project.name,
-    serious: bad.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 5) })),
+    serious: bad.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 5),
+    })),
     minor: res.violations
       .filter((v) => v.impact !== 'serious' && v.impact !== 'critical')
       .map((v) => `${v.id}:${v.impact}`),
   });
   expect(
-    bad.map((v) => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 4) })),
+    bad.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      help: v.help,
+      nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 4),
+    })),
     label,
   ).toEqual([]);
 }
@@ -35,13 +52,19 @@ for (const scheme of ['light', 'dark'] as const) {
     });
   }
 
-  test(`axe ${scheme}: tool states (results, partial failure, more options, tools sheet)`, async ({ page }) => {
+  test(`axe ${scheme}: tool states (results, partial failure, more options, tools sheet)`, async ({
+    page,
+  }) => {
     test.setTimeout(120_000);
     await page.emulateMedia({ colorScheme: scheme });
     await gotoTool(page, 'compress-image-to-50kb');
     await openMoreOptions(page);
     await axe(page, `${scheme} more-options open`);
-    await pickAndWait(page, [fixture('photo-2mp.jpg'), fixture('corrupt.jpg'), fixture('animated.gif')]);
+    await pickAndWait(page, [
+      fixture('photo-2mp.jpg'),
+      fixture('corrupt.jpg'),
+      fixture('animated.gif'),
+    ]);
     await expect(cards(page)).toHaveCount(3);
     await axe(page, `${scheme} partial results with error + notes + action bar`);
     await page.getByRole('button', { name: 'Tools' }).click();
@@ -64,7 +87,10 @@ for (const scheme of ['light', 'dark'] as const) {
   });
 }
 
-test('keyboard only: skip link, tools sheet (focus trap, Esc, focus return)', async ({ page, browserName }) => {
+test('keyboard only: skip link, tools sheet (focus trap, Esc, focus return)', async ({
+  page,
+  browserName,
+}) => {
   // WebKit's Tab order skips links, so inside the sheet focus can fall back to <body>.
   // That is still a trap: nothing behind the modal sheet may receive focus.
   const okFocus = `(() => { const a = document.activeElement; return !!a?.closest('dialog') || ${browserName === 'webkit'} && a === document.body; })()`;
@@ -100,7 +126,10 @@ test('keyboard only: skip link, tools sheet (focus trap, Esc, focus return)', as
   await expect(toolsBtn).toBeFocused();
 });
 
-test('keyboard only: compress page (picker focus ring, chips with arrow keys, switch, details, results)', async ({ page, browserName }) => {
+test('keyboard only: compress page (picker focus ring, chips with arrow keys, switch, details, results)', async ({
+  page,
+  browserName,
+}) => {
   test.setTimeout(120_000);
   await gotoTool(page, 'compress-image-to-50kb');
 
@@ -115,7 +144,8 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
         const host = el.closest('label') ?? el;
         const cs = getComputedStyle(el);
         const hs = getComputedStyle(host);
-        const label = el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 30) ?? el.tagName;
+        const label =
+          el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 30) ?? el.tagName;
         return {
           name: `${el.tagName.toLowerCase()}:${label}`,
           outline: `${cs.outlineStyle} ${cs.outlineWidth} | host ${hs.outlineStyle} ${hs.outlineWidth}`,
@@ -129,7 +159,9 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
   // The picker input is reachable and shows a focus ring on its label.
   const pickerStop = stops.find((s) => s.name.startsWith('input:'));
   expect(pickerStop, `tab order: ${names}`).toBeTruthy();
-  expect(pickerStop!.outline, 'picker focus ring').toMatch(/solid 2px \| host solid 2px|host solid 2px/);
+  expect(pickerStop!.outline, 'picker focus ring').toMatch(
+    /solid 2px \| host solid 2px|host solid 2px/,
+  );
   // Every stop shows some focus indicator (outline or ring).
   for (const s of stops) {
     if (s.name.startsWith('input:')) continue;
@@ -149,7 +181,9 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
   const summary = page.getByTestId('more-options').locator('summary');
   await summary.focus();
   await page.keyboard.press('Enter');
-  expect(await page.getByTestId('more-options').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
+  expect(
+    await page.getByTestId('more-options').evaluate((d) => (d as HTMLDetailsElement).open),
+  ).toBe(true);
   const sw = page.getByRole('switch', { name: /Keep original dimensions/ });
   await sw.focus();
   await page.keyboard.press('Space');
@@ -169,7 +203,9 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
   }
   for (let i = 0; i < 25 && !reached; i++) {
     await page.keyboard.press('Tab');
-    reached = await page.evaluate(() => document.activeElement?.getAttribute('data-testid') === 'download');
+    reached = await page.evaluate(
+      () => document.activeElement?.getAttribute('data-testid') === 'download',
+    );
   }
   expect(reached, 'Download link reachable with Tab').toBe(true);
   const [dl] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('Enter')]);
@@ -178,11 +214,15 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
   expect(dl.suggestedFilename()).toMatch(/-50kb\.jpg$/);
 });
 
-test('screen reader hooks: live region announces results, errors use role=alert, reduced motion respected', async ({ page }) => {
+test('screen reader hooks: live region announces results, errors use role=alert, reduced motion respected', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, fixture('photo-2mp.jpg'));
-  await expect(page.locator('[role=status][aria-live=polite]').filter({ hasText: /^Done\. .* smaller$/ })).toHaveCount(1);
+  await expect(
+    page.locator('[role=status][aria-live=polite]').filter({ hasText: /^Done\. .* smaller$/ }),
+  ).toHaveCount(1);
   // Transition durations are zeroed for reduced motion.
   const dur = await page.evaluate(() => {
     const el = document.querySelector('[data-testid=file-picker]') as HTMLElement;

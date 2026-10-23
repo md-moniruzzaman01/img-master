@@ -70,7 +70,9 @@ export async function faviconsJob(
     ctx.check();
 
     const ico = writeIco(
-      await Promise.all(ICO_SIZES.map(async (size) => ({ size, png: await bytesOf(png.get(size) as Blob) }))),
+      await Promise.all(
+        ICO_SIZES.map(async (size) => ({ size, png: await bytesOf(png.get(size) as Blob) })),
+      ),
     );
     const snippet = buildSnippet(spec.mode);
     const get = (s: Size) => png.get(s) as Blob;
@@ -99,7 +101,10 @@ export async function faviconsJob(
         name: 'site.webmanifest',
         blob: new Blob([buildManifest(spec)], { type: 'application/manifest+json' }),
       },
-      { name: 'README.txt', blob: new Blob([buildReadme(spec.mode, snippet)], { type: 'text/plain' }) },
+      {
+        name: 'README.txt',
+        blob: new Blob([buildReadme(spec.mode, snippet)], { type: 'text/plain' }),
+      },
     );
     return {
       files,

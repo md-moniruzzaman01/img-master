@@ -6,7 +6,11 @@ import { convertName } from './names';
 import { renderScaled } from './resize';
 import type { JobContext } from './run-job';
 
-export async function convertJob(file: File, opts: ConvertOptions, ctx: JobContext): Promise<EngineResult> {
+export async function convertJob(
+  file: File,
+  opts: ConvertOptions,
+  ctx: JobContext,
+): Promise<EngineResult> {
   const to = opts.to;
   await assertFormatSupported(to);
   ctx.progress('decode', 0);

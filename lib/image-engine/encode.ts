@@ -12,7 +12,8 @@ export const MIME: Record<ImageFormat, string> = {
   webp: 'image/webp',
 };
 
-const hasDom = () => typeof document !== 'undefined' && typeof document.createElement === 'function';
+const hasDom = () =>
+  typeof document !== 'undefined' && typeof document.createElement === 'function';
 
 /** OffscreenCanvas in workers, a DOM canvas on the main thread. */
 export function createCanvas(width: number, height: number): AnyCanvas {
@@ -66,7 +67,10 @@ export async function encodeCanvas(
   const blob = await toBlob(canvas, type, q);
   if (!blob || blob.size === 0) throw new MemoryError('Encoding failed');
   if (blob.type !== type) {
-    throw new EngineError('ENCODE_UNSUPPORTED', `This browser cannot save ${format.toUpperCase()} files`);
+    throw new EngineError(
+      'ENCODE_UNSUPPORTED',
+      `This browser cannot save ${format.toUpperCase()} files`,
+    );
   }
   return blob;
 }
@@ -104,7 +108,8 @@ export async function assertFormatSupported(format: ImageFormat): Promise<void> 
 /** Worker self-test: can this context create a 2d OffscreenCanvas and encode it? */
 export async function probeOffscreen(): Promise<boolean> {
   try {
-    if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') return false;
+    if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined')
+      return false;
     const c = new OffscreenCanvas(1, 1);
     const ctx = c.getContext('2d');
     if (!ctx) return false;
