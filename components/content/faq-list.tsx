@@ -17,7 +17,7 @@ export function FaqList({
       <div className="mt-4 divide-y divide-border rounded-card border border-border">
         {faqs.map((f, i) => (
           <details key={i} className="group">
-            <summary className="flex min-h-12 list-none items-center justify-between gap-3 rounded-card px-4 py-3">
+            <summary className="flex min-h-12 list-none items-center justify-between gap-3 px-4 py-3">
               <h3 className="type-h3 text-text">{f.q}</h3>
               <ChevronDownIcon
                 size={20}

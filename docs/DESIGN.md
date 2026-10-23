@@ -193,7 +193,7 @@ Plain reading layout: H1, "Last updated" date, text at max 680px.
 | `HowToSteps` | Numbered 3-step list. |
 | `FaqList` | Native `<details>/<summary>` (works without JS), one open at a time is not required. |
 | `RelatedTools` | 4–6 `ToolCard`s from the content file's `related`. |
-| `ToolCard` / `ToolGrid` | Icon + short name + one line, full card is the link. |
+| `ToolCard` / `ToolGrid` | Bordered card, bold short name + one line, full card is the link. No icon, no shadow. |
 | `AdSlot` | Renders nothing unless `site-config` ads are on. When on, reserves a fixed min-height (250px mobile) to prevent layout shift. Positions allowed: `below-results`, `before-footer`. |
 
 ## 5. Interaction details

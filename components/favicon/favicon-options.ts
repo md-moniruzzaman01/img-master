@@ -6,7 +6,7 @@ export type FaviconMode = 'image' | 'text' | 'emoji';
 export type Weight = 400 | 600 | 800;
 
 /** Default icon color (the brand primary). A data value for the engine, not styling. */
-export const BRAND_COLOR = '#4338ca';
+export const BRAND_COLOR = '#1d4ed8';
 
 export interface ImageOpts {
   zoom: number; // 1–4

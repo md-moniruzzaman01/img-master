@@ -1,14 +1,9 @@
-import { LockIcon } from '@/components/ui/icons';
-
-/** Home H1 and subtitle (DESIGN.md §3.2). */
+/** Home H1 and one subtitle line (DESIGN.md §3.2). No background or illustration. */
 export function HomeHero({ h1, subtitle }: { h1: string; subtitle: string }) {
   return (
-    <div className="pt-6 pb-2 lg:pt-12">
-      <h1 className="type-h1 max-w-[22ch] text-balance text-text">{h1}</h1>
-      <p className="mt-2 flex max-w-[60ch] items-start gap-2 text-muted">
-        <LockIcon size={20} className="mt-0.5 shrink-0 text-success" />
-        <span>{subtitle}</span>
-      </p>
+    <div className="pt-8 pb-2 text-center lg:pt-14">
+      <h1 className="type-h1 mx-auto max-w-[24ch] text-balance text-text">{h1}</h1>
+      <p className="mx-auto mt-2 max-w-[60ch] type-subtitle text-muted">{subtitle}</p>
     </div>
   );
 }

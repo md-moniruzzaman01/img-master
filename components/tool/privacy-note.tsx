@@ -1,12 +1,12 @@
-import { LockIcon } from '@/components/ui/icons';
+import { cx } from '@/components/ui/cx';
 import { copy } from './copy';
 
-/** Lock icon + one line. */
-export function PrivacyNote() {
+/** "🔒 Your images never leave your device", one small gray line under the picker. */
+export function PrivacyNote({ className }: { className?: string }) {
   return (
-    <p className="flex items-start gap-2 type-small text-muted">
-      <LockIcon size={20} className="shrink-0 text-success" />
-      <span className="pt-px">{copy.privacy}</span>
+    <p data-testid="privacy-note" className={cx('type-small text-muted', className)}>
+      <span aria-hidden="true">🔒 </span>
+      {copy.privacy}
     </p>
   );
 }

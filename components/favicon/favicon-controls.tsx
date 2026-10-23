@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import type { FaviconShape } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { ChipGroup } from '@/components/ui/chip-group';
@@ -108,8 +108,9 @@ function ShapeControl({
 }
 
 /**
- * Mode controls (PRODUCT.md §4.4). `part="main"` is the text or emoji field that
- * sits right under the mode tabs; `part="style"` is everything else, in a card.
+ * Mode controls (PRODUCT.md §4.4). `part="main"` is the text or emoji field,
+ * the first control on the page (`afterInput`, the privacy line, sits right
+ * under the input); `part="style"` is everything else, in a card.
  * (The image picker lives in the shell.)
  */
 export function FaviconControls({
@@ -117,16 +118,22 @@ export function FaviconControls({
   part,
   options,
   onChange,
+  afterInput,
 }: {
   mode: FaviconMode;
   part: 'main' | 'style';
   options: FaviconOptions;
   onChange: <M extends FaviconMode>(mode: M, patch: Partial<FaviconOptions[M]>) => void;
+  afterInput?: ReactNode;
 }) {
   if (part === 'main') {
     if (mode === 'text') {
       return (
-        <TextField value={options.text.text} onChange={(text) => onChange('text', { text })} />
+        <TextField
+          value={options.text.text}
+          onChange={(text) => onChange('text', { text })}
+          afterInput={afterInput}
+        />
       );
     }
     if (mode === 'emoji') {
@@ -134,6 +141,7 @@ export function FaviconControls({
         <EmojiField
           value={options.emoji.emoji}
           onChange={(emoji) => onChange('emoji', { emoji })}
+          afterInput={afterInput}
         />
       );
     }
@@ -238,7 +246,15 @@ function EmojiStyle({ o, set }: { o: EmojiOpts; set: (p: Partial<EmojiOpts>) => 
 const FIELD =
   'block h-14 w-full rounded-control border border-border-strong bg-bg px-4 text-center text-[1.5rem] font-semibold text-text';
 
-function TextField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function TextField({
+  value,
+  onChange,
+  afterInput,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  afterInput?: ReactNode;
+}) {
   const id = useId();
   const hintId = useId();
   const invalid = value.trim() === '';
@@ -261,6 +277,7 @@ function TextField({ value, onChange }: { value: string; onChange: (v: string) =
         onChange={(e) => onChange(limitGraphemes(e.target.value, MAX_TEXT, 'first'))}
         className={cx(FIELD, invalid && 'border-danger')}
       />
+      {afterInput}
       {/* Always present, so showing it never moves the content below. */}
       <p
         id={hintId}
@@ -272,7 +289,15 @@ function TextField({ value, onChange }: { value: string; onChange: (v: string) =
   );
 }
 
-function EmojiField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function EmojiField({
+  value,
+  onChange,
+  afterInput,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  afterInput?: ReactNode;
+}) {
   const id = useId();
   const hintId = useId();
   const invalid = value === '';
@@ -297,6 +322,7 @@ function EmojiField({ value, onChange }: { value: string; onChange: (v: string) 
           onFocus={(e) => e.currentTarget.select()}
           className={cx(FIELD, invalid && 'border-danger')}
         />
+        {afterInput}
         <p
           id={hintId}
           className={cx('mt-1 min-h-5 type-small', invalid ? 'text-danger' : 'text-muted')}

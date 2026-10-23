@@ -21,7 +21,6 @@ export function FaviconModeTabs({
   return (
     <ChipGroup
       label={t.modeLabel}
-      hideLabel
       variant="segmented"
       className="[&>div]:flex"
       options={OPTIONS}

@@ -98,7 +98,7 @@ export function ChipGroup<V extends string>({
         onKeyDown={onKeyDown}
         className={cx(
           segmented
-            ? 'inline-flex max-w-full gap-1 rounded-control border border-border bg-surface-2 p-1'
+            ? 'inline-flex max-w-full gap-1 rounded-control border border-border bg-surface p-1'
             : 'no-scrollbar fade-end -mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 py-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0',
         )}
       >
@@ -122,14 +122,14 @@ export function ChipGroup<V extends string>({
                 'transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-60',
                 segmented
                   ? cx(
-                      'min-h-12 min-w-12 flex-1 rounded-[8px] px-4',
+                      'min-h-12 min-w-12 flex-1 rounded-[6px] px-4',
                       checked ? 'bg-primary text-on-primary' : 'text-text hover:bg-bg',
                     )
                   : cx(
                       'min-h-12 rounded-full border px-4',
                       checked
                         ? 'border-primary bg-primary text-on-primary'
-                        : 'border-border bg-surface-2 text-text hover:border-border-strong',
+                        : 'border-border bg-bg text-text hover:border-border-strong',
                     ),
               )}
             >

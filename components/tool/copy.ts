@@ -8,7 +8,7 @@ export const copy = {
   pickerHintMobile: (max: number) => `JPG, PNG, WebP · up to ${max} at once`,
   pickerHintDesktop: 'or drop images here, or paste with Ctrl+V',
   dropHere: 'Drop images to start', // invented
-  privacy: 'Your images stay on your device. Nothing is uploaded.',
+  privacy: 'Your images never leave your device',
 
   processing(verb: 'compress' | 'convert', n: number, m: number): string {
     if (verb === 'compress') return m === 1 ? 'Compressing…' : `Compressing photo ${n} of ${m}…`;
@@ -17,15 +17,20 @@ export const copy = {
   waiting: 'Waiting…', // invented (queued card, screen readers)
 
   successLine(inputBytes: number, outputBytes: number): string {
+    return `${copy.sizes(inputBytes, outputBytes)} (${copy.change(inputBytes, outputBytes)})`;
+  },
+  /** "2.4 MB → 48 KB" (bold on the card). */
+  sizes: (inputBytes: number, outputBytes: number) =>
+    `${formatBytes(inputBytes)} → ${formatBytes(outputBytes)}`,
+  /** "98% smaller" (the card shows it under the sizes). */
+  change(inputBytes: number, outputBytes: number): string {
     const p = percentSmaller(inputBytes, outputBytes);
-    const before = formatBytes(inputBytes);
-    const after = formatBytes(outputBytes);
-    if (p > 0) return `${before} → ${after} (${p}% smaller)`;
-    if (p < 0) return `${before} → ${after} (${-p}% larger)`; // invented
+    if (p > 0) return `${p}% smaller`;
+    if (p < 0) return `${-p}% larger`; // invented
     // Rounds to 0% but the bytes differ: say which way, never "same size".
-    if (outputBytes > inputBytes) return `${before} → ${after} (slightly larger)`; // invented
-    if (outputBytes < inputBytes) return `${before} → ${after} (slightly smaller)`; // invented
-    return `${before} → ${after} (same size)`; // invented
+    if (outputBytes > inputBytes) return 'slightly larger'; // invented
+    if (outputBytes < inputBytes) return 'slightly smaller'; // invented
+    return 'same size'; // invented
   },
 
   alreadySmall: (targetKB: number) =>
@@ -63,7 +68,6 @@ export const copy = {
   savedIos: 'Ready — use Share to save to Photos',
 
   results: 'Results',
-  resultsPlaceholder: 'Your images will show here',
   moreOptions: 'More options',
   optionsChanged: 'Your new options are ready.', // invented
   applyTo: (n: number) => `Apply to ${n} images`, // invented

@@ -75,7 +75,7 @@ export function Sheet({
       }}
       className={
         'fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-hidden ' +
-        'rounded-t-2xl border border-border bg-bg p-0 text-text shadow-sheet backdrop:bg-scrim ' +
+        'rounded-t-card border border-border bg-bg p-0 text-text backdrop:bg-scrim ' +
         'md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[400px] md:rounded-none md:border-y-0 md:border-r-0'
       }
     >

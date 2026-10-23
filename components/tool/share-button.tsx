@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ShareIcon } from '@/components/ui/icons';
 import { copy } from './copy';
 
 /** True when this browser can share image files (Web Share API level 2). */
@@ -21,7 +20,7 @@ export function canShareFiles(): boolean {
 /**
  * Shares result files to WhatsApp, Messenger, Photos… Renders nothing where
  * file sharing isn't supported. `supported` is decided once by the parent so
- * the button never pops in after the bar is on screen.
+ * the button never pops in after the card is on screen.
  */
 export function ShareButton({
   supported,
@@ -49,14 +48,7 @@ export function ShareButton({
   }
 
   return (
-    <Button
-      variant="secondary"
-      size="lg"
-      icon={<ShareIcon size={20} />}
-      onClick={share}
-      data-testid="share"
-      className={className}
-    >
+    <Button variant="secondary" onClick={share} data-testid="share" className={className}>
       {copy.share}
     </Button>
   );

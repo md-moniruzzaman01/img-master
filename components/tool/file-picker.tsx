@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { buttonClasses } from '@/components/ui/button-styles';
 import { cx } from '@/components/ui/cx';
-import { UploadIcon } from '@/components/ui/icons';
 import { copy } from './copy';
+import { PrivacyNote } from './privacy-note';
 
 /**
- * Big "Choose images" control (DESIGN.md §4.3).
+ * Big "Choose images" control (DESIGN.md §4.3), with the privacy line right
+ * under the button. Mobile: button + privacy line. Desktop (≥ 768px): a dashed
+ * drop zone around both, plus the drop/paste hint.
  *
  * The visible button is a <label> for a real file input, so it opens the
  * gallery even before React hydrates. Files picked before hydration are picked
@@ -16,28 +18,24 @@ import { copy } from './copy';
  */
 export function FilePicker({
   inputId,
-  maxFiles,
   disabled,
   onFiles,
   onWarmUp,
   accept = 'image/*',
   multiple = true,
   label,
-  hint,
   desktopHint,
 }: {
   inputId: string;
-  maxFiles: number;
   disabled?: boolean;
   onFiles: (files: File[]) => void;
   /** File types for the picker (default: any image). */
   accept?: string;
   /** False: a single file; extras from drop or paste are ignored. */
   multiple?: boolean;
-  /** Overrides for the button and hint text (favicon tools). */
+  /** Overrides the button text (favicon tools). */
   label?: string;
-  hint?: string;
-  /** Second hint shown on desktop; `null` hides it. */
+  /** Drop/paste hint shown in the desktop drop zone; `null` hides it. */
   desktopHint?: string | null;
   /** Called on first intent (pointer down, focus) to start loading the engine. */
   onWarmUp?: () => void;
@@ -95,24 +93,23 @@ export function FilePicker({
       }}
       onDrop={onDrop}
       className={cx(
-        'flex flex-col items-center gap-3 rounded-card border-2 border-dashed px-4 py-4 text-center',
-        'transition-colors duration-150 ease-out fine-pointer:lg:py-10',
-        dragOver ? 'border-primary bg-surface-2' : 'border-border bg-surface',
+        'flex flex-col items-center text-center transition-colors duration-150 ease-out',
+        // Desktop: a dashed drop zone around the button.
+        'md:rounded-card md:border-2 md:border-dashed md:px-6 md:py-10',
+        dragOver ? 'md:border-primary md:bg-surface' : 'md:border-border-strong/50',
       )}
     >
-      <UploadIcon className="hidden text-primary fine-pointer:lg:block" />
       <label
         htmlFor={inputId}
         onPointerDown={onWarmUp}
         aria-disabled={disabled || undefined}
         className={cx(
           buttonClasses('primary', 'lg'),
-          'cursor-pointer sm:min-w-64',
+          'cursor-pointer text-[1.0625rem] md:w-auto md:min-w-80 md:px-10',
           'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
           disabled && 'pointer-events-none',
         )}
       >
-        <UploadIcon size={20} />
         {dragOver ? copy.dropHere : (label ?? copy.pickerButton)}
         <input
           ref={inputRef}
@@ -131,12 +128,12 @@ export function FilePicker({
           className="sr-only"
         />
       </label>
-      <p className="max-w-full type-small text-muted">
-        <span className="block truncate">{hint ?? copy.pickerHintMobile(maxFiles)}</span>
-        {desktopHint !== null && (
-          <span className="hidden fine-pointer:block">{desktopHint ?? copy.pickerHintDesktop}</span>
-        )}
-      </p>
+      <PrivacyNote className="mt-2" />
+      {desktopHint !== null && (
+        <p className="mt-1 hidden type-small text-muted md:block">
+          {desktopHint ?? copy.pickerHintDesktop}
+        </p>
+      )}
     </div>
   );
 }

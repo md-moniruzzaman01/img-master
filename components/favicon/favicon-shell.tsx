@@ -15,13 +15,11 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { AdSlot } from '@/components/content/ad-slot';
 import { Button } from '@/components/ui/button';
-import { DownloadIcon, ZipIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy, errorMessage } from '@/components/tool/copy';
 import { ErrorBanner } from '@/components/tool/error-banner';
 import { FilePicker } from '@/components/tool/file-picker';
 import { PrivacyNote } from '@/components/tool/privacy-note';
-import { StickyActionBar } from '@/components/tool/sticky-action-bar';
 import { faviconCopy as t } from './copy';
 import { FaviconControls } from './favicon-controls';
 import { FaviconModeTabs } from './favicon-mode-tabs';
@@ -260,24 +258,26 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
       data-state={state}
       className="grid gap-4 [&>*]:min-w-0"
     >
-      <FaviconModeTabs mode={mode} onChange={setMode} />
-
       {mode === 'image' ? (
         <FilePicker
           inputId={inputId}
-          maxFiles={1}
           multiple={false}
           onFiles={pickFile}
           onWarmUp={() => void loadEngine().catch(() => {})}
           label={file ? t.pickAnother : t.pickImage}
-          hint={file ? file.name : t.imageHint}
           desktopHint={t.imageHintDesktop}
         />
       ) : (
-        <FaviconControls mode={mode} part="main" options={options} onChange={change} />
+        <FaviconControls
+          mode={mode}
+          part="main"
+          options={options}
+          onChange={change}
+          afterInput={<PrivacyNote className="mt-2" />}
+        />
       )}
 
-      <PrivacyNote />
+      <FaviconModeTabs mode={mode} onChange={setMode} />
 
       {failure && (
         <ErrorBanner
@@ -299,33 +299,29 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
         }
       />
 
-      <FaviconControls mode={mode} part="style" options={options} onChange={change} />
-
-      <StickyActionBar visible={canDownload} reserve>
+      <div className="grid gap-2">
         <Button
           size="lg"
           data-testid="download-zip"
-          icon={<ZipIcon size={20} />}
+          disabled={!canDownload}
           loading={zipping}
           loadingText={t.preparingZip}
           onClick={() => void downloadZip()}
         >
           {t.downloadZip}
         </Button>
-      </StickyActionBar>
-
-      <div>
         <Button
           variant="secondary"
           disabled={!canDownload}
-          icon={<DownloadIcon size={20} />}
           data-testid="download-ico"
           onClick={() => void downloadIco()}
-          className="w-full sm:w-auto"
+          className="w-full"
         >
           {t.downloadIco}
         </Button>
       </div>
+
+      <FaviconControls mode={mode} part="style" options={options} onChange={change} />
 
       <SnippetBlock snippet={pkg?.snippet ?? null} />
 

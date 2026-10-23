@@ -9,14 +9,18 @@ const base =
   'aria-disabled:cursor-not-allowed aria-disabled:opacity-60';
 
 const variants: Record<ButtonVariant, string> = {
+  // The one brand color.
   primary: 'bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover',
-  secondary: 'border border-border-strong bg-bg text-text hover:bg-surface-2 active:bg-surface-2',
-  ghost: 'bg-transparent text-primary hover:bg-surface-2 active:bg-surface-2',
-  danger: 'bg-danger text-bg hover:opacity-90 active:opacity-90',
+  // Gray button: light gray fill, 1px border.
+  secondary:
+    'border border-border bg-surface text-text hover:border-border-strong active:border-border-strong',
+  // Plain text button (low emphasis, e.g. "Compress another").
+  ghost: 'bg-transparent text-primary underline-offset-4 hover:underline',
+  danger: 'bg-danger text-on-primary hover:opacity-90 active:opacity-90',
 };
 
 const sizes: Record<ButtonSize, string> = {
-  lg: 'min-h-[52px] w-full px-5 text-base sm:w-auto',
+  lg: 'min-h-[52px] w-full px-5 text-base',
   md: 'min-h-12 px-4 text-base',
 };
 

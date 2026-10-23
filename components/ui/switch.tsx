@@ -39,7 +39,7 @@ export function Switch({
         aria-hidden="true"
         className={cx(
           'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-150 ease-out',
-          checked ? 'border-primary bg-primary' : 'border-border-strong bg-surface-2',
+          checked ? 'border-primary bg-primary' : 'border-border-strong bg-surface',
         )}
       >
         <span

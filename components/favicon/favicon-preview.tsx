@@ -27,7 +27,7 @@ function Icon({
         aria-hidden="true"
         style={box}
         className={cx(
-          'block shrink-0 rounded-[3px] bg-surface-2',
+          'block shrink-0 rounded-[3px] bg-border',
           loading && 'animate-pulse',
           className,
         )}
@@ -63,7 +63,7 @@ function TabMock({
       <div
         data-scheme={scheme}
         className={cx(
-          'overflow-hidden rounded-[10px] border border-border bg-surface-2 text-text',
+          'overflow-hidden rounded-[8px] border border-border bg-surface text-text',
           scheme === 'light' ? 'pin-light' : 'pin-dark',
         )}
       >
@@ -115,7 +115,7 @@ export function FaviconPreview({
       aria-describedby={descId}
       data-testid="favicon-preview"
       data-state={empty ? 'empty' : busy ? 'busy' : p ? 'ready' : 'loading'}
-      className="rounded-card border border-border bg-surface p-3 sm:p-4"
+      className="rounded-card border border-border bg-bg p-3 sm:p-4"
     >
       <div className="flex h-6 items-center justify-between gap-3">
         <h2 id={headingId} className="type-h3 text-text">
@@ -141,7 +141,7 @@ export function FaviconPreview({
 
           <div className="flex items-end gap-3">
             <div className="shrink-0">
-              <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-surface-2">
+              <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-surface">
                 <Icon
                   src={p?.[180]}
                   size={52}

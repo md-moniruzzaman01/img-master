@@ -1,75 +1,47 @@
 /* Img Master design tokens and base styles (docs/DESIGN.md §2). Owned by ui-builder.
+   Light only: white, one brand blue, grays, and one red for errors.
    Components use the Tailwind names (bg-surface, text-muted…), never raw hex. */
 @import 'tailwindcss';
 
-/* Desktop-only affordances (drag and drop, paste) key off a fine pointer. */
-@custom-variant fine-pointer (@media (pointer: fine));
-
 /* ── Color tokens ─────────────────────────────────────────────────── */
 :root {
-  color-scheme: light dark;
-
-  --bg: #ffffff;
-  --surface: #f6f7f9;
-  --surface-2: #eef0f4;
-  --border: #e2e5eb;
-  /* Not in DESIGN.md: input/switch outlines need 3:1 against the page (WCAG 1.4.11). */
-  --border-strong: #7c8595;
-  --text: #0f172a;
-  --text-muted: #5b6474;
-  --primary: #4338ca;
-  --primary-hover: #3730a3;
-  --on-primary: #ffffff;
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #b91c1c;
-  --focus: #4338ca;
-
-  --scrim: rgb(15 23 42 / 0.5);
-  --shadow-color: rgb(15 23 42 / 0.12);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0d12;
-    --surface: #151821;
-    --surface-2: #1d2130;
-    --border: #2a2f3d;
-    --border-strong: #6b7387;
-    --text: #e8eaf0;
-    --text-muted: #9aa3b5;
-    --primary: #818cf8;
-    --primary-hover: #a5b4fc;
-    --on-primary: #0b0d12;
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --danger: #f87171;
-    --focus: #a5b4fc;
-
-    --scrim: rgb(0 0 0 / 0.6);
-    --shadow-color: rgb(0 0 0 / 0.5);
-  }
-}
-
-/* Mock browser tabs show both color schemes whatever the visitor uses:
-   same tokens, pinned to one scheme (favicon preview only). */
-.pin-light {
   color-scheme: light;
+
   --bg: #ffffff;
-  --surface: #f6f7f9;
-  --surface-2: #eef0f4;
-  --border: #e2e5eb;
-  --text: #0f172a;
-  --text-muted: #5b6474;
+  /* Section backgrounds, thumbnail boxes, gray (secondary) buttons. */
+  --surface: #f5f5f5;
+  --border: #e0e0e0;
+  /* Input/switch outlines need 3:1 against white and #F5F5F5 (WCAG 1.4.11): 3.5:1 / 3.2:1. */
+  --border-strong: #8a8a8a;
+  --text: #1a1a1a;
+  --text-muted: #555555;
+  /* The one brand color. White on it is 6.7:1. */
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --on-primary: #ffffff;
+  /* Errors only (ErrorBanner, failed cards). 6.6:1 on white. */
+  --danger: #b42318;
+  --focus: #1d4ed8;
+
+  /* Modal backdrop (Sheet primitive only). */
+  --scrim: rgb(0 0 0 / 0.4);
+}
+
+/* Favicon preview only: mock browser tabs show how the icon looks in a light
+   and a dark browser. This is a picture of a browser, not a site theme. */
+.pin-light {
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --text-muted: #555555;
 }
 .pin-dark {
-  color-scheme: dark;
-  --bg: #0b0d12;
-  --surface: #151821;
-  --surface-2: #1d2130;
-  --border: #2a2f3d;
-  --text: #e8eaf0;
-  --text-muted: #9aa3b5;
+  --bg: #2b2b2b;
+  --surface: #1a1a1a;
+  --border: #1a1a1a;
+  --text: #f5f5f5;
+  --text-muted: #c4c4c4;
 }
 
 /* ── Tailwind theme mapping ───────────────────────────────────────── */
@@ -78,7 +50,6 @@
   --color-*: initial;
   --color-bg: var(--bg);
   --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-text: var(--text);
@@ -86,8 +57,6 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-on-primary: var(--on-primary);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-focus: var(--focus);
   --color-scrim: var(--scrim);
@@ -96,51 +65,45 @@
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Bengali',
     Arial, sans-serif;
 
-  --radius-card: 12px;
-  --radius-control: 10px;
+  --radius-card: 8px;
+  --radius-control: 8px;
 
-  --shadow-raised: 0 -4px 16px var(--shadow-color);
-  --shadow-sheet: 0 8px 32px var(--shadow-color);
-  --shadow-toast: 0 4px 16px var(--shadow-color);
+  /* No shadows anywhere (DESIGN.md §2). */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* ── Type scale (mobile → desktop ≥ 1024px) ──────────────────────── */
 @utility type-h1 {
-  font-size: 1.5rem;
-  line-height: 1.875rem;
+  font-size: 1.625rem; /* 26px */
+  line-height: 2rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   @media (width >= 64rem) {
-    font-size: 2rem;
-    line-height: 2.5rem;
+    font-size: 1.75rem; /* 28px */
+    line-height: 2.25rem;
   }
 }
 @utility type-h2 {
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* 20px */
   line-height: 1.75rem;
-  font-weight: 650;
-  @media (width >= 64rem) {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
+  font-weight: 600;
 }
 @utility type-h3 {
-  font-size: 1.0625rem;
+  font-size: 1.0625rem; /* 17px */
   line-height: 1.5rem;
   font-weight: 600;
-  @media (width >= 64rem) {
-    font-size: 1.125rem;
-    line-height: 1.625rem;
-  }
+}
+@utility type-subtitle {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.5rem;
 }
 @utility type-body {
-  font-size: 1rem;
+  font-size: 0.9375rem; /* 15px */
   line-height: 1.5rem;
-  @media (width >= 64rem) {
-    line-height: 1.625rem;
-  }
 }
 @utility type-small {
   font-size: 0.875rem;
@@ -156,15 +119,15 @@
 @utility checkerboard {
   background-color: var(--bg);
   background-image: conic-gradient(
-    var(--surface-2) 25%,
+    var(--border) 25%,
     transparent 0 50%,
-    var(--surface-2) 0 75%,
+    var(--border) 0 75%,
     transparent 0
   );
   background-size: 16px 16px;
 }
 
-/* Horizontal scrollers fade at the trailing edge on mobile. */
+/* Horizontal scrollers fade at the trailing edge on mobile (a mask, not a color). */
 @utility fade-end {
   mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
   @media (width >= 40rem) {
@@ -181,15 +144,15 @@
 
 /* ── Range slider (components/ui/slider.tsx) ─────────────────────── */
 @layer components {
+  /* Two flat colors split at the value (a hard stop, not a gradient look). */
   .im-range::-webkit-slider-runnable-track {
     height: 6px;
     border-radius: 999px;
     background: linear-gradient(
       to right,
       var(--primary) var(--pct, 50%),
-      var(--surface-2) var(--pct, 50%)
+      var(--border) var(--pct, 50%)
     );
-    box-shadow: inset 0 0 0 1px var(--border);
   }
   .im-range::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -200,12 +163,12 @@
     border-radius: 999px;
     background: var(--primary);
     border: 2px solid var(--bg);
-    box-shadow: 0 0 0 1px var(--primary);
+    outline: 1px solid var(--primary);
   }
   .im-range::-moz-range-track {
     height: 6px;
     border-radius: 999px;
-    background: var(--surface-2);
+    background: var(--border);
   }
   .im-range::-moz-range-progress {
     height: 6px;
@@ -218,7 +181,7 @@
     border-radius: 999px;
     background: var(--primary);
     border: 2px solid var(--bg);
-    box-shadow: 0 0 0 1px var(--primary);
+    outline: 1px solid var(--primary);
   }
 }
 
@@ -235,15 +198,9 @@
 
   body {
     min-height: 100dvh;
-    font-size: 1rem;
-    line-height: 1.5rem;
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.6;
     overflow-wrap: break-word;
-  }
-
-  @media (width >= 64rem) {
-    body {
-      line-height: 1.625rem;
-    }
   }
 
   /* Inputs never smaller than 16px (prevents iOS zoom on focus). */
@@ -264,23 +221,6 @@
 
   a {
     color: inherit;
-  }
-
-  /* While the sticky action bar is on screen (mobile), keep the page end reachable. */
-  html.has-action-bar body {
-    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
-  }
-  /* Focused or scrolled-to controls stay clear of the fixed bar (WCAG 2.4.11). */
-  html.has-action-bar {
-    scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom));
-  }
-  @media (width >= 48rem) {
-    html.has-action-bar {
-      scroll-padding-bottom: 0;
-    }
-    html.has-action-bar body {
-      padding-bottom: 0;
-    }
   }
 
   html.sheet-open {

@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckIcon, CopyIcon } from '@/components/ui/icons';
 import { faviconCopy as t } from './copy';
 
 type CopyState = 'idle' | 'copied' | 'failed';
@@ -84,7 +83,6 @@ export function SnippetBlock({ snippet }: { snippet: string | null }) {
             variant="secondary"
             disabled={!snippet}
             onClick={() => void copySnippet()}
-            icon={state === 'copied' ? <CheckIcon size={20} /> : <CopyIcon size={20} />}
             data-testid="copy-snippet"
           >
             <span aria-live="polite">{state === 'copied' ? t.copied : t.copyCode}</span>

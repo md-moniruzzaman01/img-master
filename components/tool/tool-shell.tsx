@@ -24,24 +24,22 @@ import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
 import { Button } from '@/components/ui/button';
-import { buttonClasses } from '@/components/ui/button-styles';
 import { ChipGroup } from '@/components/ui/chip-group';
-import { AlertIcon, CheckIcon, DownloadIcon, ZipIcon } from '@/components/ui/icons';
+import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Switch } from '@/components/ui/switch';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { AdvancedOptions } from './advanced-options';
 import { copy, errorMessage } from './copy';
 import { ErrorBanner } from './error-banner';
 import { FilePicker } from './file-picker';
-import { FORMAT_MIME, uniqueNames } from './format';
+import { uniqueNames } from './format';
 import { FormatSelect } from './format-select';
-import { PrivacyNote } from './privacy-note';
 import { ProgressBar } from './progress-bar';
 import { QualitySlider } from './quality-slider';
 import { ResultCard, type CardAction, type ResultItem } from './result-card';
 import { ResultList } from './result-list';
-import { ShareButton, canShareFiles } from './share-button';
-import { StickyActionBar } from './sticky-action-bar';
+import { ResultsPlaceholder } from './results-placeholder';
+import { canShareFiles } from './share-button';
 import { TargetSizeChips } from './target-size-chips';
 import { makeThumbnail } from './thumbnail';
 import {
@@ -68,7 +66,7 @@ export function ToolShell({ tool }: { tool: ToolDefinition }) {
       <div
         data-testid="tool-shell"
         data-kind={tool.kind}
-        className="rounded-card border border-border bg-surface p-4 text-muted"
+        className="rounded-card border border-border bg-bg p-4 text-muted"
       >
         {copy.comingSoon}
       </div>
@@ -440,7 +438,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   );
   const failedCount = items.filter((it) => it.status === 'failed').length;
   const multi = success.length > 1;
-  const single = success.length === 1 ? success[0] : undefined;
   const totalOut = success.reduce((s, it) => s + it.result.outputBytes, 0);
   const state: ShellState = running
     ? 'processing'
@@ -462,7 +459,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   const reserveFor = (it: ResultItem) => ({
     // Size targets usually add a note ("Resized to…", "Already under…").
     note: usesTarget(runOpts) || (outputsJpeg && mayHaveAlpha(it.file)),
-    download: items.length > 1,
+    share: shareSupported,
   });
 
   // Idle placeholder (DESIGN.md §3.1): an invisible copy of one finished
@@ -472,7 +469,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     kind === 'convert' &&
     (tool.preset.from === 'any' || /^(png|webp|gif|avif)$/.test(tool.preset.from ?? ''));
   const ghostBackground = ghostAlpha && outputsJpegFor(options);
-  const ghostReserve = { note: usesTarget(options) || ghostBackground, download: false };
+  const ghostReserve = { note: usesTarget(options) || ghostBackground, share: shareSupported };
 
   // The placeholder's height stays as a floor once results show, so a result
   // shorter than the guess (e.g. a JPG on a WebP page) never pulls content up.
@@ -510,11 +507,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       setZipping(false);
     }
   }
-
-  const shareFiles = () =>
-    success.map(
-      (it) => new File([it.result.blob], outName(it), { type: FORMAT_MIME[it.result.format] }),
-    );
 
   const hideToast = useCallback(() => setToast(null), []);
 
@@ -626,7 +618,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     ) : null;
 
   const m = items.length;
-  const statusSlot = running ? (
+  const statusLine = running ? (
     <ProgressBar
       label={copy.processing(verb, Math.min(progress.index + 1, m), m)}
       value={m ? (progress.index + progress.ratio) / m : 0}
@@ -637,11 +629,38 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       {m === 1 ? copy.failedOne : copy.noneWorked}
     </p>
   ) : m > 0 ? (
-    <p className="flex items-center gap-2 font-semibold text-success">
+    <p className="flex items-center gap-2 font-semibold text-text">
       <CheckIcon size={20} />
       {state === 'done' ? copy.doneBang(m) : copy.doneMany(success.length, m)}
     </p>
   ) : null;
+  // Batches: one "Download all (ZIP)" under the heading. Its slot is held from
+  // the start of processing, so the button appearing moves nothing.
+  const statusSlot =
+    m > 1 ? (
+      <>
+        <div className="min-h-11">{statusLine}</div>
+        <div className="mt-3 min-h-[52px]">
+          {!running && multi && (
+            <Button
+              size="lg"
+              data-testid="download-all"
+              loading={zipping}
+              loadingText={copy.preparingZip}
+              onClick={() => void downloadAll()}
+            >
+              {copy.downloadAll(totalOut)}
+            </Button>
+          )}
+        </div>
+      </>
+    ) : (
+      statusLine
+    );
+  const onShared = () => {
+    savedRef.current = true;
+    track('share', { tool: slug });
+  };
 
   return (
     <div
@@ -652,7 +671,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     >
       <FilePicker
         inputId={inputId}
-        maxFiles={maxFiles}
         disabled={running}
         onFiles={handleFiles}
         onWarmUp={() => void loadEngine().catch(() => {})}
@@ -660,14 +678,14 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
 
       {primary}
 
-      <PrivacyNote />
+      {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
 
       {noticeBanner}
 
       {needsApply && (
         <div
           role="status"
-          className="flex flex-col gap-3 rounded-card border border-primary bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-card border border-primary bg-bg p-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <p className="text-text">{copy.optionsChanged}</p>
           <Button onClick={() => void run(sourceRef.current, options, 'rerun')}>
@@ -689,46 +707,14 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
                     errorText={it.error ? errorText(it.error, runOpts) : undefined}
                     actions={suggestionsFor(it, runOpts)}
                     onAction={onSuggestion}
-                    showDownload={multi}
                     onDownload={() => onDownloaded('single')}
+                    shareSupported={shareSupported}
+                    onShared={onShared}
                     reserve={reserveFor(it)}
                   />
                 </li>
               ))}
             </ResultList>
-            <StickyActionBar visible={!running && success.length > 0} reserve>
-              {multi ? (
-                <Button
-                  size="lg"
-                  data-testid="download-all"
-                  icon={<ZipIcon size={20} />}
-                  loading={zipping}
-                  loadingText={copy.preparingZip}
-                  onClick={() => void downloadAll()}
-                >
-                  {copy.downloadAll(totalOut)}
-                </Button>
-              ) : single ? (
-                <a
-                  href={single.url}
-                  download={single.result.fileName}
-                  data-testid="download"
-                  onClick={() => onDownloaded('single')}
-                  className={buttonClasses('primary', 'lg')}
-                >
-                  <DownloadIcon size={20} />
-                  {copy.download(single.result.outputBytes)}
-                </a>
-              ) : null}
-              <ShareButton
-                supported={shareSupported}
-                getFiles={shareFiles}
-                onShared={() => {
-                  savedRef.current = true;
-                  track('share', { tool: slug });
-                }}
-              />
-            </StickyActionBar>
             {(flattened || mayFlatten) && (
               <BackgroundField
                 value={options.background}
@@ -738,10 +724,10 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
             {/* Present (but hidden) while processing, so it doesn't push content down when done. */}
             <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
               <Button
-                variant="secondary"
+                variant="ghost"
                 disabled={running}
                 onClick={() => document.getElementById(inputId)?.click()}
-                className="w-full sm:w-auto"
+                className="-ml-4"
               >
                 {copy.again(verb)}
               </Button>
@@ -755,26 +741,20 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
                   ghost
                   item={GHOST_ITEM}
                   noteText={() => null}
-                  showDownload={false}
                   onDownload={() => {}}
                   reserve={ghostReserve}
                 />
               </li>
             </ResultList>
-            <StickyActionBar visible={false} reserve>
-              {null}
-            </StickyActionBar>
             {ghostBackground && <BackgroundField value={options.background} onChange={() => {}} />}
             <div>
-              <Button variant="secondary" disabled className="w-full sm:w-auto">
+              <Button variant="ghost" disabled className="-ml-4">
                 {copy.again(verb)}
               </Button>
             </div>
           </ResultsPlaceholder>
         )}
       </div>
-
-      {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
 
       <AdSlot position="below-results" />
 
@@ -790,7 +770,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
 function BackgroundField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const id = useId();
   return (
-    <div className="flex items-center justify-between gap-4 rounded-card border border-border bg-surface p-4">
+    <div className="flex items-center justify-between gap-4 rounded-card border border-border bg-bg p-4">
       <label htmlFor={id} className="text-text">
         <span className="block font-semibold">{copy.backgroundLabel}</span>
         <span className="block type-small text-muted">{copy.backgroundHint}</span>
@@ -802,24 +782,6 @@ function BackgroundField({ value, onChange }: { value: string; onChange: (v: str
         onChange={(e) => onChange(e.target.value)}
         className="h-12 w-16 shrink-0 cursor-pointer rounded-control border border-border-strong bg-bg p-1"
       />
-    </div>
-  );
-}
-
-/**
- * Calm empty panel where results will appear. Its height comes from an
- * invisible copy of one finished result (children), so it reserves exactly
- * that space. Only the sentence is exposed to screen readers.
- */
-function ResultsPlaceholder({ children }: { children: React.ReactNode }) {
-  return (
-    <div data-testid="results-placeholder" className="relative">
-      <div aria-hidden="true" className="invisible grid gap-4">
-        {children}
-      </div>
-      <div className="absolute inset-0 flex items-start justify-center rounded-card border border-dashed border-border-strong/60 px-4 pt-10 text-center">
-        <p className="text-muted">{copy.resultsPlaceholder}</p>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useId, type ReactNode, type Ref } from 'react';
 import { copy } from './copy';
 
-const HEADING = 'scroll-mt-4 type-h3 text-text focus:outline-none';
+const HEADING = 'scroll-mt-4 type-h2 text-text focus:outline-none';
 
 /** "Results" heading (receives focus when done) + ordered list of cards. */
 export function ResultList({

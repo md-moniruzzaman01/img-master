@@ -8,18 +8,16 @@ import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
 import { Button } from '@/components/ui/button';
-import { buttonClasses } from '@/components/ui/button-styles';
-import { AlertIcon, CheckIcon, DownloadIcon, ZipIcon } from '@/components/ui/icons';
+import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy } from '@/components/tool/copy';
 import { ErrorBanner } from '@/components/tool/error-banner';
 import { FilePicker } from '@/components/tool/file-picker';
 import { formatBytes, uniqueNames } from '@/components/tool/format';
-import { PrivacyNote } from '@/components/tool/privacy-note';
 import { ProgressBar } from '@/components/tool/progress-bar';
 import { ResultCard, type ResultItem } from '@/components/tool/result-card';
 import { ResultList } from '@/components/tool/result-list';
-import { StickyActionBar } from '@/components/tool/sticky-action-bar';
+import { ResultsPlaceholder } from '@/components/tool/results-placeholder';
 import { makeThumbnail } from '@/components/tool/thumbnail';
 import { faviconCopy as t } from './copy';
 import { isIOS, saveBlob } from './save-blob';
@@ -27,6 +25,13 @@ import { isIOS, saveBlob } from './save-blob';
 type Notice = 'too-many' | 'engine' | null;
 
 let toastSeq = 0;
+
+/** Stand-in item for the idle placeholder's invisible card (never processed). */
+const GHOST_ITEM: ResultItem = {
+  id: -1,
+  file: { name: ' ', size: 0, type: '' } as File,
+  status: 'queued',
+};
 
 const isPng = (f: File) => f.type === 'image/png' || (f.type === '' && /\.png$/i.test(f.name));
 
@@ -193,7 +198,6 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
   );
   const failedCount = items.filter((it) => it.status === 'failed').length;
   const multi = success.length > 1;
-  const single = success.length === 1 ? success[0] : undefined;
   const totalOut = success.reduce((s, it) => s + it.result.outputBytes, 0);
   const m = items.length;
   const state = running
@@ -228,7 +232,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
   const summaryFor = (r: EngineResult) => t.icoSummary(formatBytes(r.outputBytes));
   const metaFor = (r: EngineResult) => t.icoSizes(r.width >= 256);
 
-  const statusSlot = running ? (
+  const statusLine = running ? (
     <ProgressBar
       label={toolCopy.processing('convert', Math.min(progress.index + 1, m), m)}
       value={m ? (progress.index + progress.ratio) / m : 0}
@@ -239,11 +243,33 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       {m === 1 ? toolCopy.failedOne : toolCopy.noneWorked}
     </p>
   ) : m > 0 ? (
-    <p className="flex items-center gap-2 font-semibold text-success">
+    <p className="flex items-center gap-2 font-semibold text-text">
       <CheckIcon size={20} />
       {state === 'done' ? t.icoDone(m) : toolCopy.doneMany(success.length, m)}
     </p>
   ) : null;
+  // Batches: one "Download all (ZIP)" under the heading, in a slot held from the start.
+  const statusSlot =
+    m > 1 ? (
+      <>
+        <div className="min-h-11">{statusLine}</div>
+        <div className="mt-3 min-h-[52px]">
+          {!running && multi && (
+            <Button
+              size="lg"
+              data-testid="download-all"
+              loading={zipping}
+              loadingText={toolCopy.preparingZip}
+              onClick={() => void downloadAll()}
+            >
+              {toolCopy.downloadAll(totalOut)}
+            </Button>
+          )}
+        </div>
+      </>
+    ) : (
+      statusLine
+    );
 
   return (
     <div
@@ -254,17 +280,13 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
     >
       <FilePicker
         inputId={inputId}
-        maxFiles={maxFiles}
         disabled={running}
         onFiles={handleFiles}
         onWarmUp={() => void loadEngine().catch(() => {})}
         accept="image/png,.png"
         label={t.icoPick}
-        hint={t.icoHint(maxFiles)}
         desktopHint={t.icoHintDesktop}
       />
-
-      <PrivacyNote />
 
       {notice === 'too-many' && <ErrorBanner tone="warning" message={toolCopy.tooMany(maxFiles)} />}
       {notice === 'engine' && (
@@ -274,8 +296,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
         />
       )}
 
-      {/* Held tall enough for one finished card, so results replace the note in place. */}
-      <div className="grid min-h-[300px] content-start gap-4 [&>*]:min-w-0">
+      <div className="grid gap-4 [&>*]:min-w-0">
         {m > 0 ? (
           <>
             <ResultList headingRef={headingRef} status={statusSlot}>
@@ -288,56 +309,43 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
                     summary={it.result ? summaryFor(it.result) : undefined}
                     meta={it.result ? metaFor(it.result) : undefined}
                     errorText={it.error?.code === 'UNSUPPORTED_FORMAT' ? t.icoNeedPng : undefined}
-                    showDownload={multi}
                     onDownload={() => onDownloaded('single')}
-                    reserve={{ note: false, download: m > 1 }}
+                    reserve={{ note: false, share: false }}
                   />
                 </li>
               ))}
             </ResultList>
-            <StickyActionBar visible={!running && success.length > 0} reserve>
-              {multi ? (
-                <Button
-                  size="lg"
-                  data-testid="download-all"
-                  icon={<ZipIcon size={20} />}
-                  loading={zipping}
-                  loadingText={toolCopy.preparingZip}
-                  onClick={() => void downloadAll()}
-                >
-                  {toolCopy.downloadAll(totalOut)}
-                </Button>
-              ) : single ? (
-                <a
-                  href={single.url}
-                  download={outName(single)}
-                  data-testid="download"
-                  onClick={() => onDownloaded('single')}
-                  className={buttonClasses('primary', 'lg')}
-                >
-                  <DownloadIcon size={20} />
-                  {toolCopy.download(single.result.outputBytes)}
-                </a>
-              ) : null}
-            </StickyActionBar>
+            {/* Present (but hidden) while processing, so it doesn't push content down when done. */}
             <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
               <Button
-                variant="secondary"
+                variant="ghost"
                 disabled={running}
                 onClick={() => document.getElementById(inputId)?.click()}
-                className="w-full sm:w-auto"
+                className="-ml-4"
               >
                 {t.icoAnother}
               </Button>
             </div>
           </>
         ) : (
-          <div
-            data-testid="results-placeholder"
-            className="flex min-h-[300px] items-start justify-center rounded-card border border-dashed border-border-strong/60 px-4 pt-10 text-center"
-          >
-            <p className="text-muted">{t.icoPlaceholder}</p>
-          </div>
+          <ResultsPlaceholder>
+            <ResultList ghost>
+              <li>
+                <ResultCard
+                  ghost
+                  item={GHOST_ITEM}
+                  noteText={noteText}
+                  onDownload={() => {}}
+                  reserve={{ note: false, share: false }}
+                />
+              </li>
+            </ResultList>
+            <div>
+              <Button variant="ghost" disabled className="-ml-4">
+                {t.icoAnother}
+              </Button>
+            </div>
+          </ResultsPlaceholder>
         )}
       </div>
 

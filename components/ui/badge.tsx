@@ -1,13 +1,11 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
 
-export type BadgeTone = 'success' | 'warning' | 'danger' | 'neutral';
+export type BadgeTone = 'neutral' | 'danger';
 
 const tones: Record<BadgeTone, string> = {
-  success: 'text-success',
-  warning: 'text-warning',
-  danger: 'text-danger',
-  neutral: 'text-muted',
+  neutral: 'border-border text-text',
+  danger: 'border-danger text-danger',
 };
 
 /** Small status label. Pair it with an icon or words, never color alone. */
@@ -25,7 +23,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-1 rounded-full border border-current/30 px-2 py-0.5 type-caption whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-full border bg-bg px-2 py-0.5 type-caption whitespace-nowrap',
         tones[tone],
         className,
       )}

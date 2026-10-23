@@ -5,9 +5,10 @@ import type { EngineErrorCode, EngineErrorDetail, EngineNote, EngineResult } fro
 import { buttonClasses } from '@/components/ui/button-styles';
 import { Button } from '@/components/ui/button';
 import { cx } from '@/components/ui/cx';
-import { AlertIcon, CheckIcon, DownloadIcon, ImageIcon, InfoIcon } from '@/components/ui/icons';
+import { AlertIcon, InfoIcon } from '@/components/ui/icons';
 import { copy, errorMessage, WARNING_NOTES } from './copy';
-import { FORMAT_LABEL, percentSmaller } from './format';
+import { FORMAT_LABEL, FORMAT_MIME } from './format';
+import { ShareButton } from './share-button';
 
 export type ItemStatus = 'queued' | 'processing' | 'success' | 'failed';
 
@@ -25,10 +26,10 @@ export interface ResultItem {
 
 /** Space a waiting card holds for parts that may appear in the result. */
 export interface CardReserve {
-  /** One note (two short lines). */
+  /** One note (two short lines on phones). */
   note: boolean;
-  /** The per-card Download button (batches). */
-  download: boolean;
+  /** The Share button (only where the browser can share files). */
+  share: boolean;
 }
 
 export interface CardAction {
@@ -36,9 +37,27 @@ export interface CardAction {
   label: string;
 }
 
+/** Pulsing bar that stands in for one line of text (same line box as the real text). */
+function SkeletonLine({ width, small }: { width: string; small?: boolean }) {
+  return (
+    <p aria-hidden="true" className={cx('relative', small ? 'type-small' : 'leading-6')}>
+      &nbsp;
+      <span
+        className={cx(
+          'absolute left-0 animate-pulse rounded bg-surface',
+          small ? 'top-1 h-3' : 'top-1 h-4',
+          width,
+        )}
+      />
+    </p>
+  );
+}
+
 /**
- * One file's result (DESIGN.md §4.3): skeleton while waiting, then before →
- * after, dimensions and notes, or a plain error with suggestion buttons.
+ * One file's result (DESIGN.md §4.3): white bordered card with an 80px
+ * thumbnail, name, before → after in bold, "% smaller", dimensions and notes,
+ * then a full-width Download and (where supported) Share. A skeleton of the
+ * same height while waiting; a plain error with suggestion buttons on failure.
  * Carries the QA data-* hooks.
  */
 export function ResultCard({
@@ -48,15 +67,16 @@ export function ResultCard({
   errorText,
   actions,
   onAction,
-  showDownload,
   onDownload,
+  shareSupported = false,
+  onShared,
   reserve,
   ghost = false,
   summary,
   meta,
 }: {
   item: ResultItem;
-  /** Replaces the "before → after" line (for outputs where savings make no sense). */
+  /** Replaces the "before → after" lines (for outputs where savings make no sense). */
   summary?: string;
   /** Replaces the "W × H px · FORMAT" line. */
   meta?: string;
@@ -68,8 +88,10 @@ export function ResultCard({
   errorText?: string;
   actions?: CardAction[];
   onAction?: (id: string) => void;
-  showDownload: boolean;
   onDownload: () => void;
+  /** Show a Share button on the finished card (decided once by the parent). */
+  shareSupported?: boolean;
+  onShared?: () => void;
   /** What the skeleton should hold space for (DESIGN.md §8: no shift when results land). */
   reserve?: CardReserve;
   /** Invisible stand-in that holds the idle placeholder's height (no QA hooks). */
@@ -77,7 +99,6 @@ export function ResultCard({
 }) {
   const { status, result: r, file } = item;
   const busy = status === 'queued' || status === 'processing';
-  const p = r ? percentSmaller(r.inputBytes, r.outputBytes) : 0;
   const transparent = r && r.format !== 'jpeg';
   const name = fileName ?? r?.fileName ?? file.name;
   const ref = useRef<HTMLElement>(null);
@@ -89,7 +110,15 @@ export function ResultCard({
     if (!el || !busy) return;
     const h = el.offsetHeight;
     if (h > (parseFloat(el.style.minHeight) || 0)) el.style.minHeight = `${h}px`;
-  }, [busy, reserve?.note, reserve?.download]);
+  }, [busy, reserve?.note, reserve?.share]);
+
+  const notes =
+    status === 'success' && r
+      ? r.notes.flatMap((n) => {
+          const text = noteText(n, r);
+          return text ? [{ n, text, warn: WARNING_NOTES.includes(n) }] : [];
+        })
+      : [];
 
   return (
     <article
@@ -108,130 +137,138 @@ export function ResultCard({
       data-error={item.error?.code}
       aria-busy={busy || undefined}
       className={cx(
-        'flex min-h-[104px] min-w-0 gap-3 rounded-card border bg-surface p-3 lg:p-4',
+        'min-w-0 rounded-card border bg-bg p-4',
         status === 'failed' ? 'border-danger' : 'border-border',
       )}
     >
-      <div
-        className={cx(
-          'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[8px] lg:size-20',
-          busy ? 'animate-pulse bg-surface-2' : transparent ? 'checkerboard' : 'bg-surface-2',
-        )}
-      >
-        {item.thumb ? (
-          // Downscaled preview (≤ 256px) from an object URL; next/image adds nothing here.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.thumb} alt="" className="size-full object-contain" />
-        ) : (
-          !busy && <ImageIcon className="text-muted" />
-        )}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p
-          data-testid={ghost ? undefined : 'file-name'}
-          className="truncate font-semibold text-text"
-          title={name}
+      <div className="flex gap-3">
+        <div
+          className={cx(
+            'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px]',
+            busy ? 'animate-pulse bg-surface' : transparent ? 'checkerboard' : 'bg-surface',
+          )}
         >
-          {name}
-        </p>
+          {item.thumb && (
+            // Downscaled preview (≤ 256px) from an object URL; next/image adds nothing here.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.thumb} alt={name} className="size-full object-cover" />
+          )}
+        </div>
 
-        {busy && (
-          // Same line boxes as the result below, so the card doesn't grow when it lands.
-          <div aria-hidden="true">
-            {/* "2.4 MB → 48 KB (98% smaller)" usually takes two lines on phones. */}
-            <p className="relative mt-0.5">
-              &nbsp;
-              <br className="sm:hidden" />
-              &nbsp;
-              <span className="absolute left-0 top-1 h-4 w-3/4 animate-pulse rounded bg-surface-2" />
-            </p>
-            <p className="relative type-small">
-              &nbsp;
-              <span className="absolute left-0 top-1 h-3 w-1/2 animate-pulse rounded bg-surface-2" />
-            </p>
-            {reserve?.note && (
-              // A note is usually two lines on phones, one on wider screens.
-              <p className="mt-1 type-small">
-                &nbsp;
-                <br className="sm:hidden" />
-                &nbsp;
-              </p>
-            )}
-            {reserve?.download && <div className="mt-3 h-12" />}
-          </div>
-        )}
-        {busy && (
-          <span className="sr-only">{status === 'queued' ? copy.waiting : copy.working}</span>
-        )}
+        <div className="min-w-0 flex-1">
+          <p
+            data-testid={ghost ? undefined : 'file-name'}
+            className="truncate leading-6 font-semibold text-text"
+            title={name}
+          >
+            {name}
+          </p>
 
-        {status === 'success' && r && (
-          <>
-            <p className="mt-0.5 tabular-nums text-text">
-              {!summary && p > 0 && (
-                <CheckIcon size={20} className="mr-1 inline size-4 align-[-2px] text-success" />
+          {busy && (
+            // Same line boxes as the result below, so the card doesn't grow when it lands.
+            <>
+              <SkeletonLine width="w-3/4" />
+              <SkeletonLine width="w-1/3" />
+              <SkeletonLine width="w-1/2" small />
+              <span className="sr-only">{status === 'queued' ? copy.waiting : copy.working}</span>
+            </>
+          )}
+
+          {status === 'success' && r && (
+            <>
+              {summary ? (
+                <p className="min-h-12 leading-6 tabular-nums text-text">{summary}</p>
+              ) : (
+                <>
+                  <p className="leading-6 font-bold tabular-nums text-text">
+                    {copy.sizes(r.inputBytes, r.outputBytes)}
+                  </p>
+                  <p className="leading-6 tabular-nums text-text">
+                    {copy.change(r.inputBytes, r.outputBytes)}
+                  </p>
+                </>
               )}
-              {summary ?? copy.successLine(r.inputBytes, r.outputBytes)}
-            </p>
-            <p className="type-small tabular-nums text-muted">
-              {meta ?? `${r.width} × ${r.height} px · ${FORMAT_LABEL[r.format]}`}
-            </p>
-            {r.notes.map((n) => {
-              const text = noteText(n, r);
-              if (!text) return null;
-              const warn = WARNING_NOTES.includes(n);
-              return (
-                <p
-                  key={n}
-                  className={cx(
-                    'mt-1 flex items-start gap-1.5 type-small',
-                    warn ? 'text-warning' : 'text-muted',
-                  )}
-                >
-                  {warn ? (
-                    <AlertIcon size={20} className="size-4 shrink-0 translate-y-0.5" />
-                  ) : (
-                    <InfoIcon size={20} className="size-4 shrink-0 translate-y-0.5" />
-                  )}
-                  <span>{text}</span>
-                </p>
-              );
-            })}
-            {showDownload && item.url && (
-              <a
-                href={item.url}
-                download={name}
-                data-testid="download"
-                onClick={onDownload}
-                className={buttonClasses('secondary', 'md', 'mt-3 w-full sm:w-auto')}
-              >
-                <DownloadIcon size={20} />
-                {copy.download(r.outputBytes)}
-              </a>
-            )}
-          </>
-        )}
+              <p className="type-small tabular-nums text-muted">
+                {meta ?? `${r.width} × ${r.height} px · ${FORMAT_LABEL[r.format]}`}
+              </p>
+            </>
+          )}
 
-        {status === 'failed' && item.error && (
-          <>
+          {status === 'failed' && item.error && (
             <p className="mt-1 flex items-start gap-1.5 text-danger">
               <AlertIcon size={20} className="mt-0.5 shrink-0" />
               <span className="min-w-0 [overflow-wrap:anywhere]">
                 {errorText ?? errorMessage(item.error.code)}
               </span>
             </p>
-            {actions && actions.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {actions.map((a) => (
-                  <Button key={a.id} variant="secondary" onClick={() => onAction?.(a.id)}>
-                    {a.label}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+          )}
+        </div>
       </div>
+
+      {busy && reserve?.note && (
+        // A note is usually two lines on phones, one on wider screens.
+        <p aria-hidden="true" className="mt-3 type-small">
+          &nbsp;
+          <br className="sm:hidden" />
+          &nbsp;
+        </p>
+      )}
+      {notes.length > 0 && (
+        <div className="mt-3 grid gap-1">
+          {notes.map(({ n, text, warn }) => (
+            <p
+              key={n}
+              className={cx('flex items-start gap-1.5 type-small', warn ? 'text-text' : 'text-muted')}
+            >
+              {warn ? (
+                <AlertIcon size={20} className="size-4 shrink-0 translate-y-0.5" />
+              ) : (
+                <InfoIcon size={20} className="size-4 shrink-0 translate-y-0.5" />
+              )}
+              <span>{text}</span>
+            </p>
+          ))}
+        </div>
+      )}
+
+      {busy && (
+        <div aria-hidden="true" className="mt-4 grid gap-2">
+          <div className="h-[52px]" />
+          {reserve?.share && <div className="h-12" />}
+        </div>
+      )}
+
+      {status === 'success' && r && item.url && (
+        <div className="mt-4 grid gap-2">
+          <a
+            href={item.url}
+            download={name}
+            data-testid="download"
+            onClick={onDownload}
+            className={buttonClasses('primary', 'lg')}
+          >
+            {copy.download(r.outputBytes)}
+          </a>
+          <ShareButton
+            supported={shareSupported}
+            getFiles={() => [
+              new File([r.blob], name, { type: FORMAT_MIME[r.format] ?? r.blob.type }),
+            ]}
+            onShared={onShared}
+            className="w-full"
+          />
+        </div>
+      )}
+
+      {status === 'failed' && actions && actions.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {actions.map((a) => (
+            <Button key={a.id} variant="secondary" onClick={() => onAction?.(a.id)}>
+              {a.label}
+            </Button>
+          ))}
+        </div>
+      )}
     </article>
   );
 }
