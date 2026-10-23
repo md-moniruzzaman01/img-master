@@ -1,6 +1,7 @@
-// Serves `out/` the way Cloudflare does: /slug -> slug.html, missing -> 404.html.
+// Serves `out/` the way Cloudflare does: /slug -> slug.html, missing -> 404.html,
+// gzip for text, and the rules in out/_headers.
 // No dependencies. Usage: node scripts/serve-static.mjs  (PORT and HOST env vars optional)
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream, readFileSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { createGzip } from 'node:zlib';
@@ -37,8 +38,48 @@ function isFile(p) {
   }
 }
 
+const escapeRegExp = (s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+
+// Cloudflare-style _headers: an unindented "/path" line (`*` matches anything)
+// followed by indented "Name: value" lines. Every matching rule applies.
+function loadHeaderRules() {
+  let text = '';
+  try {
+    text = readFileSync(join(root, '_headers'), 'utf8');
+  } catch {
+    return [];
+  }
+  const rules = [];
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    if (!/^\s/.test(line)) {
+      const pattern = trimmed.split('*').map(escapeRegExp).join('.*');
+      rules.push({ re: new RegExp(`^${pattern}$`), headers: {} });
+    } else if (rules.length) {
+      const i = trimmed.indexOf(':');
+      if (i > 0) rules.at(-1).headers[trimmed.slice(0, i).trim()] = trimmed.slice(i + 1).trim();
+    }
+  }
+  return rules;
+}
+const headerRules = loadHeaderRules();
+
+function headersFor(pathname) {
+  return Object.assign(
+    {},
+    ...headerRules.filter((r) => r.re.test(pathname)).map((r) => r.headers),
+  );
+}
+
 function resolveFile(urlPath) {
-  const clean = normalize(decodeURIComponent(urlPath)).replace(/^([/\\])+/, '');
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPath);
+  } catch {
+    return null; // malformed URL: treat as not found instead of crashing
+  }
+  const clean = normalize(decoded).replace(/^([/\\])+/, '');
   const base = join(root, clean);
   if (base !== root && !base.startsWith(root + sep)) return null; // path traversal
   const candidates = [base, `${base}.html`, join(base, 'index.html')];
@@ -65,6 +106,7 @@ createServer((req, res) => {
     /^(text\/|application\/(json|xml|manifest))|svg/.test(type) &&
     /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''));
   res.writeHead(status, {
+    ...headersFor(pathname),
     'Content-Type': type,
     'Cache-Control': 'no-cache',
     ...(gzip ? { 'Content-Encoding': 'gzip', Vary: 'Accept-Encoding' } : {}),
