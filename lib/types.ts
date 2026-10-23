@@ -90,6 +90,8 @@ export interface ToolContent {
   h1: string;
   subtitle: string; // ≤ 100 chars, shown above the tool
   howTo: [string, string, string];
+  /** H2 above the three steps, e.g. "How to compress an image to 50KB". Default: "How it works". */
+  howToHeading?: string;
   sections: RichSection[]; // 2–4 page-unique sections
   tips?: string[];
   faqs: FaqItem[]; // 4–6

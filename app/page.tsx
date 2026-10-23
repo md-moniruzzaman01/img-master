@@ -4,12 +4,10 @@ import { JsonLd } from '@/components/content/json-ld';
 import { RichText } from '@/components/content/rich-text';
 import { ToolGrid } from '@/components/content/tool-grid';
 import { HomeHero } from '@/components/home/home-hero';
-import { SizeLinks } from '@/components/home/size-links';
-import { TrustStrip } from '@/components/home/trust-strip';
 import { Container } from '@/components/layout/container';
 import { homeJsonLd } from '@/lib/seo/jsonld';
 import { buildPageMetadata } from '@/lib/seo/metadata';
-import { getNavGroups, getSizeLinks } from '@/lib/tools';
+import { getNavGroups } from '@/lib/tools';
 
 export const metadata = buildPageMetadata({
   title: homeContent.title,
@@ -22,9 +20,7 @@ export default function HomePage() {
     <>
       <Container size="wide">
         <HomeHero h1={homeContent.h1} subtitle={homeContent.subtitle} />
-        <SizeLinks heading={homeContent.sizeRowHeading} links={getSizeLinks()} />
         <ToolGrid groups={getNavGroups()} />
-        <TrustStrip items={homeContent.trustItems} />
       </Container>
       <Container size="text">
         <RichText sections={[homeContent.howItWorks]} />

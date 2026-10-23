@@ -3,34 +3,31 @@
 ## 1. Design principles
 
 1. **Tool first.** The visitor came to do one job. The picker is the first interactive thing on the page.
-2. **One thumb.** Every main action is reachable with one thumb on a 360px phone. The main action after processing lives in a sticky bottom bar.
+2. **One thumb.** Every main action is reachable with one thumb on a 360px phone. After processing, the result card (with its Download button) is scrolled into view; there is no sticky bar.
 3. **Honest numbers.** Always show real before/after sizes and dimensions. No fake progress, no fake counters.
-4. **Calm.** White space, one accent color, no popups, no countdowns, no "are you sure you want to leave".
+4. **Calm and trustworthy.** White, one brand color, no shadows, no gradients, no decorative icons, no popups, no countdowns. Looks like ilovepdf/smallpdf: one task at a time. (Owner redesign, 2026-10-24.)
 5. **Fast feels good.** Instant feedback within 100 ms of any tap; skeletons instead of spinners.
 
 ## 2. Tokens
 
 Define tokens as CSS variables in `app/globals.css` and map them into Tailwind's theme. Components use the Tailwind names (`bg-surface`, `text-muted`), never raw hex.
 
-### Color
+### Color (light only)
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `--bg` | `#FFFFFF` | `#0B0D12` | Page background |
-| `--surface` | `#F6F7F9` | `#151821` | Cards, picker area |
-| `--surface-2` | `#EEF0F4` | `#1D2130` | Chips, inputs, hover |
-| `--border` | `#E2E5EB` | `#2A2F3D` | Card and input borders |
-| `--text` | `#0F172A` | `#E8EAF0` | Main text |
-| `--text-muted` | `#5B6474` | `#9AA3B5` | Secondary text |
-| `--primary` | `#4338CA` | `#818CF8` | Primary buttons, selected chips, links |
-| `--primary-hover` | `#3730A3` | `#A5B4FC` | Hover/pressed |
-| `--on-primary` | `#FFFFFF` | `#0B0D12` | Text on primary |
-| `--success` | `#15803D` | `#4ADE80` | "98% smaller", done states |
-| `--warning` | `#B45309` | `#FBBF24` | "Dimensions reduced" notes |
-| `--danger` | `#B91C1C` | `#F87171` | Errors |
-| `--focus` | `#4338CA` | `#A5B4FC` | Focus ring |
+| Token | Value | Use |
+|---|---|---|
+| `--bg` | `#FFFFFF` | Page and card background |
+| `--surface` | `#F5F5F5` | Section backgrounds, thumbnail boxes |
+| `--border` | `#E0E0E0` | Card, header and section borders |
+| `--border-strong` | darker gray (≥ 3:1) | Input and control outlines |
+| `--text` | `#1A1A1A` | Main text |
+| `--text-muted` | `#555555` | Subtitles, secondary text |
+| `--primary` | `#1D4ED8` | The one brand color: primary buttons, links, selected states, focus ring |
+| `--primary-hover` | `#1E40AF` | Hover/pressed |
+| `--on-primary` | `#FFFFFF` | Text on primary |
+| `--danger` | `#B42318` | Error text and borders only (the single exception to "one color") |
 
-Dark mode follows `prefers-color-scheme`. Every text/background pair must meet WCAG AA (4.5:1 for body text, 3:1 for large text and UI borders). If a check fails, adjust the token, not the component.
+No other colors. Success and warning notes use the normal text colors plus an icon and words. No dark mode (`color-scheme: light`). Every text/background pair meets WCAG AA; if a check fails, adjust the token, not the component.
 
 ### Typography
 
@@ -39,10 +36,11 @@ Dark mode follows `prefers-color-scheme`. Every text/background pair must meet W
 
 | Style | Mobile | Desktop | Weight |
 |---|---|---|---|
-| H1 | 24/30 | 32/40 | 700 |
-| H2 | 20/28 | 24/32 | 650 |
-| H3 | 17/24 | 18/26 | 600 |
-| Body | 16/24 | 16/26 | 400 |
+| H1 | 26/32 | 28/36 | 700 |
+| H2 | 20/28 | 20/28 | 600 |
+| H3 | 17/24 | 17/24 | 600 |
+| Subtitle | 15–16/24, `#555`, one sentence | same | 400 |
+| Body | 15/24 (1.6) | 15/24 | 400 |
 | Small | 14/20 | 14/20 | 400 |
 | Caption | 12/16 | 12/16 | 500 |
 
@@ -53,8 +51,8 @@ Dark mode follows `prefers-color-scheme`. Every text/background pair must meet W
 
 - 4px grid. Page side gutter 16px (mobile), 24px (≥ 640px).
 - Card padding 16px (mobile), 20px (desktop). Section gap 32px (mobile), 48px (desktop).
-- Radius: cards 12px, buttons and inputs 10px, chips fully rounded.
-- Elevation: flat with 1px borders. Only the sticky action bar, sheets and toasts get a shadow.
+- Radius: 8px for cards, buttons, inputs and the drop zone; chips fully rounded.
+- Elevation: none. No shadows anywhere; separate things with 1px `#E0E0E0` borders. No gradients.
 - Motion: 150 ms ease-out for state changes. Respect `prefers-reduced-motion` (no transitions). No decorative animation.
 
 ### Layout widths and breakpoints
@@ -70,7 +68,7 @@ Dark mode follows `prefers-color-scheme`. Every text/background pair must meet W
 
 ### Icons
 
-Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `currentColor`. Set: upload, download, share, zip, image, check, x, alert, info, lock, copy, chevron-down, chevron-right, menu, arrow-right, sparkle. No icon library.
+Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `currentColor`. Only icons that carry meaning (check/alert next to status text, chevron on disclosures, menu, close). No icons on buttons or tool cards, no decorative icons. No icon library.
 
 ## 3. Page layouts
 
@@ -78,52 +76,47 @@ Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `cu
 
 ```
 ┌────────────────────────────────────┐
-│ ▣ Img Master              [☰ Tools]│  SiteHeader 56px (not sticky)
+│ Img Master                      ☰  │  SiteHeader ≤ 52px, text logo, not sticky
 ├────────────────────────────────────┤
-│ Home › Compress › 50KB             │  Breadcrumbs (small, muted)
-│ Compress Image to 50KB             │  H1
-│ Get a clear JPG under 50KB in      │  Subtitle (1–2 lines)
+│ Compress Image to 50KB             │  H1 (static HTML)
+│ Get a clear JPG under 50KB in      │  Subtitle, one sentence, gray
 │ seconds, right on your phone.      │
 │ ┌────────────────────────────────┐ │
-│ │            ⤒                   │ │  FilePicker
-│ │      [ Choose images ]         │ │  (primary button, full width)
-│ │  JPG, PNG, WebP · up to 20     │ │
-│ └────────────────────────────────┘ │
-│ Target  (20KB)(50KB●)(100KB)(200…→ │  OptionChips, horizontal scroll
-│ 🔒 Stays on your device. Never     │  PrivacyNote
-│    uploaded.                       │
-│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │  Results placeholder (idle): "Your
-│   Your images will show here      │  images will show here", one result
-│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │  tall; replaced in place (no CLS)
-├────────────────────────────────────┤  ↓ replaces the placeholder
-│ ┌────────────────────────────────┐ │
-│ │ [thumb] photo-50kb.jpg         │ │  ResultCard
+│ │        Choose images           │ │  FilePicker: full-width solid blue
+│ └────────────────────────────────┘ │  button, ≥ 52px, no icon
+│ 🔒 Your images never leave your    │  PrivacyNote, directly under the
+│    device                          │  button (above the fold at 360×640)
+│ Target  (20KB)(50KB●)(100KB)(200…→ │  Options come after the privacy line
+│ ▸ More options                     │
+│                                    │  Results placeholder: empty reserved
+│                                    │  space, one result tall (no CLS)
+├────────────────────────────────────┤  ↓ replaced in place after picking
+│ Results                            │
+│ ┌────────────────────────────────┐ │  ResultCard: white, 1px border, 8px
+│ │ [80×80] photo-50kb.jpg         │ │  radius, no shadow
 │ │ 2.4 MB → 48 KB  98% smaller    │ │
 │ │ 1200 × 900 px                  │ │
+│ │ [     Download (48 KB)       ] │ │  full-width blue
+│ │ [           Share            ] │ │  secondary gray (if supported)
 │ └────────────────────────────────┘ │
-│ ▸ More options                     │  Collapsed advanced options
-│ [ad slot, reserved height, off]    │  AdSlot (below results only)
+│ Compress another                   │
 ├────────────────────────────────────┤
-│ How it works (3 steps)             │  HowToSteps
-│ Page-unique sections               │  RichText sections
-│ Related tools (cards)              │  RelatedTools
-│ FAQ (accordion)                    │  FaqList
-│ Footer                             │  SiteFooter
-└────────────────────────────────────┘
-┌────────────────────────────────────┐
-│ [ ⤓ Download (48 KB) ]   [ Share ] │  StickyActionBar (after results)
+│ Home › Compress › To 50KB          │  Breadcrumbs (small, gray)
+│ Related tools (bordered cards)     │  RelatedTools, after the result
+│ How to compress an image to 50KB   │  HowToSteps (H2 from content)
+│ Page-unique sections               │  RichText
+│ FAQ (details/summary, no JS)       │  FaqList
+│ © 2026 Img Master · Built by …     │  SiteFooter, two lines
 └────────────────────────────────────┘
 ```
 
-On desktop the same column is centered. The FilePicker becomes a taller drop zone that also says "or drop images here, or paste with Ctrl+V".
+Batches show one full-width "Download all (ZIP, {size})" button with the results, plus a Download on each card. On desktop the picker is a dashed-border drop zone with "or drop images here, or paste with Ctrl+V".
 
 ### 3.2 Home page
 
-1. H1: "Free image tools that work on your phone"; subtitle about no upload, no signup.
-2. "Compress to a size" quick row: big chips 20KB · 50KB · 100KB · 200KB · 500KB · 1MB linking to the size pages.
-3. Tool grid grouped by category (Compress, Convert, Favicon), each `ToolCard` = icon + short name + one line.
-4. Trust strip: No upload · No signup · No watermark · Free.
-5. Short "How Img Master works" paragraph and 4 FAQs.
+1. H1 "Free Image Tools. No Upload. No Signup." and one subtitle sentence. No background, gradient or illustration.
+2. Tool grid grouped by category (H2 per category: Compress, Convert, Favicon). `ToolCard` = bordered, 8px radius, bold name, one line, whole card is the link, no icon, no shadow. 1 → 2 → 3 columns.
+3. "How Img Master works" text and 4 FAQs below.
 
 ### 3.3 Legal and info pages
 
@@ -157,9 +150,9 @@ Plain reading layout: H1, "Last updated" date, text at max 680px.
 
 | Component | Notes |
 |---|---|
-| `SiteHeader` | Logo (wordmark + simple square icon) left, "Tools" button right opens `ToolsSheet`. Includes a skip link to `#main`. |
-| `ToolsSheet` (client) | All live tools grouped by category, from the registry. |
-| `SiteFooter` | Category link lists, About/Privacy/Terms/Contact, "Built by Softwara" link (from `site-config`), copyright year. |
+| `SiteHeader` | White, 1px bottom border, ≤ 52px, not sticky. Text logo "Img Master" (bold, no icon) left. Mobile: one hamburger opening a menu of all live tools + About/Privacy/Terms/Contact, links in the static HTML. Desktop: 4–5 text links (Compress, Convert, Favicon, About). Skip link to `#main`. |
+| Mobile menu | All live tools grouped by category, from the registry; works without JS; keyboard accessible. |
+| `SiteFooter` | Two lines max on mobile: "© {year} Img Master · Built by Softwara" and Privacy · Terms · Contact. No tool lists, tagline or social icons. |
 | `Breadcrumbs` | Home › Category › Tool. Matches the BreadcrumbList JSON-LD. |
 | `Container` | Width + gutters. |
 
@@ -177,7 +170,7 @@ Plain reading layout: H1, "Last updated" date, text at max 680px.
 | `ProgressBar` (client) | Determinate when the engine reports progress; text label "Compressing photo 2 of 5…". | — |
 | `ResultCard` (client) | Thumbnail (object URL, revoked on unmount), file name, before → after, % smaller, dimensions, notes, per-file Download. Transparent images on a checkerboard. | processing (skeleton), success, warning note, failed (with suggestion buttons) |
 | `ResultList` (client) | Ordered list of `ResultCard`s, heading "Results" that receives focus when done. | — |
-| `StickyActionBar` (client) | Fixed bottom on mobile (with `env(safe-area-inset-bottom)` padding), inline on desktop. Single file: Download + Share. Multiple: "Download all (ZIP)" + Share. Reserve page bottom padding so it never covers content. | hidden until a result exists |
+| (removed) `StickyActionBar` | Replaced by the Download/Share buttons on each ResultCard and one "Download all (ZIP)" button for batches (owner redesign, 2026-10-24). | — |
 | `ShareButton` (client) | Uses `navigator.canShare({ files })`; hidden when unsupported. | — |
 | `ErrorBanner` (client) | Plain-language message + one action. | — |
 
@@ -218,7 +211,7 @@ Plain reading layout: H1, "Last updated" date, text at max 680px.
 | Picker button | Choose images |
 | Picker hint (mobile) | JPG, PNG, WebP · up to 20 at once |
 | Picker hint (desktop) | or drop images here, or paste with Ctrl+V |
-| Privacy note | Your images stay on your device. Nothing is uploaded. |
+| Privacy note | 🔒 Your images never leave your device |
 | Processing | Compressing photo {n} of {m}… / Converting {n} of {m}… |
 | Success line | {before} → {after} ({percent}% smaller) |
 | Already small | Already under {target}. We saved a clean copy without hidden photo data. |
@@ -243,7 +236,7 @@ Tone: friendly, short, no exclamation marks except one "Done!" moment, no jargon
 - Live region for processing and results; errors use `role="alert"`.
 - Everything works by keyboard; sheet traps focus and restores it.
 - Color is never the only signal (icons + text for success, warning, error).
-- Respects `prefers-reduced-motion` and `prefers-color-scheme`.
+- Respects `prefers-reduced-motion`. Light theme only (owner decision, 2026-10-24).
 - Passes axe with zero serious or critical issues.
 
 ## 8. Performance rules for UI

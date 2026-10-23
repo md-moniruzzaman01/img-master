@@ -41,17 +41,17 @@ export default async function ToolPage({ params }: PageProps<'/[slug]'>) {
   return (
     <>
       <Container size="tool">
-        <Breadcrumbs items={getBreadcrumbs(slug)} />
         <PageIntro h1={content.h1} subtitle={content.subtitle} />
         {tool.category === 'favicon' ? <FaviconShell tool={tool} /> : <ToolShell tool={tool} />}
       </Container>
       <Container size="text">
-        <HowToSteps steps={content.howTo} />
+        <Breadcrumbs items={getBreadcrumbs(slug)} />
+        <RelatedTools tools={getToolCards(content.related)} />
+        <HowToSteps steps={content.howTo} heading={content.howToHeading} />
         <RichText sections={content.sections} />
         {content.tips?.length ? (
           <RichText sections={[{ heading: 'Tips', paragraphs: [], list: content.tips }]} />
         ) : null}
-        <RelatedTools tools={getToolCards(content.related)} />
         <FaqList faqs={content.faqs} />
         <LastUpdated date={content.updatedAt} />
         <AdSlot position="before-footer" />
