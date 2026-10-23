@@ -8,7 +8,7 @@
         "http://localhost:4173/compress-image-to-50kb",
         "http://localhost:4173/webp-to-jpg"
       ],
-      "numberOfRuns": 1,
+      "numberOfRuns": 3,
       "settings": { "onlyCategories": ["performance", "accessibility", "best-practices", "seo"] }
     },
     "assert": {

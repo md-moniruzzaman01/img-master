@@ -3,6 +3,7 @@
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
+import { createGzip } from 'node:zlib';
 
 const root = resolve(process.cwd(), 'out');
 const port = Number(process.env.PORT ?? 4173);
@@ -58,12 +59,20 @@ createServer((req, res) => {
   }
   // Next writes OG images without an extension (out/{slug}/opengraph-image).
   const isOg = /(^|[/\\])opengraph-image$/.test(file);
+  const type = isOg ? 'image/png' : (types[extname(file)] ?? 'application/octet-stream');
+  // Compress text like Cloudflare does, so local Lighthouse numbers are realistic.
+  const gzip =
+    /^(text\/|application\/(json|xml|manifest))|svg/.test(type) &&
+    /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''));
   res.writeHead(status, {
-    'Content-Type': isOg ? 'image/png' : (types[extname(file)] ?? 'application/octet-stream'),
+    'Content-Type': type,
     'Cache-Control': 'no-cache',
+    ...(gzip ? { 'Content-Encoding': 'gzip', Vary: 'Accept-Encoding' } : {}),
   });
   if (req.method === 'HEAD') return res.end();
-  createReadStream(file).pipe(res);
+  const stream = createReadStream(file);
+  if (gzip) stream.pipe(createGzip()).pipe(res);
+  else stream.pipe(res);
 }).listen(port, host, () => {
   console.log(`Serving out/ at http://${host}:${port}`);
 });
