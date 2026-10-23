@@ -56,8 +56,10 @@ createServer((req, res) => {
       return;
     }
   }
+  // Next writes OG images without an extension (out/{slug}/opengraph-image).
+  const isOg = /(^|[/\\])opengraph-image$/.test(file);
   res.writeHead(status, {
-    'Content-Type': types[extname(file)] ?? 'application/octet-stream',
+    'Content-Type': isOg ? 'image/png' : (types[extname(file)] ?? 'application/octet-stream'),
     'Cache-Control': 'no-cache',
   });
   if (req.method === 'HEAD') return res.end();
