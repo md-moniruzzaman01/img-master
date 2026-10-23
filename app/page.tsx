@@ -1,20 +1,36 @@
-import Link from 'next/link';
 import { homeContent } from '@/content/home';
-import { getLiveTools, getToolContent } from '@/lib/tools';
+import { FaqList } from '@/components/content/faq-list';
+import { JsonLd } from '@/components/content/json-ld';
+import { RichText } from '@/components/content/rich-text';
+import { ToolGrid } from '@/components/content/tool-grid';
+import { HomeHero } from '@/components/home/home-hero';
+import { SizeLinks } from '@/components/home/size-links';
+import { TrustStrip } from '@/components/home/trust-strip';
+import { Container } from '@/components/layout/container';
+import { homeJsonLd } from '@/lib/seo/jsonld';
+import { buildPageMetadata } from '@/lib/seo/metadata';
+import { getNavGroups, getSizeLinks } from '@/lib/tools';
 
-// Phase 0 placeholder home. Replaced in Phase 1 with ui-builder's sections.
+export const metadata = buildPageMetadata({
+  title: homeContent.title,
+  description: homeContent.description,
+  path: '/',
+});
+
 export default function HomePage() {
   return (
-    <main id="main">
-      <h1>{homeContent.h1}</h1>
-      <p>{homeContent.subtitle}</p>
-      <ul>
-        {getLiveTools().map((t) => (
-          <li key={t.slug}>
-            <Link href={`/${t.slug}`}>{getToolContent(t.slug)?.h1 ?? t.slug}</Link>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <Container size="wide">
+        <HomeHero h1={homeContent.h1} subtitle={homeContent.subtitle} />
+        <SizeLinks heading={homeContent.sizeRowHeading} links={getSizeLinks()} />
+        <ToolGrid groups={getNavGroups()} />
+        <TrustStrip items={homeContent.trustItems} />
+      </Container>
+      <Container size="text">
+        <RichText sections={[homeContent.howItWorks]} />
+        <FaqList faqs={homeContent.faqs} />
+      </Container>
+      <JsonLd data={homeJsonLd()} />
+    </>
   );
 }
