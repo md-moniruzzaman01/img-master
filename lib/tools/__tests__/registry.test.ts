@@ -38,3 +38,27 @@ describe('tool registry', () => {
     expect(getToolsByCategory('favicon')).toHaveLength(0);
   });
 });
+
+describe('navigation helpers', () => {
+  it('builds breadcrumbs that end with the page short name', async () => {
+    const { getBreadcrumbs, getToolContent } = await import('@/lib/tools');
+    const crumbs = getBreadcrumbs('compress-image-to-50kb');
+    expect(crumbs[0]).toEqual({ label: 'Home', href: '/' });
+    expect(crumbs[1]).toEqual({ label: 'Compress', href: '/compress-image' });
+    expect(crumbs.at(-1)).toEqual({ label: getToolContent('compress-image-to-50kb')!.shortName });
+    expect(getBreadcrumbs('compress-image')).toHaveLength(2);
+  });
+
+  it('groups live tools and lists size links smallest first', async () => {
+    const { getNavGroups, getSizeLinks } = await import('@/lib/tools');
+    expect(getNavGroups().map((g) => g.category)).toEqual(['compress', 'convert']);
+    expect(getSizeLinks().map((l) => l.label)).toEqual([
+      '20KB',
+      '50KB',
+      '100KB',
+      '200KB',
+      '500KB',
+      '1MB',
+    ]);
+  });
+});

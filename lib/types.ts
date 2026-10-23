@@ -40,6 +40,30 @@ export interface ToolDefinition {
   };
 }
 
+/** One breadcrumb. The last crumb (current page) has no href. */
+export interface Crumb {
+  label: string;
+  href?: string;
+}
+
+/** Everything a ToolCard needs; built by lib/tools from registry + content. */
+export interface ToolCardData {
+  slug: string;
+  href: string; // canonical path, e.g. "/compress-image-to-50kb"
+  kind: ToolKind;
+  category: ToolCategory;
+  shortName: string;
+  description: string; // content.cardDescription
+}
+
+/** A category with its live tools (menus, footer, home grid, 404). */
+export interface ToolNavGroup {
+  category: ToolCategory;
+  label: string; // "Compress"
+  hubHref?: string;
+  tools: ToolCardData[];
+}
+
 /* ------------------------------------------------------------------ */
 /* Content (text: content/pages/{slug}.ts, content/home.ts, legal)     */
 /* ------------------------------------------------------------------ */

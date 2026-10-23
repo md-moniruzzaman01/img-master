@@ -1,7 +1,14 @@
 // Lookup helpers over the registry. Owned by the lead.
 import { toolContent } from '@/content/pages';
-import type { ToolCategory, ToolContent, ToolDefinition } from '../types';
-import { categoryOrder, tools } from './registry';
+import type {
+  Crumb,
+  ToolCardData,
+  ToolCategory,
+  ToolContent,
+  ToolDefinition,
+  ToolNavGroup,
+} from '../types';
+import { categoryLabels, categoryOrder, tools } from './registry';
 
 export { categoryLabels, categoryOrder, tools } from './registry';
 
@@ -30,6 +37,65 @@ export function getCategoryHub(category: ToolCategory): ToolDefinition | undefin
 
 export function getToolContent(slug: string): ToolContent | undefined {
   return toolContent[slug];
+}
+
+/** Card data for a live tool with content (undefined otherwise). */
+export function getToolCard(slug: string): ToolCardData | undefined {
+  const tool = getTool(slug);
+  const content = getToolContent(slug);
+  if (!tool || tool.status !== 'live' || !content) return undefined;
+  return {
+    slug,
+    href: `/${slug}`,
+    kind: tool.kind,
+    category: tool.category,
+    shortName: content.shortName,
+    description: content.cardDescription,
+  };
+}
+
+/** Card data for a list of slugs, skipping any that aren't live. */
+export function getToolCards(slugs: readonly string[]): ToolCardData[] {
+  return slugs.map(getToolCard).filter((c): c is ToolCardData => !!c);
+}
+
+/** Live tools grouped by category, for menus, footer, home grid and 404. */
+export function getNavGroups(): ToolNavGroup[] {
+  return getLiveCategories().map((category) => ({
+    category,
+    label: categoryLabels[category],
+    hubHref: getCategoryHub(category) ? `/${getCategoryHub(category)!.slug}` : undefined,
+    tools: getToolCards(getToolsByCategory(category).map((t) => t.slug)),
+  }));
+}
+
+/** Home "Compress to a size" row: live compress-to-size pages, smallest first. */
+export function getSizeLinks(): { label: string; href: string; targetKB: number }[] {
+  return getLiveTools()
+    .filter((t) => t.kind === 'compress-to-size' && t.preset.targetKB)
+    .map((t) => {
+      const kb = t.preset.targetKB!;
+      return { label: kb >= 1000 ? `${kb / 1000}MB` : `${kb}KB`, href: `/${t.slug}`, targetKB: kb };
+    })
+    .sort((a, b) => a.targetKB - b.targetKB);
+}
+
+/**
+ * Breadcrumb trail for a tool page: Home › {Category hub} › {shortName}.
+ * A hub page is Home › {shortName}. Used by the Breadcrumbs component AND the
+ * BreadcrumbList JSON-LD, so both always match.
+ */
+export function getBreadcrumbs(slug: string): Crumb[] {
+  const tool = getTool(slug);
+  const content = getToolContent(slug);
+  if (!tool || !content) return [{ label: 'Home', href: '/' }];
+  const crumbs: Crumb[] = [{ label: 'Home', href: '/' }];
+  const hub = getCategoryHub(tool.category);
+  if (hub && hub.slug !== slug) {
+    crumbs.push({ label: categoryLabels[tool.category], href: `/${hub.slug}` });
+  }
+  crumbs.push({ label: content.shortName });
+  return crumbs;
 }
 
 /** A live tool together with its content. Throws if content is missing. */
