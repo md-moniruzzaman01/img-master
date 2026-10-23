@@ -69,6 +69,13 @@ export const content: ToolContent = {
       a: `You can convert up to ${siteConfig.maxFiles} images in one batch, and there is no daily limit. The files are converted on your device, so nothing is uploaded.`,
     },
   ],
-  related: ['jpg-to-webp', 'webp-to-png', 'png-to-jpg', 'image-converter', 'compress-image'],
+  related: [
+    'jpg-to-webp',
+    'webp-to-png',
+    'png-to-jpg',
+    'image-converter',
+    'compress-image',
+    'favicon-generator',
+  ],
   updatedAt: '2026-10-23',
 };

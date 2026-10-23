@@ -15,6 +15,10 @@ import { content as pngToWebp } from './png-to-webp';
 import { content as jpgToWebp } from './jpg-to-webp';
 import { content as pngToJpg } from './png-to-jpg';
 import { content as jpgToPng } from './jpg-to-png';
+import { content as faviconGenerator } from './favicon-generator';
+import { content as faviconFromText } from './favicon-from-text';
+import { content as faviconFromEmoji } from './favicon-from-emoji';
+import { content as pngToIco } from './png-to-ico';
 
 export const toolContent: Readonly<Partial<Record<string, ToolContent>>> = {
   'compress-image': compressImage,
@@ -31,4 +35,8 @@ export const toolContent: Readonly<Partial<Record<string, ToolContent>>> = {
   'jpg-to-webp': jpgToWebp,
   'png-to-jpg': pngToJpg,
   'jpg-to-png': jpgToPng,
+  'favicon-generator': faviconGenerator,
+  'favicon-from-text': faviconFromText,
+  'favicon-from-emoji': faviconFromEmoji,
+  'png-to-ico': pngToIco,
 };

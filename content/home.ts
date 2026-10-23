@@ -5,7 +5,7 @@ import type { HomeContent } from '@/lib/types';
 export const homeContent: HomeContent = {
   title: 'Img Master – Free Image Tools for Your Phone',
   description:
-    'Compress photos to an exact size like 50KB, and convert between JPG, PNG and WebP. Runs in your browser, so nothing is uploaded. Free, no signup.',
+    'Compress photos to an exact size like 50KB, convert JPG, PNG and WebP, and make favicons. Runs in your browser, so nothing is uploaded. Free, no signup.',
   h1: 'Free image tools that work on your phone',
   subtitle: 'Shrink a photo to an exact size or change its format. No upload, no signup.',
   sizeRowHeading: 'Compress to a size',
@@ -15,6 +15,7 @@ export const homeContent: HomeContent = {
     paragraphs: [
       'Img Master runs in your web browser. When you choose an image, your own phone or computer does the work. The image is not uploaded to any server, so it stays private, and the result is ready quickly even on slow mobile data.',
       `Pick a tool, choose your images and download the result. You can work on up to ${siteConfig.maxFiles} images at once, save them together as a ZIP, or share a result straight to another app on phones that support it. Every new file is saved without hidden photo data, such as GPS location.`,
+      'Building a website? The [Favicon Generator](/favicon-generator) turns a logo, letters or an emoji into the icon files your site needs, in one ZIP.',
     ],
   },
   faqs: [
@@ -28,7 +29,7 @@ export const homeContent: HomeContent = {
     },
     {
       q: 'Which image formats can I use?',
-      a: 'You can open JPG, PNG, WebP, GIF and BMP images, plus other formats your browser supports, such as HEIC in Safari. You can save as JPG, PNG or WebP.',
+      a: 'You can open JPG, PNG, WebP, GIF and BMP images, plus other formats your browser supports, such as HEIC in Safari. You can save as JPG, PNG or WebP. The favicon tools save ICO and PNG files, plus SVG for text and emoji icons.',
     },
     {
       q: 'Will an online form accept the compressed file?',

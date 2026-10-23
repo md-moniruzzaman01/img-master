@@ -34,7 +34,7 @@ export const content: ToolContent = {
     {
       heading: 'Choosing the right format',
       paragraphs: [
-        'When an image with a transparent background is saved as JPG, the clear parts are filled with a color. White is the default, and you can change it on the result.',
+        'When an image with a transparent background is saved as JPG, the clear parts are filled with a color. White is the default, and you can change it on the result. If you need a website icon in the .ico format, use [PNG to ICO](/png-to-ico).',
       ],
       table: {
         caption: 'JPG, PNG and WebP compared',

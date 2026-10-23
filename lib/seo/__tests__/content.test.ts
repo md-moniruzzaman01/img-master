@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { toolContent } from '@/content/pages';
 import { homeContent } from '@/content/home';
 import { legalContent } from '@/content/legal';
-import { getLiveTools, getTool } from '@/lib/tools';
+import { getLiveTools, getTool, tools } from '@/lib/tools';
 import type { ToolContent } from '@/lib/types';
 import {
   allLinks,
@@ -17,7 +17,10 @@ import {
 
 const live = getLiveTools();
 const liveSlugs = new Set(live.map((t) => t.slug));
-const pages: [string, ToolContent][] = live.map((t) => [t.slug, toolContent[t.slug]!]);
+// Every tool that has content is checked, live or draft, so drafts are validated before launch.
+const withContent = tools.filter((t) => toolContent[t.slug]);
+const knownSlugs = new Set(withContent.map((t) => t.slug));
+const pages: [string, ToolContent][] = withContent.map((t) => [t.slug, toolContent[t.slug]!]);
 
 const BANNED = [
   /\bbest\b/i,
@@ -58,7 +61,20 @@ describe('tool page content', () => {
     expect(c.related.length).toBeLessThanOrEqual(6);
     expect(new Set(c.related).size).toBe(c.related.length);
     expect(c.related).not.toContain(slug);
-    for (const r of c.related) expect(liveSlugs.has(r), `${slug} → ${r}`).toBe(true);
+    for (const r of c.related) expect(knownSlugs.has(r), `${slug} → ${r}`).toBe(true);
+  });
+
+  it.each(pages)('%s: a live page links only to live pages', (slug, c) => {
+    if (!liveSlugs.has(slug)) return;
+    for (const r of c.related) expect(liveSlugs.has(r), `${slug} related ${r} is draft`).toBe(true);
+    for (const href of allLinks(c)) {
+      if (
+        href.startsWith('/') &&
+        href !== '/' &&
+        !['/about', '/privacy', '/terms', '/contact'].includes(href)
+      )
+        expect(liveSlugs.has(href.slice(1)), `${slug} links to draft ${href}`).toBe(true);
+    }
   });
 
   it.each(pages)('%s: every internal link points to a live page', (slug, c) => {
@@ -66,7 +82,7 @@ describe('tool page content', () => {
     for (const href of allLinks(c)) {
       if (!href.startsWith('/')) continue;
       expect(href.endsWith('/') && href !== '/', `${slug} trailing slash ${href}`).toBe(false);
-      const ok = known.has(href) || liveSlugs.has(href.slice(1));
+      const ok = known.has(href) || knownSlugs.has(href.slice(1));
       expect(ok, `${slug} links to ${href}`).toBe(true);
       expect(href, `${slug} links to itself`).not.toBe(`/${slug}`);
     }

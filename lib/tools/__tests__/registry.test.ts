@@ -19,9 +19,9 @@ describe('tool registry', () => {
     expect(() => assertLiveToolsHaveContent()).not.toThrow();
   });
 
-  it('has the 14 Phase 1 live pages and favicon tools as drafts', () => {
-    expect(getLiveTools()).toHaveLength(14);
-    expect(getTool('favicon-generator')?.status).toBe('draft');
+  it('has the 18 live pages (Phase 1 plus favicon tools)', () => {
+    expect(getLiveTools()).toHaveLength(18);
+    expect(getTool('favicon-generator')?.status).toBe('live');
     expect(getTool('compress-image-to-1mb')?.preset.targetKB).toBe(1000);
   });
 
@@ -35,7 +35,8 @@ describe('tool registry', () => {
   it('live categories have a live hub', () => {
     expect(getCategoryHub('compress')?.slug).toBe('compress-image');
     expect(getCategoryHub('convert')?.slug).toBe('image-converter');
-    expect(getToolsByCategory('favicon')).toHaveLength(0);
+    expect(getCategoryHub('favicon')?.slug).toBe('favicon-generator');
+    expect(getToolsByCategory('favicon')).toHaveLength(4);
   });
 });
 
@@ -51,7 +52,7 @@ describe('navigation helpers', () => {
 
   it('groups live tools and lists size links smallest first', async () => {
     const { getNavGroups, getSizeLinks } = await import('@/lib/tools');
-    expect(getNavGroups().map((g) => g.category)).toEqual(['compress', 'convert']);
+    expect(getNavGroups().map((g) => g.category)).toEqual(['compress', 'convert', 'favicon']);
     expect(getSizeLinks().map((l) => l.label)).toEqual([
       '20KB',
       '50KB',
