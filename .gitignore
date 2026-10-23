@@ -46,3 +46,6 @@ next-env.d.ts
 /.lighthouseci/
 /playwright-report/
 /test-results/
+
+# raw QA run data
+/reports/data/

@@ -17,7 +17,6 @@ Owned by the lead. Last review: 2026-10-23 (whole codebase; static site, no back
 | X-Content-Type-Options | `nosniff` |
 | Referrer-Policy | `strict-origin-when-cross-origin` |
 | Permissions-Policy | camera, microphone, geolocation, payment, usb off |
-| Cross-Origin-Opener-Policy | `same-origin` |
 
 HSTS is set in Cloudflare (SSL/TLS → Edge Certificates → HSTS) at deploy time, not in `_headers`.
 
@@ -41,3 +40,4 @@ HSTS is set in Cloudflare (SSL/TLS → Edge Certificates → HSTS) at deploy tim
 ## Accepted risks
 
 - `'unsafe-inline'` in `script-src` (Next static export). Mitigated by having no user-generated content and no third-party scripts.
+- No `Cross-Origin-Opener-Policy`: with `same-origin` (or `same-origin-allow-popups`) Lighthouse aborts with `NO_NAVSTART` (QA-01, 2026-10-23). The site opens no popups and embeds nothing cross-origin, so the protection it would add is small.
