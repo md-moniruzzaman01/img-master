@@ -138,12 +138,12 @@ test('built pages are exactly the live pages (no drafts, no dev pages)', () => {
 test('sitemap.xml = exactly the live pages, canonical host, no trailing slash', () => {
   const xml = readFileSync(join(OUT_DIR, 'sitemap.xml'), 'utf8');
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => decode(m[1]));
-  const expected = EXPECTED_PATHS.map((p) => (p === '/' ? `${SITE}/` : `${SITE}${p}`));
+  const expected = EXPECTED_PATHS.map((p) => (p === '/' ? SITE : `${SITE}${p}`));
   expect([...locs].sort()).toEqual([...expected].sort());
   expect(new Set(locs).size).toBe(locs.length);
   for (const l of locs) {
     expect(l.startsWith(SITE)).toBe(true);
-    if (l !== `${SITE}/`) expect(l.endsWith('/'), l).toBe(false);
+    expect(l.endsWith('/'), l).toBe(false);
     expect(l).not.toMatch(/[?#]/);
   }
   for (const m of xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)) expect(m[1]).toMatch(/^\d{4}-\d{2}-\d{2}/);
