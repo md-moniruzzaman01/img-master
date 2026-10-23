@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 // [text](https://...). Nothing else, and no markdown library.
 const TOKEN = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
 
-const linkClass = 'font-medium text-primary underline underline-offset-4 hover:text-primary-hover';
+const linkClass =
+  'inline-block py-[13.5px] -my-[13.5px] font-medium text-primary underline underline-offset-4 [overflow-wrap:anywhere] hover:text-primary-hover';
 
 function parse(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];

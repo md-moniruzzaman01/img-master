@@ -94,12 +94,15 @@ export function FaviconPreview({
   previews,
   busy,
   empty,
+  emptyText,
 }: {
   /** Latest package previews; kept on screen while the next one renders. */
   previews: Previews | null;
   busy: boolean;
   /** Nothing to draw yet (image mode before a file is chosen). */
   empty: boolean;
+  /** Overrides the default empty-state sentence (text and emoji modes). */
+  emptyText?: string;
 }) {
   const headingId = useId();
   const descId = useId();
@@ -168,7 +171,7 @@ export function FaviconPreview({
         </div>
         {empty && (
           <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-muted">
-            {t.previewEmpty}
+            {emptyText ?? t.previewEmpty}
           </p>
         )}
       </div>

@@ -108,7 +108,7 @@ export function ResultCard({
       data-error={item.error?.code}
       aria-busy={busy || undefined}
       className={cx(
-        'flex min-h-[104px] gap-3 rounded-card border bg-surface p-3 lg:p-4',
+        'flex min-h-[104px] min-w-0 gap-3 rounded-card border bg-surface p-3 lg:p-4',
         status === 'failed' ? 'border-danger' : 'border-border',
       )}
     >
@@ -216,7 +216,9 @@ export function ResultCard({
           <>
             <p className="mt-1 flex items-start gap-1.5 text-danger">
               <AlertIcon size={20} className="mt-0.5 shrink-0" />
-              <span>{errorText ?? errorMessage(item.error.code)}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                {errorText ?? errorMessage(item.error.code)}
+              </span>
             </p>
             {actions && actions.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">

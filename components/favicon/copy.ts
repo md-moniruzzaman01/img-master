@@ -43,6 +43,8 @@ export const faviconCopy = {
   // Preview
   previewHeading: 'Preview', // invented
   previewEmpty: 'Choose an image to see your icon.', // invented
+  previewEmptyText: 'Type 1 to 3 letters to see your icon.', // invented
+  previewEmptyEmoji: 'Choose an emoji to see your icon.', // invented
   updating: 'Updating…', // invented
   previewUpdated: 'Preview updated', // invented
   siteTitle: 'Your site', // invented (fake tab title)

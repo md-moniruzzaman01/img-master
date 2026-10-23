@@ -32,7 +32,7 @@ export function ErrorBanner({
         ) : (
           <InfoIcon size={20} className="mt-0.5 shrink-0 text-warning" />
         )}
-        <span>{message}</span>
+        <span className="min-w-0 [overflow-wrap:anywhere]">{message}</span>
       </p>
       {action && (
         <Button variant="secondary" onClick={action.onClick} className="shrink-0">

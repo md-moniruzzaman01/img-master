@@ -21,7 +21,11 @@ export function ResultList({
 }) {
   const id = useId();
   return (
-    <section aria-labelledby={ghost ? undefined : id} data-testid={ghost ? undefined : 'results'}>
+    <section
+      className="min-w-0"
+      aria-labelledby={ghost ? undefined : id}
+      data-testid={ghost ? undefined : 'results'}
+    >
       {ghost ? (
         <p className={HEADING}>{copy.results}</p>
       ) : (
@@ -30,7 +34,7 @@ export function ResultList({
         </h2>
       )}
       <div className="mt-2 min-h-11">{status}</div>
-      <ol className="mt-2 grid gap-3">{children}</ol>
+      <ol className="mt-2 grid gap-3 [&>*]:min-w-0">{children}</ol>
     </section>
   );
 }

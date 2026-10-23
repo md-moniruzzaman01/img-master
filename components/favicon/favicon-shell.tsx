@@ -101,8 +101,7 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   const shown = made && made.source.mode === mode ? made : null;
   const failure = failed && failed.source === source ? failed : null;
   const busy = source !== null && made?.source !== source && !failure;
-  const imageEmpty = mode === 'image' && !file;
-  const pkg = imageEmpty ? null : (shown?.pkg ?? null);
+  const pkg = source === null ? null : (shown?.pkg ?? null);
   const canDownload = pkg !== null && source !== null;
 
   // Free the previous package's preview URLs when it is replaced, and on unmount.
@@ -250,15 +249,8 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
     onDownloaded('single');
   }
 
-  const state = imageEmpty
-    ? 'idle'
-    : failure
-      ? 'error'
-      : busy
-        ? 'processing'
-        : pkg
-          ? 'done'
-          : 'idle';
+  const state =
+    source === null ? 'idle' : failure ? 'error' : busy ? 'processing' : pkg ? 'done' : 'idle';
 
   return (
     <div
@@ -298,7 +290,14 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
         />
       )}
 
-      <FaviconPreview previews={shown?.pkg.previews ?? null} busy={busy} empty={imageEmpty} />
+      <FaviconPreview
+        previews={pkg?.previews ?? null}
+        busy={busy}
+        empty={source === null}
+        emptyText={
+          mode === 'text' ? t.previewEmptyText : mode === 'emoji' ? t.previewEmptyEmoji : undefined
+        }
+      />
 
       <FaviconControls mode={mode} part="style" options={options} onChange={change} />
 

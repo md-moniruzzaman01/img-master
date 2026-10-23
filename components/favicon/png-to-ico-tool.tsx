@@ -275,7 +275,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       )}
 
       {/* Held tall enough for one finished card, so results replace the note in place. */}
-      <div className="grid min-h-[300px] content-start gap-4">
+      <div className="grid min-h-[300px] content-start gap-4 [&>*]:min-w-0">
         {m > 0 ? (
           <>
             <ResultList headingRef={headingRef} status={statusSlot}>

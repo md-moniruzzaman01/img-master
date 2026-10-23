@@ -644,7 +644,12 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   ) : null;
 
   return (
-    <div data-testid="tool-shell" data-kind={kind} data-state={state} className="grid gap-4">
+    <div
+      data-testid="tool-shell"
+      data-kind={kind}
+      data-state={state}
+      className="grid gap-4 [&>*]:min-w-0"
+    >
       <FilePicker
         inputId={inputId}
         maxFiles={maxFiles}
@@ -671,7 +676,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         </div>
       )}
 
-      <div ref={regionRef} className="grid gap-4">
+      <div ref={regionRef} className="grid gap-4 [&>*]:min-w-0">
         {m > 0 ? (
           <>
             <ResultList headingRef={headingRef} status={statusSlot}>
