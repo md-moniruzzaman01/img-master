@@ -89,3 +89,28 @@ Titles in content are complete (they already end with " | Img Master"); metadata
 ## 4. Engine (image-engine)
 
 `lib/image-engine/index.ts` exports `imageEngine: ImageEngine`. The lead switches `lib/engine.ts` to it in Phase 2. Until favicons are built (Phase 4), `pngToIco` and `makeFavicons` reject with an `EngineError` (`ENCODE_UNSUPPORTED`, message "Not built yet").
+
+## 5. Favicon tools (Phase 4)
+
+Types are already in `lib/types.ts` (`FaviconSource`, `FaviconPackage`, `ImageEngine.makeFavicons`, `ImageEngine.pngToIco`, `EngineResult.format === 'ico'`).
+
+### Engine (image-engine)
+
+- `imageEngine.makeFavicons(src)` → `JobHandle<FaviconPackage>`. `files` is exactly the list in PRODUCT.md §4.4: `favicon.ico` (16, 32, 48), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `favicon.svg` (text and emoji modes only), `site.webmanifest`, `README.txt` (with the HTML snippet). `snippet` is the same HTML `<link>` block (ENGINE.md §9). `previews` are object URLs the **UI revokes** when replaced or on unmount.
+- The UI calls `makeFavicons` on every control change (debounced, previous job cancelled), so a package must be < 1 s on desktop and cancellation must be cheap.
+- `imageEngine.pngToIco(file)` → `EngineResult` with `format: 'ico'`, file name `{base}.ico`, 16/32/48 (+256 when the source is ≥ 256px).
+- Text and emoji render with the system font stack and the platform emoji font; at 16 and 32px render directly at that size (ENGINE.md §9).
+- The ZIP is built by the UI with `imageEngine.zip(files)`.
+
+### UI (ui-builder), `@/components/favicon/...`
+
+| Component | File | Props |
+|---|---|---|
+| `FaviconShell` (client) | `favicon-shell.tsx` | `{ tool: ToolDefinition }`. Handles all four kinds: `favicon-image`, `favicon-text`, `favicon-emoji` (live preview + ZIP + snippet) and `png-to-ico` (pick PNG → one `.ico` download, same result-card pattern as converters). Each page opens on its own mode. |
+| `FaviconModeTabs`, `FaviconControls`, `FaviconPreview`, `SnippetBlock` | per DESIGN.md §4.4 | internal to the shell |
+
+Routes render `<FaviconShell tool={tool} />` instead of `<ToolShell />` when `tool.category === 'favicon'`.
+
+### Content (seo-content)
+
+Pages: `favicon-generator` (hub, image mode), `favicon-from-text`, `favicon-from-emoji`, `png-to-ico`. The hub has a table linking all four.
