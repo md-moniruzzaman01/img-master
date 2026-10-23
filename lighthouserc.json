@@ -8,7 +8,9 @@
         "http://localhost:4173/compress-image",
         "http://localhost:4173/compress-image-to-50kb",
         "http://localhost:4173/image-converter",
-        "http://localhost:4173/webp-to-jpg"
+        "http://localhost:4173/webp-to-jpg",
+        "http://localhost:4173/favicon-generator",
+        "http://localhost:4173/png-to-ico"
       ],
       "numberOfRuns": 3,
       "settings": {

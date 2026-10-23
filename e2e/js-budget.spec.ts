@@ -3,7 +3,7 @@
 // "Ours" = every script except the Next.js/React framework chunks and the noModule polyfill.
 import { expect, test } from '@playwright/test';
 import { gzipSync } from 'node:zlib';
-import { logMetric, ALL_PATHS, TOOL_SLUGS } from './helpers/tool';
+import { logMetric, ALL_PATHS, FAVICON_SLUGS, TOOL_SLUGS } from './helpers/tool';
 
 test.skip(({ browserName }) => browserName !== 'chromium', 'one measurement is enough');
 
@@ -18,9 +18,11 @@ const OURS = [
   /Nothing is uploaded/,
   /compressToSize/,
   /transparency-flattened|Transparent areas/,
+  // Favicon island (Phase 4)
+  /favicon-package\.zip|Add this to your site|Quick picks|Choose PNG files/,
 ];
 
-for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
+for (const path of ['/', ...[...TOOL_SLUGS, ...FAVICON_SLUGS].map((s) => `/${s}`)]) {
   test(`first-load JS: ${path}`, async ({ page }) => {
     const scripts: {
       url: string;
@@ -28,6 +30,8 @@ for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
       gz: number;
       gz9: number;
       ours: boolean;
+      /** The lazily imported image-engine chunk (dynamic import; does not count toward the budget). */
+      lazyEngine: boolean;
       polyfill: boolean;
     }[] = [];
     page.on('response', async (res) => {
@@ -41,7 +45,8 @@ for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
           raw: body.length,
           gz: gzipSync(body).length,
           gz9: gzipSync(body, { level: 9 }).length,
-          ours: OURS.some((r) => r.test(text)),
+          lazyEngine: /OffscreenCanvas/.test(text),
+          ours: OURS.some((r) => r.test(text)) && !/OffscreenCanvas/.test(text),
           polyfill: false,
         });
       } catch {
@@ -54,14 +59,16 @@ for (const path of ['/', ...TOOL_SLUGS.map((s) => `/${s}`)]) {
     const sum = (k: 'raw' | 'gz' | 'gz9', f: (s: (typeof scripts)[number]) => boolean) =>
       scripts.filter(f).reduce((a, s) => a + s[k], 0);
     const ours = sum('gz', (s) => s.ours);
+    const lazyEngine = sum('gz', (s) => s.lazyEngine);
     const total = sum('gz', () => true);
     logMetric('js-budget.ndjson', {
       path,
       totalGz: total,
       oursGz: ours,
       oursGz9: sum('gz9', (s) => s.ours),
-      frameworkGz: total - ours,
-      files: scripts.map((s) => `${s.url} ${s.gz}${s.ours ? ' OURS' : ''}`),
+      lazyEngineGz: lazyEngine,
+      frameworkGz: total - ours - lazyEngine,
+      files: scripts.map((s) => `${s.url} ${s.gz}${s.ours ? ' OURS' : ''}${s.lazyEngine ? ' LAZY-ENGINE' : ''}`),
     });
     if (path !== '/')
       expect(ours, `our first-load JS ${ours} B gz vs budget ${BUDGET_BYTES}`).toBeLessThanOrEqual(

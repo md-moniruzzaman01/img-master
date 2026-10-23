@@ -50,8 +50,20 @@ export const TOOL_SLUGS: string[] = [
   'image-converter',
   ...CONVERTER_PAGES.map((p) => p.slug),
 ];
+/** Phase 4 favicon pages (different island: data-testid=favicon-shell, no result cards except png-to-ico). */
+export const FAVICON_SLUGS = [
+  'favicon-generator',
+  'favicon-from-text',
+  'favicon-from-emoji',
+  'png-to-ico',
+];
 export const INFO_PATHS = ['/about', '/privacy', '/terms', '/contact'];
-export const ALL_PATHS: string[] = ['/', ...TOOL_SLUGS.map((s) => `/${s}`), ...INFO_PATHS];
+export const ALL_PATHS: string[] = [
+  '/',
+  ...TOOL_SLUGS.map((s) => `/${s}`),
+  ...FAVICON_SLUGS.map((s) => `/${s}`),
+  ...INFO_PATHS,
+];
 
 // ── Locators ─────────────────────────────────────────────────────────────
 

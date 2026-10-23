@@ -23,13 +23,14 @@ const LIVE_TOOLS = [
   'jpg-to-webp',
   'png-to-jpg',
   'jpg-to-png',
-];
-const LEGAL = ['about', 'privacy', 'terms', 'contact'];
-const DRAFT_SLUGS = [
   'favicon-generator',
   'favicon-from-text',
   'favicon-from-emoji',
   'png-to-ico',
+];
+const FAVICON = ['favicon-generator', 'favicon-from-text', 'favicon-from-emoji', 'png-to-ico'];
+const LEGAL = ['about', 'privacy', 'terms', 'contact'];
+const DRAFT_SLUGS = [
   'heic-to-jpg',
   'resize-image',
   'compress-image-to-10kb',
@@ -107,7 +108,9 @@ function loadPages(): Page[] {
         r === 'index.html' ? '/' : '/' + r.replace(/\.html$/, '').replace(/\/index$/, '');
       const mainHtml = /<main[\s\S]*<\/main>/.exec(html)?.[0] ?? '';
       const idx = mainHtml.indexOf('max-w-[680px]');
-      const hasTool = mainHtml.includes('data-testid="tool-shell"');
+      const hasTool =
+        mainHtml.includes('data-testid="tool-shell"') ||
+        mainHtml.includes('data-testid="favicon-shell"');
       const belowHtml = hasTool && idx > 0 ? mainHtml.slice(idx) : mainHtml;
       return {
         path,
@@ -137,10 +140,7 @@ test('built pages are exactly the live pages (no drafts, no dev pages)', () => {
       `draft ${d} leaked into out/`,
     ).toEqual([]);
   }
-  expect(
-    all.some((f) => /favicon-|png-to-ico/.test(f)),
-    'favicon tool files',
-  ).toBe(false);
+  expect(EXPECTED_PATHS.length, '1 home + 18 tools + 4 info pages').toBe(23);
 });
 
 test('sitemap.xml = exactly the live pages, canonical host, no trailing slash', () => {
@@ -293,8 +293,9 @@ test('JSON-LD parses and matches visible content (tool pages)', () => {
     const types = blocks.map((b) => String(b['@type']));
     for (const t of ['WebApplication', 'BreadcrumbList', 'FAQPage'])
       if (!types.includes(t)) problems.push(`${p.path}: missing ${t}`);
-    for (const bad of ['aggregateRating', 'review', 'HowTo'])
-      if (JSON.stringify(blocks).includes(bad)) problems.push(`${p.path}: has ${bad}`);
+    // Match JSON keys/types, not substrings ("preview" is legitimate text on favicon pages).
+    for (const bad of [/"aggregateRating"/, /"review"\s*:/, /"@type":"Review"/, /"@type":"HowTo"/])
+      if (bad.test(JSON.stringify(blocks))) problems.push(`${p.path}: has ${bad}`);
 
     const app = blocks.find((b) => b['@type'] === 'WebApplication') as
       Record<string, unknown> | undefined;
@@ -328,7 +329,9 @@ test('JSON-LD parses and matches visible content (tool pages)', () => {
       for (const e of faq.mainEntity) {
         const v = visible.find((x) => x.q === e.name);
         if (!v) continue;
-        if (v.a !== e.acceptedAnswer.text)
+        // textOf() puts a space after closing inline tags, so "<a>text</a>." reads "text ."; ignore that artifact only.
+        const unspace = (x: string) => x.replace(/\s+([.,;:!?])/g, '$1');
+        if (unspace(v.a) !== unspace(e.acceptedAnswer.text))
           problems.push(
             `${p.path}: FAQ answer differs for "${e.name}"\n  page: ${v.a}\n  json: ${e.acceptedAnswer.text}`,
           );
@@ -426,8 +429,16 @@ test('home links to every live tool; hubs link to every tool in their category; 
     'jpg-to-png',
   ])
     if (!conv.has(`/${s}`)) problems.push(`/image-converter does not link to /${s}`);
+  const fav = hrefs(pages.find((p) => p.path === '/favicon-generator')!);
+  for (const s of FAVICON.slice(1))
+    if (!fav.has(`/${s}`)) problems.push(`/favicon-generator does not link to /${s}`);
   for (const p of toolPages) {
-    const hub = p.path.startsWith('/compress-image') ? '/compress-image' : '/image-converter';
+    const slug = p.path.slice(1);
+    const hub = FAVICON.includes(slug)
+      ? '/favicon-generator'
+      : p.path.startsWith('/compress-image')
+        ? '/compress-image'
+        : '/image-converter';
     if (p.path !== hub && !hrefs(p).has(hub))
       problems.push(`${p.path} does not link to its hub ${hub}`);
     const related =
@@ -463,8 +474,8 @@ test('text is in the HTML without JavaScript (H1, intro, sections, FAQ answers p
     if (!raw.includes(p.h1s[0])) problems.push(`${p.path}: H1 missing`);
     if (p.below.split(' ').length < 300)
       problems.push(`${p.path}: only ${p.below.split(' ').length} words in server HTML`);
-    if (!p.mainHtml.includes('data-testid="file-input"'))
-      problems.push(`${p.path}: file picker not in server-rendered HTML`);
+    if (!/data-testid="(file-input|text-input|emoji-input)"/.test(p.mainHtml))
+      problems.push(`${p.path}: first control (picker or text/emoji field) not in server HTML`);
     if (!p.mainHtml.includes('Your images stay on your device'))
       problems.push(`${p.path}: privacy note missing in HTML`);
   }
@@ -556,7 +567,8 @@ test('content similarity between sibling tool pages (< 30%)', () => {
 
 // Not banned outright, but each hit needs a human look (unsourced requirement claims).
 const REVIEW = /\b(passport|visa|official|government|requirement|required by|mandatory)\b/i;
-const ALLOW = [/best way to reach/i];
+// Reviewed by QA: advice wording, not claims ("square images work best", emoji tip "such as a star or a leaf").
+const ALLOW = [/best way to reach/i, /images work best/i, /such as a star or a leaf/i];
 
 const BANNED: [string, RegExp][] = [
   ['"best"', /\bbest\b/i],
