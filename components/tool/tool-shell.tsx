@@ -103,6 +103,11 @@ function isNotImage(file: File): boolean {
   return file.type !== '' && !file.type.startsWith('image/');
 }
 
+/** Inputs that may have transparency (flattened onto a color when saved as JPG). */
+function mayHaveAlpha(file: File): boolean {
+  return /^image\/(png|webp|gif|avif)$/.test(file.type);
+}
+
 function isIOS(): boolean {
   const n = navigator;
   return /iP(hone|ad|od)/.test(n.userAgent) || (n.platform === 'MacIntel' && n.maxTouchPoints > 1);
@@ -438,11 +443,25 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
           : 'partial';
   const flattened = success.some((it) => it.result.notes.includes('transparency-flattened'));
 
+  // Space held from the moment processing starts, so nothing below the tool
+  // moves when results land (DESIGN.md §8, CLS < 0.05).
+  const outputsJpeg = usesTarget(runOpts)
+    ? runOpts.sizeFormat === 'jpeg'
+    : kind === 'convert' && runOpts.convertTo === 'jpeg';
+  const mayFlatten = outputsJpeg && items.some((it) => mayHaveAlpha(it.file));
+  const reserveFor = (it: ResultItem) => ({
+    // Size targets usually add a note ("Resized to…", "Already under…").
+    note: usesTarget(runOpts) || (outputsJpeg && mayHaveAlpha(it.file)),
+    download: items.length > 1,
+  });
+
   async function downloadAll() {
     setZipping(true);
     try {
       const engine = await loadEngine();
-      const zip = await engine.zip(success.map((it) => ({ name: outName(it), blob: it.result.blob })));
+      const zip = await engine.zip(
+        success.map((it) => ({ name: outName(it), blob: it.result.blob })),
+      );
       const url = URL.createObjectURL(zip);
       urlsRef.current.push(url);
       const a = document.createElement('a');
@@ -499,7 +518,10 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         {options.mode === 'size' ? (
           targetChips
         ) : (
-          <QualitySlider value={options.quality} onChange={(quality) => updateOptions({ quality })} />
+          <QualitySlider
+            value={options.quality}
+            onChange={(quality) => updateOptions({ quality })}
+          />
         )}
       </div>
     );
@@ -559,7 +581,10 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     notice === 'too-many' ? (
       <ErrorBanner tone="warning" message={copy.tooMany(maxFiles)} />
     ) : notice === 'webp' ? (
-      <ErrorBanner message={copy.webpUnsupported} action={{ label: copy.useJpg, onClick: switchToJpg }} />
+      <ErrorBanner
+        message={copy.webpUnsupported}
+        action={{ label: copy.useJpg, onClick: switchToJpg }}
+      />
     ) : notice === 'engine' ? (
       <ErrorBanner
         message={copy.engineLoadFailed}
@@ -626,6 +651,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
                 onAction={onSuggestion}
                 showDownload={multi}
                 onDownload={() => onDownloaded('single')}
+                reserve={reserveFor(it)}
               />
             </li>
           ))}
@@ -666,17 +692,19 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         />
       </StickyActionBar>
 
-      {flattened && (
+      {(flattened || mayFlatten) && (
         <BackgroundField
           value={options.background}
           onChange={(background) => updateOptions({ background })}
         />
       )}
 
-      {!running && m > 0 && (
-        <div>
+      {m > 0 && (
+        // Present (but hidden) while processing, so it doesn't push content down when done.
+        <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
           <Button
             variant="secondary"
+            disabled={running}
             onClick={() => document.getElementById(inputId)?.click()}
             className="w-full sm:w-auto"
           >
@@ -688,7 +716,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
 
       <AdSlot position="below-results" />
-
 
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announce}

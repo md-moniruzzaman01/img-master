@@ -19,7 +19,8 @@ export function ToolGrid({
             {g.hubHref ? (
               <Link
                 href={g.hubHref}
-                className="underline-offset-4 hover:text-primary hover:underline"
+                // 48px tap target; the negative margin keeps the heading's own line height.
+                className="-my-2.5 inline-flex min-h-12 items-center underline-offset-4 hover:text-primary hover:underline"
               >
                 {g.label}
               </Link>

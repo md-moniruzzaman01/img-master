@@ -19,9 +19,12 @@ export function formatBytes(bytes: number): string {
   return `${mb < 10 ? floorTo(mb, 1) : Math.floor(mb)} MB`;
 }
 
-/** Target for sentences: 50 → "50 KB", 1000 → "1 MB". */
+/**
+ * Target in sentences: 50 → "50KB", 1000 → "1MB". Same style as the chips,
+ * H1s and size pages; measured byte sizes ("48 KB") use formatBytes.
+ */
 export function targetText(kb: number): string {
-  return kb >= 1000 && kb % 100 === 0 ? `${kb / 1000} MB` : `${kb} KB`;
+  return targetChip(kb);
 }
 
 /** Target for chips: 50 → "50KB", 1000 → "1MB". */

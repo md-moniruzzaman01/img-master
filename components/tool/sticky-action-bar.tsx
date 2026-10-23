@@ -30,7 +30,9 @@ export function StickyActionBar({
   if (!visible && !reserve) return null;
 
   return (
-    <div className={cx('max-md:-mt-4 md:min-h-[52px]', !visible && 'hidden md:block')}>
+    // Mobile: the bar is fixed, so its wrapper takes no space in the layout
+    // (display: contents adds no grid row or gap). Desktop: an inline slot of fixed height.
+    <div className={cx('md:min-h-[52px]', visible ? 'max-md:contents' : 'hidden md:block')}>
       {visible && (
         <div
           data-testid="action-bar"

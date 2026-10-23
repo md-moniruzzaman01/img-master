@@ -1,5 +1,6 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
 import type { EngineErrorCode, EngineErrorDetail, EngineNote, EngineResult } from '@/lib/types';
 import { buttonClasses } from '@/components/ui/button-styles';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,14 @@ export interface ResultItem {
   error?: { code: EngineErrorCode | 'UNKNOWN'; detail?: EngineErrorDetail };
 }
 
+/** Space a waiting card holds for parts that may appear in the result. */
+export interface CardReserve {
+  /** One note (two short lines). */
+  note: boolean;
+  /** The per-card Download button (batches). */
+  download: boolean;
+}
+
 export interface CardAction {
   id: string;
   label: string;
@@ -41,6 +50,7 @@ export function ResultCard({
   onAction,
   showDownload,
   onDownload,
+  reserve,
 }: {
   item: ResultItem;
   /** Output name, unique within the batch (defaults to the engine's name). */
@@ -53,15 +63,28 @@ export function ResultCard({
   onAction?: (id: string) => void;
   showDownload: boolean;
   onDownload: () => void;
+  /** What the skeleton should hold space for (DESIGN.md §8: no shift when results land). */
+  reserve?: CardReserve;
 }) {
   const { status, result: r, file } = item;
   const busy = status === 'queued' || status === 'processing';
   const p = r ? percentSmaller(r.inputBytes, r.outputBytes) : 0;
   const transparent = r && r.format !== 'jpeg';
   const name = fileName ?? r?.fileName ?? file.name;
+  const ref = useRef<HTMLElement>(null);
+
+  // The skeleton is drawn at the expected final height. Keep that height as a
+  // floor so a shorter result never pulls the content below it upward.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !busy) return;
+    const h = el.offsetHeight;
+    if (h > (parseFloat(el.style.minHeight) || 0)) el.style.minHeight = `${h}px`;
+  }, [busy, reserve?.note, reserve?.download]);
 
   return (
     <article
+      ref={ref}
       data-testid="result-card"
       data-status={status}
       data-input-bytes={file.size}
@@ -101,9 +124,28 @@ export function ResultCard({
         </p>
 
         {busy && (
-          <div aria-hidden="true" className="mt-2 grid gap-2">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-2" />
-            <div className="h-4 w-1/2 animate-pulse rounded bg-surface-2" />
+          // Same line boxes as the result below, so the card doesn't grow when it lands.
+          <div aria-hidden="true">
+            {/* "2.4 MB → 48 KB (98% smaller)" usually takes two lines on phones. */}
+            <p className="relative mt-0.5">
+              &nbsp;
+              <br className="sm:hidden" />
+              &nbsp;
+              <span className="absolute left-0 top-1 h-4 w-3/4 animate-pulse rounded bg-surface-2" />
+            </p>
+            <p className="relative type-small">
+              &nbsp;
+              <span className="absolute left-0 top-1 h-3 w-1/2 animate-pulse rounded bg-surface-2" />
+            </p>
+            {reserve?.note && (
+              // A note is usually two lines on phones, one on wider screens.
+              <p className="mt-1 type-small">
+                &nbsp;
+                <br className="sm:hidden" />
+                &nbsp;
+              </p>
+            )}
+            {reserve?.download && <div className="mt-3 h-12" />}
           </div>
         )}
         {busy && (
