@@ -12,7 +12,7 @@ type Mode = 'worker' | 'main';
 interface Job {
   id: number;
   type: JobType;
-  file: File;
+  file: File | null;
   options: unknown;
   onProgress?: ProgressFn;
   resolve(v: unknown): void;
@@ -197,7 +197,7 @@ async function pumpMain(): Promise<void> {
 
 export function submit<T>(
   type: JobType,
-  file: File,
+  file: File | null,
   options: unknown,
   onProgress?: ProgressFn,
 ): JobHandle<T> {

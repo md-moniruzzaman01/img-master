@@ -9,6 +9,9 @@ import type {
 import { compressJob } from './compress';
 import { MAX_ENCODES, searchToSize, targetBytesFor, type Encoder } from './compress-to-size';
 import { convertJob } from './convert';
+import type { JobOutput } from './protocol';
+import { faviconsJob, pngToIcoJob } from './favicon/job';
+import type { WireFaviconSource } from './favicon/package';
 import { decodeImage } from './decode';
 import { EngineError, cancelled, isOutOfMemory } from './errors';
 import { assertFormatSupported, encodeCanvas, releaseCanvas, type AnyCanvas } from './encode';
@@ -119,10 +122,12 @@ export async function compressToSizeJob(
 
 async function runOnce(
   type: JobType,
-  file: File,
+  file: File | null,
   options: unknown,
   ctx: JobContext,
-): Promise<EngineResult> {
+): Promise<JobOutput> {
+  if (type === 'favicons') return faviconsJob(file, options as WireFaviconSource, ctx);
+  if (!file) throw new EngineError('DECODE_FAILED', 'No file was provided');
   switch (type) {
     case 'compressToSize':
       return compressToSizeJob(file, options as CompressToSizeOptions, ctx);
@@ -130,9 +135,8 @@ async function runOnce(
       return convertJob(file, options as ConvertOptions, ctx);
     case 'compress':
       return compressJob(file, options as CompressOptions, ctx);
-    default:
-      // pngToIco and favicons arrive in Phase 4.
-      throw new EngineError('ENCODE_UNSUPPORTED', 'Not built yet');
+    case 'pngToIco':
+      return pngToIcoJob(file, ctx);
   }
 }
 
@@ -142,10 +146,10 @@ async function runOnce(
  */
 export async function runJob(
   type: JobType,
-  file: File,
+  file: File | null,
   options: unknown,
   run: RunOptions,
-): Promise<EngineResult> {
+): Promise<JobOutput> {
   const started = now();
   const isCancelled = () => run.isCancelled?.() ?? false;
   const makeCtx = (maxPixels: number): JobContext => ({
