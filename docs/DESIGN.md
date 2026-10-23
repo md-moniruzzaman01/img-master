@@ -92,7 +92,10 @@ Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `cu
 │ Target  (20KB)(50KB●)(100KB)(200…→ │  OptionChips, horizontal scroll
 │ 🔒 Stays on your device. Never     │  PrivacyNote
 │    uploaded.                       │
-├────────────────────────────────────┤  ↓ appears after picking
+│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │  Results placeholder (idle): "Your
+│   Your images will show here      │  images will show here", one result
+│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │  tall; replaced in place (no CLS)
+├────────────────────────────────────┤  ↓ replaces the placeholder
 │ ┌────────────────────────────────┐ │
 │ │ [thumb] photo-50kb.jpg         │ │  ResultCard
 │ │ 2.4 MB → 48 KB  98% smaller    │ │
