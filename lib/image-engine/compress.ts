@@ -5,10 +5,7 @@ import { assertFormatSupported, clampQuality, encodeCanvas, releaseCanvas } from
 import { compressName } from './names';
 import { fitWidth, renderScaled } from './resize';
 import type { JobContext } from './run-job';
-
-/** Lower qualities tried when the first result is bigger than the input. */
-const RETRY_STEPS = [0.1, 0.2, 0.3];
-const RETRY_MIN_QUALITY = 0.3;
+import { runCompressAttempts } from './compress-attempts';
 
 /** Output format for "same": formats the browser can't write go to PNG (lossless) or JPG. */
 export function sameFormatFor(kind: SniffedKind, hasAlpha: boolean): ImageFormat {
@@ -37,26 +34,21 @@ export async function compressJob(file: File, opts: CompressOptions, ctx: JobCon
     decoded.release();
 
     const lossy = format !== 'png';
-    let quality = lossy ? clampQuality(opts.quality) : undefined;
+    const startQ = lossy ? clampQuality(opts.quality) : undefined;
     ctx.progress('encode', 0.3);
-    let blob = await encodeCanvas(canvas, format, quality);
-
-    // Bigger than the input? Try a few lower qualities and keep the first smaller one.
-    if (lossy && quality !== undefined && blob.size >= file.size) {
-      const startQ: number = quality;
-      for (const step of RETRY_STEPS) {
-        const q = Math.round((startQ - step) * 100) / 100;
-        if (q < RETRY_MIN_QUALITY) break;
+    const target = canvas;
+    // Not smaller than the input? Try a few lower qualities; else return the smallest
+    // (still re-encoded, so metadata is gone) with the 'not-smaller' note.
+    const { out: blob, quality, notSmaller } = await runCompressAttempts(
+      (q) => encodeCanvas(target, format, q),
+      startQ,
+      file.size,
+      async () => {
         ctx.check();
         await ctx.yieldNow();
-        const b = await encodeCanvas(canvas, format, q);
-        if (b.size < blob.size) {
-          blob = b;
-          quality = q;
-        }
-        if (b.size < file.size) break;
-      }
-    }
+      },
+    );
+    if (notSmaller) notes.push('not-smaller');
     ctx.progress('encode', 1);
     return {
       blob,
