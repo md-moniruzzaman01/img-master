@@ -27,7 +27,7 @@ Define tokens as CSS variables in `app/globals.css` and map them into Tailwind's
 | `--on-primary` | `#FFFFFF` | Text on primary |
 | `--danger` | `#B42318` | Error text and borders only (the single exception to "one color") |
 
-No other colors. Success and warning notes use the normal text colors plus an icon and words. No dark mode (`color-scheme: light`). Every text/background pair meets WCAG AA; if a check fails, adjust the token, not the component.
+No other colors (neutral grays for control outlines, loading skeletons and the favicon preview's dark browser-tab mock are fine). Success and warning notes use the normal text colors plus an icon and words. No dark mode (`color-scheme: light`). Every text/background pair meets WCAG AA; if a check fails, adjust the token, not the component.
 
 ### Typography
 
