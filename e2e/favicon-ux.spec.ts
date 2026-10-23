@@ -38,6 +38,7 @@ async function interactive(page: Page, scope: string): Promise<Target[]> {
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none') continue;
       if (el instanceof HTMLInputElement && el.type === 'file') continue;
+      if (el.closest('details:not([open])') && el.tagName !== 'SUMMARY') continue; // closed menu / more-options content
       if (el.getAttribute('href') === '#main') continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
@@ -73,7 +74,7 @@ async function reachResults(page: Page, slug: string) {
 // ── Above the fold ───────────────────────────────────────────────────────
 
 for (const slug of FAVICON_SLUGS) {
-  test(`first control is fully above the fold with header, breadcrumbs, H1 and subtitle: /${slug}`, async ({
+  test(`first control is fully above the fold with header, H1 and subtitle: /${slug}`, async ({
     page,
   }) => {
     await page.goto(`/${slug}`);
@@ -84,7 +85,6 @@ for (const slug of FAVICON_SLUGS) {
       return { top: box!.y, bottom: box!.y + box!.height, h: box!.height };
     };
     const header = await bottomOf('header');
-    const crumbs = await bottomOf('nav[aria-label=Breadcrumb]');
     const h1 = await bottomOf('main h1');
     const sub = await bottomOf('main h1 + p');
     expect(header.top).toBeGreaterThanOrEqual(0);
@@ -106,17 +106,17 @@ for (const slug of FAVICON_SLUGS) {
       firstControlBottom: bottom,
       subtitleBottom: sub.bottom,
       headerBottom: header.bottom,
-      crumbsBottom: crumbs.bottom,
       h1Bottom: h1.bottom,
     });
     expect(box.y, 'control starts below subtitle').toBeGreaterThanOrEqual(sub.bottom - 1);
     expect(bottom, `first control bottom ${bottom} vs viewport ${vh}`).toBeLessThanOrEqual(vh);
     expect(box.height).toBeGreaterThanOrEqual(48);
-    // The mode tabs (when present) are above it and fully visible too.
+    // Redesign order: picker, privacy line, then the mode tabs (when present) below them.
     const tabs = page.getByRole('radiogroup', { name: 'Make your icon from' });
     if (await tabs.count()) {
       const t = (await tabs.boundingBox())!;
-      expect(t.y + t.height).toBeLessThanOrEqual(box.y + 1);
+      const pn = (await page.getByTestId('privacy-note').first().boundingBox())!;
+      expect(t.y, 'mode tabs come after the privacy line').toBeGreaterThanOrEqual(pn.y + pn.height - 1);
     }
   });
 }
@@ -156,7 +156,7 @@ for (const slug of FAVICON_SLUGS) {
 }
 
 for (const slug of FAVICON_SLUGS) {
-  test(`tap targets >= 48px in the tool area, header and breadcrumbs, before and after results: /${slug}`, async ({
+  test(`tap targets >= 48px in the tool area, header and breadcrumbs (below the tool), before and after results: /${slug}`, async ({
     page,
   }) => {
     test.setTimeout(90_000);
@@ -195,65 +195,53 @@ for (const slug of FAVICON_SLUGS) {
   });
 }
 
-// ── Sticky bar and last controls ─────────────────────────────────────────
+// ── No sticky bar; last controls and footer stay reachable ───────────────
 
 for (const slug of FAVICON_SLUGS) {
-  test(`sticky action bar never covers the last control, snippet or footer: /${slug}`, async ({
+  test(`no sticky action bar; downloads, snippet and footer are reachable: /${slug}`, async ({
     page,
   }) => {
     test.setTimeout(90_000);
     await gotoFavicon(page, slug);
     await reachResults(page, slug);
-    const bar = page.getByTestId('action-bar');
-    await expect(bar).toBeVisible();
-    const b = (await bar.boundingBox())!;
-    expect(b.width).toBeLessThanOrEqual(360);
-    const barBtns = await interactive(page, '[data-testid=action-bar]');
-    expect(barBtns.length).toBeGreaterThan(0);
-    for (const t of barBtns) expect(t.h, t.text).toBeGreaterThanOrEqual(48);
+    await expect(page.getByTestId('action-bar')).toHaveCount(0);
+    // Nothing in the page is position:fixed/sticky (except the skip link while focused).
+    const pinned = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('body *')]
+        .filter((e) => ['fixed', 'sticky'].includes(getComputedStyle(e).position))
+        .filter((e) => !(e instanceof HTMLAnchorElement && e.getAttribute('href') === '#main'))
+        .filter((e) => getComputedStyle(e).pointerEvents !== 'none') // the toast
+        .map((e) => e.tagName + '.' + e.className.toString().slice(0, 40)),
+    );
+    expect(pinned, 'fixed/sticky elements').toEqual([]);
 
-    // 1) End of page: the footer's last link and (favicon tools) the snippet block sit above the bar.
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await page.waitForTimeout(250);
-    const end = await page.evaluate(() => {
-      const barTop = document.querySelector('[data-testid=action-bar]')!.getBoundingClientRect().top;
-      const links = document.querySelectorAll<HTMLElement>('footer a');
-      const lastLink = links[links.length - 1];
-      const rr = lastLink.getBoundingClientRect();
-      const h = document.elementFromPoint(rr.x + rr.width / 2, rr.y + rr.height / 2);
-      return { barTop, footerBottom: rr.bottom, footerHit: !!h && lastLink.contains(h) };
-    });
-    expect(end.footerHit, 'last footer link hit-testable at scroll end').toBe(true);
-    expect(end.footerBottom, JSON.stringify(end)).toBeLessThanOrEqual(end.barTop + 0.5);
-
-    // 2) Every control, scrolled to the middle of the screen, receives the pointer (the bar is not on top of it).
+    // Every control, scrolled to the middle of the screen, receives the pointer.
     const ids =
       slug === 'png-to-ico'
         ? ['download-all']
-        : ['download-ico', 'copy-snippet', 'snippet', 'favicon-controls'];
+        : ['download-zip', 'download-ico', 'copy-snippet', 'snippet', 'favicon-controls'];
     for (const id of ids) {
       const hit = await page.evaluate((tid) => {
         const el = document.querySelector(`[data-testid=${tid}]`) as HTMLElement | null;
         if (!el) return null;
         el.scrollIntoView({ block: 'center' });
         const rr = el.getBoundingClientRect();
-        const h = document.elementFromPoint(rr.x + rr.width / 2, rr.y + 12);
+        const h = document.elementFromPoint(rr.x + rr.width / 2, rr.y + Math.min(12, rr.height / 2));
         return !!h && el.contains(h);
       }, id);
       if (hit === null) continue;
       expect(hit, `${id} receives the pointer when centred`).toBe(true);
     }
-
-    // 3) The last control of the page (before the snippet and footer) can be scrolled above the bar.
-    const last = slug === 'png-to-ico' ? 'footer' : '[data-testid=snippet-block]';
-    const gap = await page.evaluate((sel) => {
-      window.scrollTo(0, document.documentElement.scrollHeight);
-      const barTop = document.querySelector('[data-testid=action-bar]')!.getBoundingClientRect().top;
-      const el = document.querySelector(sel)!;
-      return barTop - el.getBoundingClientRect().bottom;
-    }, last);
-    // footer/snippet block either ends above the bar, or the bar overlaps only the footer (checked above)
-    if (slug !== 'png-to-ico') expect(gap, 'snippet block ends above the bar at scroll end').toBeGreaterThanOrEqual(0);
+    // Footer: last link is hit-testable at the end of the page.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const ok = await page.evaluate(() => {
+      const links = document.querySelectorAll<HTMLElement>('footer a');
+      const last = links[links.length - 1];
+      const rr = last.getBoundingClientRect();
+      const h = document.elementFromPoint(rr.x + rr.width / 2, rr.y + rr.height / 2);
+      return !!h && last.contains(h) && rr.bottom <= window.innerHeight + 0.5;
+    });
+    expect(ok, 'last footer link hit-testable inside the viewport at scroll end').toBe(true);
   });
 }
 
@@ -299,21 +287,20 @@ test('Copy button is disabled when there is nothing to copy (image mode before a
 
 // ── Navigation lists the favicon category ────────────────────────────────
 
-test('Tools sheet and footer list the favicon category and its four pages', async ({ page }) => {
+test('header menu lists the favicon category and its four pages; footer has no tool list', async ({
+  page,
+}) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Tools' }).click();
-  const dialog = page.getByRole('dialog', { name: 'All tools' });
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText('Favicon', { exact: true }).first()).toBeVisible();
+  const menu = page.locator('header details');
+  await menu.locator('summary[aria-label="Menu"]').click();
+  await expect(menu).toHaveAttribute('open', '');
+  await expect(menu.getByText('Favicon', { exact: true }).first()).toBeVisible();
   for (const s of FAVICON_SLUGS)
-    expect(await dialog.locator(`a[href="/${s}"]`).count(), s).toBeGreaterThan(0);
-  await page.keyboard.press('Escape');
-  const footer = page.locator('footer');
+    expect(await menu.locator(`a[href="/${s}"]`).count(), s).toBeGreaterThan(0);
   for (const s of FAVICON_SLUGS)
-    expect(await footer.locator(`a[href="/${s}"]`).count(), `footer ${s}`).toBeGreaterThan(0);
-  // A favicon link in the sheet opens the page
-  await page.getByRole('button', { name: 'Tools' }).click();
-  await dialog.locator('a[href="/favicon-from-emoji"]').click();
+    expect(await page.locator(`footer a[href="/${s}"]`).count(), `footer ${s}`).toBe(0);
+  // A favicon link in the menu opens the page
+  await menu.locator('a[href="/favicon-from-emoji"]').click();
   await expect(page).toHaveURL(/\/favicon-from-emoji$/);
   await expect(fshell(page)).toHaveAttribute('data-mode', 'emoji');
 });
@@ -377,7 +364,7 @@ async function axe(page: Page, label: string) {
   ).toEqual([]);
 }
 
-for (const scheme of ['light', 'dark'] as const) {
+for (const scheme of ['light'] as const) {
   test(`axe ${scheme}: favicon pages after changing mode and after generating results`, async ({
     page,
   }) => {
@@ -489,7 +476,8 @@ test('keyboard: mode tabs, shape and weight radiogroups, Download ZIP', async ({
     await zip.focus();
     reached = true;
   } else {
-    await pad.focus();
+    // Download ZIP sits between the preview and the style controls: Tab from the mode tabs.
+    await page.getByRole('radio', { name: 'Text', exact: true }).focus();
     for (let i = 0; i < 20 && !reached; i++) {
       await page.keyboard.press('Tab');
       reached = await page.evaluate(

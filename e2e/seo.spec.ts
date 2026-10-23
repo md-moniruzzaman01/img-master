@@ -446,8 +446,15 @@ test('home links to every live tool; hubs link to every tool in their category; 
     const n = (related.match(/<li>/g) ?? []).length;
     if (n < 4 || n > 6) problems.push(`${p.path}: ${n} related tools (want 4-6)`);
     const footer = /<footer[\s\S]*<\/footer>/.exec(p.html)?.[0] ?? '';
-    for (const l of ['/about', '/privacy', '/terms', '/contact'])
+    const header = /<header[\s\S]*<\/header>/.exec(p.html)?.[0] ?? '';
+    for (const l of ['/privacy', '/terms', '/contact'])
       if (!footer.includes(`href="${l}"`)) problems.push(`${p.path}: footer lacks ${l}`);
+    // About lives in the header (desktop link + menu), the menu lists every live tool.
+    for (const l of ['/about', '/privacy', '/terms', '/contact', ...LIVE_TOOLS.map((x) => `/${x}`)])
+      if (!header.includes(`href="${l}"`)) problems.push(`${p.path}: header menu lacks ${l}`);
+    if (footer.includes('href="/about"')) problems.push(`${p.path}: footer still links /about`);
+    if ([...footer.matchAll(/href="\/[^"]*"/g)].length !== 3)
+      problems.push(`${p.path}: footer must have exactly 3 internal links`);
   }
   expect(problems).toEqual([]);
 });
@@ -476,7 +483,7 @@ test('text is in the HTML without JavaScript (H1, intro, sections, FAQ answers p
       problems.push(`${p.path}: only ${p.below.split(' ').length} words in server HTML`);
     if (!/data-testid="(file-input|text-input|emoji-input)"/.test(p.mainHtml))
       problems.push(`${p.path}: first control (picker or text/emoji field) not in server HTML`);
-    if (!p.mainHtml.includes('Your images stay on your device'))
+    if (!p.mainHtml.includes('Your images never leave your device'))
       problems.push(`${p.path}: privacy note missing in HTML`);
   }
   expect(problems).toEqual([]);
@@ -670,7 +677,7 @@ test('privacy and legal pages: contact email present, "Last updated" date shown'
     if (!/Last updated/i.test(p.below)) problems.push(`${p.path}: no "Last updated"`);
   const priv = pages.find((x) => x.path === '/privacy')!;
   if (
-    !/nothing is uploaded|never (sent|uploaded)|not uploaded|stay on your device/i.test(priv.below)
+    !/nothing is uploaded|never (sent|uploaded)|not uploaded|stay on your device|never leave your device/i.test(priv.below)
   )
     problems.push('/privacy does not state that images are not uploaded');
   const about = pages.find((x) => x.path === '/about')!;

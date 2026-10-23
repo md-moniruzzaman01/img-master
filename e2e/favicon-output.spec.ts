@@ -76,7 +76,7 @@ test('hub switches modes: text and emoji ZIPs from /favicon-generator', async ({
   await chooseMode(page, 'Image');
   await expect(fshell(page)).toHaveAttribute('data-state', 'idle');
   await expect(page.getByTestId('download-ico')).toBeDisabled();
-  await expect(page.getByTestId('download-zip')).toHaveCount(0);
+  await expect(page.getByTestId('download-zip')).toBeDisabled();
 });
 
 // ── Text / emoji / image behaviour ───────────────────────────────────────
@@ -118,7 +118,7 @@ test('text mode: empty or whitespace-only disables every download and shows the 
     await text(page).fill(v);
     await expect(page.getByText('Type 1 to 3 characters to see your icon.')).toBeVisible();
     await expect(page.getByTestId('download-ico')).toBeDisabled();
-    await expect(page.getByTestId('download-zip')).toHaveCount(0);
+    await expect(page.getByTestId('download-zip')).toBeDisabled();
     await expect(fshell(page)).not.toHaveAttribute('data-state', 'error');
     // Observed (QA-10): the previous icon stays in the preview and the Copy button stays enabled.
     test.info().annotations.push({
@@ -152,7 +152,7 @@ test('emoji mode: pasting two emoji keeps one; ZWJ family and flag count as one'
   await expect(emoji(page)).toHaveValue('🚀');
   await emoji(page).fill('');
   await expect(page.getByTestId('download-ico')).toBeDisabled();
-  await expect(page.getByTestId('download-zip')).toHaveCount(0);
+  await expect(page.getByTestId('download-zip')).toBeDisabled();
 });
 
 test('image mode: shape, zoom, padding and transparent switch change the output', async ({
@@ -208,7 +208,7 @@ test('image mode: not-an-image and corrupt files show an error; a good file reco
     await page.getByTestId('file-input').setInputFiles(fixture(f));
     await expect(fshell(page)).toHaveAttribute('data-state', 'error', { timeout: 30_000 });
     await expect(page.getByTestId('error-banner')).toBeVisible();
-    await expect(page.getByTestId('download-zip')).toHaveCount(0);
+    await expect(page.getByTestId('download-zip')).toBeDisabled();
     await expect(page.getByTestId('download-ico')).toBeDisabled();
   }
   await page.getByTestId('file-input').setInputFiles(fixture('photo-2mp.png'));

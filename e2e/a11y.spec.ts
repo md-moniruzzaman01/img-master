@@ -1,4 +1,4 @@
-// Section 4: accessibility. axe in light and dark, plus a keyboard-only pass.
+// Section 4: accessibility. axe (light theme only since the redesign), plus a keyboard-only pass.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ensureFixtures, fixture } from './helpers/fixtures';
@@ -42,7 +42,7 @@ async function axe(page: Page, label: string) {
   ).toEqual([]);
 }
 
-for (const scheme of ['light', 'dark'] as const) {
+for (const scheme of ['light'] as const) {
   for (const path of [...ALL_PATHS, '/this-page-does-not-exist']) {
     test(`axe ${scheme}: ${path}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
@@ -52,7 +52,7 @@ for (const scheme of ['light', 'dark'] as const) {
     });
   }
 
-  test(`axe ${scheme}: tool states (results, partial failure, more options, tools sheet)`, async ({
+  test(`axe ${scheme}: tool states (results, partial failure, more options, open menu)`, async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -66,10 +66,10 @@ for (const scheme of ['light', 'dark'] as const) {
       fixture('animated.gif'),
     ]);
     await expect(cards(page)).toHaveCount(3);
-    await axe(page, `${scheme} partial results with error + notes + action bar`);
-    await page.getByRole('button', { name: 'Tools' }).click();
-    await expect(page.getByRole('dialog', { name: 'All tools' })).toBeVisible();
-    await axe(page, `${scheme} tools sheet over results`);
+    await axe(page, `${scheme} partial results with error + notes + per-card downloads`);
+    await page.locator('header summary[aria-label="Menu"]').click();
+    await expect(page.locator('header details')).toHaveAttribute('open', '');
+    await axe(page, `${scheme} menu open over results`);
     await page.keyboard.press('Escape');
 
     await gotoTool(page, 'png-to-jpg');
@@ -87,13 +87,10 @@ for (const scheme of ['light', 'dark'] as const) {
   });
 }
 
-test('keyboard only: skip link, tools sheet (focus trap, Esc, focus return)', async ({
+test('keyboard only: skip link, menu (open, reach every link, Esc closes, focus returns)', async ({
   page,
   browserName,
 }) => {
-  // WebKit's Tab order skips links, so inside the sheet focus can fall back to <body>.
-  // That is still a trap: nothing behind the modal sheet may receive focus.
-  const okFocus = `(() => { const a = document.activeElement; return !!a?.closest('dialog') || ${browserName === 'webkit'} && a === document.body; })()`;
   await page.goto('/compress-image-to-50kb');
   // First Tab goes to the skip link and it becomes visible.
   // WebKit's default Tab order skips links (Safari setting), so focus it directly there.
@@ -105,25 +102,34 @@ test('keyboard only: skip link, tools sheet (focus trap, Esc, focus return)', as
   await page.keyboard.press('Enter');
   expect(page.url()).toContain('#main');
 
-  // Open the sheet with the keyboard.
-  const toolsBtn = page.getByRole('button', { name: 'Tools' });
-  await toolsBtn.focus();
+  const summary = page.locator('header summary[aria-label="Menu"]');
+  const details = page.locator('header details');
+  await expect(details).not.toHaveAttribute('open', '');
+  await summary.focus();
   await page.keyboard.press('Enter');
-  const dialog = page.getByRole('dialog', { name: 'All tools' });
-  await expect(dialog).toBeVisible();
-  // Focus is inside the dialog, and Tab never leaves it.
-  for (let i = 0; i < 40; i++) {
-    await page.keyboard.press('Tab');
-    const inside = await page.evaluate(okFocus);
-    expect(inside, `Tab #${i + 1} escaped the dialog`).toBe(true);
+  await expect(details).toHaveAttribute('open', '');
+  await expect(summary).toHaveAttribute('aria-expanded', 'true');
+
+  // Links in the open menu are reachable with Tab (22 = 18 tools + 4 info pages).
+  const links = details.locator('a[href]');
+  expect(await links.count()).toBe(22);
+  if (browserName !== 'webkit') {
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      const href = await page.evaluate(() => {
+        const a = document.activeElement as HTMLAnchorElement | null;
+        return a?.closest('header details') && a.tagName === 'A' ? a.getAttribute('href') : null;
+      });
+      if (href) seen.add(href);
+    }
+    expect(seen.size, 'every menu link receives focus by Tab').toBe(22);
   }
-  for (let i = 0; i < 40; i++) {
-    await page.keyboard.press('Shift+Tab');
-    expect(await page.evaluate(okFocus)).toBe(true);
-  }
+  // Esc closes the menu and focus returns to the button.
   await page.keyboard.press('Escape');
-  await expect(dialog).toBeHidden();
-  await expect(toolsBtn).toBeFocused();
+  await expect(details).not.toHaveAttribute('open', '');
+  await expect(summary).toBeFocused();
+  await expect(summary).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('keyboard only: compress page (picker focus ring, chips with arrow keys, switch, details, results)', async ({

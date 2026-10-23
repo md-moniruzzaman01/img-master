@@ -13,9 +13,8 @@ const BUDGET_BYTES = 30 * 1024;
 // (react-dom, Next router/runtime, turbopack runtime, polyfills) is framework.
 const OURS = [
   /Choose images/,
-  /aria-haspopup/,
-  /All tools/,
-  /Nothing is uploaded/,
+  /never leave your device/,
+  /aria-label[^;]{0,40}Menu/,
   /compressToSize/,
   /transparency-flattened|Transparent areas/,
   // Favicon island (Phase 4)

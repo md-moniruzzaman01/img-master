@@ -29,6 +29,7 @@ async function interactive(page: Page, scope: string): Promise<Target[]> {
       if (cs.visibility === 'hidden' || cs.display === 'none') continue;
       // The real file input is visually hidden inside its (big) label.
       if (el instanceof HTMLInputElement && el.type === 'file') continue;
+      if (el.closest('details:not([open])') && el.tagName !== 'SUMMARY') continue; // closed menu / more-options content
       if (el.getAttribute('href') === '#main') continue; // skip link: visible only on focus
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
@@ -93,7 +94,7 @@ for (const slug of TOOL_SLUGS) {
     await gotoTool(page, slug);
     const tool = await interactive(page, '[data-testid=tool-shell]');
     const header = await interactive(page, 'header');
-    const crumbs = await interactive(page, 'nav[aria-label=Breadcrumb]');
+    const crumbs = await interactive(page, 'nav[aria-label=Breadcrumb]'); // now below the tool
     const small = [...tool, ...header].filter((t) => t.h < 47.5 || t.w < 47.5);
     logMetric('tap-targets.ndjson', {
       slug,
@@ -109,7 +110,7 @@ for (const slug of TOOL_SLUGS) {
 }
 
 for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', 'image-converter']) {
-  test(`after results: tap targets, spacing and sticky bar on /${slug}`, async ({ page }) => {
+  test(`after results: tap targets, spacing and no pinned bar on /${slug}`, async ({ page }) => {
     test.setTimeout(120_000);
     await gotoTool(page, slug);
     await pickAndWait(page, [fixture('photo-2mp.jpg'), fixture('photo-small.jpg')]);
@@ -117,58 +118,57 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', '
     const small = tool.filter((t) => t.h < 47.5 || t.w < 47.5);
     expect(small, JSON.stringify(small)).toEqual([]);
 
-    // Action bar: visible, within viewport width, buttons tall enough.
-    const bar = page.getByTestId('action-bar');
-    await expect(bar).toBeVisible();
-    const b = await bar.boundingBox();
-    expect(b!.width).toBeLessThanOrEqual(360);
-    const barTargets = await interactive(page, '[data-testid=action-bar]');
-    expect(barTargets.length).toBeGreaterThan(0);
-    for (const t of barTargets) expect(t.h, t.text).toBeGreaterThanOrEqual(48);
-    // 8px gap between neighbours inside the bar.
-    const row = barTargets
-      .filter((t) => Math.abs(t.y - barTargets[0].y) < 4)
-      .sort((a, c) => a.x - c.x);
-    for (let i = 1; i < row.length; i++)
-      expect(row[i].x - (row[i - 1].x + row[i - 1].w)).toBeGreaterThanOrEqual(8);
+    // The sticky action bar is gone: each card has its own Download, a batch has one "download-all".
+    await expect(page.getByTestId('action-bar')).toHaveCount(0);
+    await expect(page.getByTestId('download')).toHaveCount(2);
+    await expect(page.getByTestId('download-all')).toHaveCount(1);
+    const pinned = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('body *')]
+        .filter((e) => ['fixed', 'sticky'].includes(getComputedStyle(e).position))
+        .filter((e) => !(e instanceof HTMLAnchorElement && e.getAttribute('href') === '#main'))
+        .filter((e) => getComputedStyle(e).pointerEvents !== 'none') // the toast
+        .map((e) => e.tagName),
+    );
+    expect(pinned, 'fixed/sticky elements').toEqual([]);
 
-    // The bar must not hide the end of the page: scroll to the bottom, then the
-    // last footer link must be above the bar and actually hit-testable.
+    // Buttons inside the cards are at least 48px tall and 8px apart in a row.
+    const btns = await interactive(page, '[data-testid=results]');
+    for (const t of btns) expect(t.h, t.text).toBeGreaterThanOrEqual(48);
+
+    // Nothing covers the end of the page: the last footer link is hit-testable and inside the viewport.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(200);
     const r = await page.evaluate(() => {
-      const bar = document.querySelector('[data-testid=action-bar]')!.getBoundingClientRect();
       const links = document.querySelectorAll<HTMLElement>('footer a');
-      const last = links[links.length - 1].getBoundingClientRect();
-      const midX = last.x + last.width / 2;
-      const midY = last.y + last.height / 2;
-      const hit = document.elementFromPoint(midX, midY);
+      const last = links[links.length - 1];
+      const rr = last.getBoundingClientRect();
+      const hit = document.elementFromPoint(rr.x + rr.width / 2, rr.y + rr.height / 2);
       return {
-        barTop: bar.top,
-        lastBottom: last.bottom,
-        covered: !hit || !links[links.length - 1].contains(hit),
+        covered: !hit || !last.contains(hit),
+        bottom: rr.bottom,
+        vh: window.innerHeight,
         scrollW: document.documentElement.scrollWidth,
       };
     });
     expect(r.covered, JSON.stringify(r)).toBe(false);
-    expect(r.lastBottom, JSON.stringify(r)).toBeLessThanOrEqual(r.barTop + 0.5);
+    expect(r.bottom, JSON.stringify(r)).toBeLessThanOrEqual(r.vh + 0.5);
     expect(r.scrollW).toBeLessThanOrEqual(360);
   });
 }
 
-test('tools sheet: opens as a bottom sheet, items >= 48px, no horizontal scroll', async ({
-  page,
-}) => {
+test('menu: tap targets >= 48px, fits the screen, no horizontal scroll', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Tools' }).click();
-  const dialog = page.getByRole('dialog', { name: 'All tools' });
-  await expect(dialog).toBeVisible();
-  const items = await interactive(page, 'dialog[open]');
-  expect(items.length).toBeGreaterThan(10);
+  await page.locator('header summary[aria-label="Menu"]').click();
+  await expect(page.locator('header details')).toHaveAttribute('open', '');
+  const items = await interactive(page, 'header details');
+  expect(items.length).toBeGreaterThanOrEqual(23); // summary + 18 tools + 4 info pages
   const small = items.filter((t) => t.h < 47.5);
   expect(small, JSON.stringify(small)).toEqual([]);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(sw).toBeLessThanOrEqual(360);
+  const panel = await page.locator('header details > div').boundingBox();
+  expect(panel!.width).toBeLessThanOrEqual(360);
+  expect(panel!.y + panel!.height, 'menu panel fits the viewport').toBeLessThanOrEqual(640.5);
 });
 
 test('home: size chips and tool cards are >= 48px', async ({ page }) => {
