@@ -32,7 +32,7 @@ import { AdvancedOptions } from './advanced-options';
 import { copy, errorMessage } from './copy';
 import { ErrorBanner } from './error-banner';
 import { FilePicker } from './file-picker';
-import { FORMAT_MIME } from './format';
+import { FORMAT_MIME, uniqueNames } from './format';
 import { FormatSelect } from './format-select';
 import { PrivacyNote } from './privacy-note';
 import { ProgressBar } from './progress-bar';
@@ -106,18 +106,6 @@ function isNotImage(file: File): boolean {
 function isIOS(): boolean {
   const n = navigator;
   return /iP(hone|ad|od)/.test(n.userAgent) || (n.platform === 'MacIntel' && n.maxTouchPoints > 1);
-}
-
-/** a.jpg, a.jpg → a.jpg, a-2.jpg (so ZIP entries don't overwrite each other). */
-function uniqueNames(names: string[]): string[] {
-  const seen = new Map<string, number>();
-  return names.map((name) => {
-    const count = (seen.get(name) ?? 0) + 1;
-    seen.set(name, count);
-    if (count === 1) return name;
-    const dot = name.lastIndexOf('.');
-    return dot > 0 ? `${name.slice(0, dot)}-${count}${name.slice(dot)}` : `${name}-${count}`;
-  });
 }
 
 function ImageTool({ tool }: { tool: ToolDefinition }) {
@@ -404,6 +392,8 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         return copy.flattened;
       case 'animation-dropped':
         return copy.animationDropped;
+      case 'not-smaller':
+        return copy.notSmaller;
       default:
         return null;
     }
@@ -419,6 +409,15 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       tone: ios ? 'info' : 'success',
     });
   }
+
+  // Unique output names in item order (earlier names never change as later ones arrive).
+  const named = items.filter(
+    (it): it is ResultItem & { result: EngineResult } => it.status === 'success' && !!it.result,
+  );
+  const uniq = uniqueNames(named.map((it) => it.result.fileName));
+  const nameOf = new Map(named.map((it, k) => [it.id, uniq[k]]));
+  const outName = (it: ResultItem & { result: EngineResult }) =>
+    nameOf.get(it.id) ?? it.result.fileName;
 
   const success = items.filter(
     (it): it is ResultItem & { result: EngineResult; url: string } =>
@@ -443,8 +442,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     setZipping(true);
     try {
       const engine = await loadEngine();
-      const names = uniqueNames(success.map((it) => it.result.fileName));
-      const zip = await engine.zip(success.map((it, k) => ({ name: names[k], blob: it.result.blob })));
+      const zip = await engine.zip(success.map((it) => ({ name: outName(it), blob: it.result.blob })));
       const url = URL.createObjectURL(zip);
       urlsRef.current.push(url);
       const a = document.createElement('a');
@@ -463,7 +461,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
 
   const shareFiles = () =>
     success.map(
-      (it) => new File([it.result.blob], it.result.fileName, { type: FORMAT_MIME[it.result.format] }),
+      (it) => new File([it.result.blob], outName(it), { type: FORMAT_MIME[it.result.format] }),
     );
 
   const hideToast = useCallback(() => setToast(null), []);
@@ -621,6 +619,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
             <li key={`${it.id}-${it.file.name}`}>
               <ResultCard
                 item={it}
+                fileName={nameOf.get(it.id)}
                 noteText={noteText}
                 errorText={it.error ? errorText(it.error, runOpts) : undefined}
                 actions={suggestionsFor(it, runOpts)}

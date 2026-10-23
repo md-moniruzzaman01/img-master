@@ -34,6 +34,7 @@ export interface CardAction {
  */
 export function ResultCard({
   item,
+  fileName,
   noteText,
   errorText,
   actions,
@@ -42,6 +43,8 @@ export function ResultCard({
   onDownload,
 }: {
   item: ResultItem;
+  /** Output name, unique within the batch (defaults to the engine's name). */
+  fileName?: string;
   /** Turns an engine note into a sentence (needs the tool's target). */
   noteText: (note: EngineNote, r: EngineResult) => string | null;
   /** Overrides the default error sentence (e.g. TARGET_UNREACHABLE). */
@@ -55,6 +58,7 @@ export function ResultCard({
   const busy = status === 'queued' || status === 'processing';
   const p = r ? percentSmaller(r.inputBytes, r.outputBytes) : 0;
   const transparent = r && r.format !== 'jpeg';
+  const name = fileName ?? r?.fileName ?? file.name;
 
   return (
     <article
@@ -65,6 +69,7 @@ export function ResultCard({
       data-width={r?.width}
       data-height={r?.height}
       data-format={r?.format}
+      data-file-name={r ? name : undefined}
       data-quality={r?.quality}
       data-ms={r?.ms}
       data-notes={r && r.notes.length > 0 ? r.notes.join(' ') : undefined}
@@ -91,8 +96,8 @@ export function ResultCard({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-text" title={r?.fileName ?? file.name}>
-          {r?.fileName ?? file.name}
+        <p data-testid="file-name" className="truncate font-semibold text-text" title={name}>
+          {name}
         </p>
 
         {busy && (
@@ -140,7 +145,7 @@ export function ResultCard({
             {showDownload && item.url && (
               <a
                 href={item.url}
-                download={r.fileName}
+                download={name}
                 data-testid="download"
                 onClick={onDownload}
                 className={buttonClasses('secondary', 'md', 'mt-3 w-full sm:w-auto')}

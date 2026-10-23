@@ -22,6 +22,9 @@ export const copy = {
     const after = formatBytes(outputBytes);
     if (p > 0) return `${before} → ${after} (${p}% smaller)`;
     if (p < 0) return `${before} → ${after} (${-p}% larger)`; // invented
+    // Rounds to 0% but the bytes differ: say which way, never "same size".
+    if (outputBytes > inputBytes) return `${before} → ${after} (slightly larger)`; // invented
+    if (outputBytes < inputBytes) return `${before} → ${after} (slightly smaller)`; // invented
     return `${before} → ${after} (same size)`; // invented
   },
 
@@ -33,6 +36,7 @@ export const copy = {
   bigImage:
     'This photo is very large, so we reduced its dimensions first to keep your phone fast.',
   flattened: 'Transparent areas were filled with your background color.', // invented
+  notSmaller: "We couldn't make this file smaller. Try JPG or WebP, or a lower quality.", // invented
   animationDropped: 'This was an animation. We kept the first frame.', // invented
 
   unreachable: (targetKB: number, nextKB: number, canAllowSmaller: boolean) =>
@@ -102,4 +106,8 @@ export function errorMessage(code: EngineErrorCode | 'UNKNOWN'): string {
 }
 
 /** Notes that warn (dimensions changed) vs. notes that only inform. */
-export const WARNING_NOTES: readonly EngineNote[] = ['resized', 'downscaled-for-memory'];
+export const WARNING_NOTES: readonly EngineNote[] = [
+  'resized',
+  'downscaled-for-memory',
+  'not-smaller',
+];

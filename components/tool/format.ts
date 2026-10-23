@@ -51,3 +51,21 @@ export const FORMAT_MIME: Record<ImageFormat | 'ico', string> = {
   webp: 'image/webp',
   ico: 'image/x-icon',
 };
+
+/**
+ * Makes names unique within one batch, case-insensitive, suffix before the
+ * extension: photo.jpg, Photo.jpg, photo.jpg → photo.jpg, Photo-2.jpg, photo-3.jpg.
+ * Downloads, Share and the ZIP all use these names.
+ */
+export function uniqueNames(names: readonly string[]): string[] {
+  const used = new Set<string>();
+  return names.map((name) => {
+    const dot = name.lastIndexOf('.');
+    const base = dot > 0 ? name.slice(0, dot) : name;
+    const ext = dot > 0 ? name.slice(dot) : '';
+    let candidate = name;
+    for (let n = 2; used.has(candidate.toLowerCase()); n++) candidate = `${base}-${n}${ext}`;
+    used.add(candidate.toLowerCase());
+    return candidate;
+  });
+}
