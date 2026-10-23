@@ -14,7 +14,7 @@ export const content: ToolContent = {
   cardDescription: 'Convert a PNG into a multi-size .ico file.',
   title: 'PNG to ICO Converter – Free, No Upload | Img Master',
   description:
-    'Convert a PNG into a .ico file with 16, 32 and 48 pixel icons inside. Use it as favicon.ico for your site. Free, runs in your browser, no upload.',
+    'Convert a PNG to ICO with 16, 32 and 48 px icons (plus 256 px for large PNGs). Use it as favicon.ico. Free, runs in your browser, no upload.',
   h1: 'PNG to ICO Converter',
   subtitle:
     'Convert a PNG to ICO with several icon sizes inside one file, ready to use as favicon.ico.',
