@@ -13,7 +13,7 @@ export type FrameSet = {
 };
 
 export const KENDO: FrameSet = {
-  sprite: '/samurai/kendo.svg',
+  sprite: '/samurai/kendo.svg?v=1',
   prefix: 'k',
   w: 271,
   h: 200,
@@ -32,7 +32,7 @@ export const KENDO: FrameSet = {
 const RONIN_SEQ = Array.from({ length: 37 }, (_, n) => n);
 
 export const RONIN: FrameSet = {
-  sprite: '/samurai/ronin.svg',
+  sprite: '/samurai/ronin.svg?v=1',
   prefix: 'r',
   w: 165,
   h: 260,
