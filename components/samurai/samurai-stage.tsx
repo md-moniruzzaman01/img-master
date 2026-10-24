@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { FrameSet, SamuraiState } from './frames';
 import { KENDO } from './frames';
 import { Samurai } from './samurai';
@@ -10,6 +10,7 @@ export function SamuraiStage({
   state,
   set = KENDO,
   height = 150,
+  heightSm,
   sun = true,
   className,
   children,
@@ -17,6 +18,8 @@ export function SamuraiStage({
   state: SamuraiState;
   set?: FrameSet;
   height?: number;
+  /** Height in px from the `sm` breakpoint (640px) up. Layout-true, no scaling. */
+  heightSm?: number;
   sun?: boolean;
   className?: string;
   children?: ReactNode;
@@ -28,13 +31,20 @@ export function SamuraiStage({
     <div
       data-testid="samurai-stage"
       data-state={shown}
-      style={{ height }}
-      className={`flex items-center justify-center${className ? ` ${className}` : ''}`}
+      style={
+        heightSm
+          ? ({ '--stage-h': `${height}px`, '--stage-h-sm': `${heightSm}px` } as CSSProperties)
+          : { height }
+      }
+      className={`flex items-center justify-center${
+        heightSm ? ' h-[var(--stage-h)] sm:h-[var(--stage-h-sm)]' : ''
+      }${className ? ` ${className}` : ''}`}
     >
       <Samurai
         state={state}
         set={set}
         height={height}
+        className={heightSm ? 'h-full w-auto' : undefined}
         sun={sun}
         onCut={() => setCuts((n) => n + 1)}
         onShownChange={setShown}

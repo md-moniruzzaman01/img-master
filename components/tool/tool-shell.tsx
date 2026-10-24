@@ -22,6 +22,7 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
+import { SamuraiStage } from '@/components/samurai/samurai-stage';
 import { Button } from '@/components/ui/button';
 import { ChipGroup } from '@/components/ui/chip-group';
 import { AlertIcon, CheckIcon } from '@/components/ui/icons';
@@ -629,88 +630,115 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     track('share', { tool: slug });
   };
 
+  const stageState =
+    state === 'processing'
+      ? 'working'
+      : state === 'done' || state === 'partial'
+        ? 'success'
+        : state === 'error'
+          ? 'error'
+          : 'idle';
+  const hasOptions = primary !== null || advanced.length > 0;
+
   return (
     <div
       data-testid="tool-shell"
       data-kind={kind}
       data-state={state}
-      className="grid gap-4 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-3 overflow-hidden border-y border-border bg-card px-4 py-3 sm:mx-0 sm:grid-cols-[1fr_auto] sm:gap-5 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
-      <FilePicker
-        inputId={inputId}
-        disabled={running}
-        onFiles={handleFiles}
-        onWarmUp={() => void loadEngine().catch(() => {})}
+      <SamuraiStage
+        state={stageState}
+        height={126}
+        heightSm={200}
+        className="sm:sticky sm:top-4 sm:col-start-2 sm:row-start-1 sm:self-start"
       />
 
-      {primary}
-
-      {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
-
-      {noticeBanner}
-
-      {needsApply && (
-        <div
-          role="status"
-          className="flex flex-col gap-3 rounded-card border border-primary bg-bg p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-text">{copy.optionsChanged}</p>
-          <Button onClick={() => void run(sourceRef.current, options, 'rerun')}>
-            {copy.applyTo(items.length)}
-          </Button>
-        </div>
-      )}
-
-      <div className="grid gap-4 [&>*]:min-w-0">
-        {m > 0 ? (
-          <>
-            <ResultList headingRef={headingRef} status={statusSlot}>
-              {items.map((it) => (
-                <li key={`${it.id}-${it.file.name}`}>
-                  <ResultCard
-                    item={it}
-                    fileName={nameOf.get(it.id)}
-                    noteText={noteText}
-                    errorText={it.error ? errorText(it.error, runOpts) : undefined}
-                    actions={suggestionsFor(it, runOpts)}
-                    onAction={onSuggestion}
-                    onDownload={() => onDownloaded('single')}
-                    shareSupported={shareSupported}
-                    onShared={onShared}
-                    reserve={reserveFor(it)}
-                  />
-                </li>
-              ))}
-            </ResultList>
-            {(flattened || mayFlatten) && (
-              <BackgroundField
-                value={options.background}
-                onChange={(background) => updateOptions({ background })}
-              />
-            )}
-            {/* Present (but hidden) while processing, so it doesn't push content down when done. */}
-            <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
-              <Button
-                variant="ghost"
-                disabled={running}
-                onClick={() => document.getElementById(inputId)?.click()}
-                className="-ml-4"
-              >
-                {copy.again(verb)}
-              </Button>
-            </div>
-          </>
-        ) : (
-          <ResultsPlaceholder />
+      <div className="grid gap-3 sm:gap-4 sm:col-start-1 sm:row-start-1 [&>*]:min-w-0">
+        {hasOptions && (
+          <div className={running ? 'grid gap-4 opacity-25 transition-opacity' : 'grid gap-4'}>
+            {primary}
+            {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
+          </div>
         )}
-      </div>
 
-      <AdSlot position="below-results" />
+        {noticeBanner}
 
-      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-        {announce}
+        {needsApply && (
+          <div
+            role="status"
+            className="flex flex-col gap-3 rounded-card border border-primary bg-bg p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-text">{copy.optionsChanged}</p>
+            <Button onClick={() => void run(sourceRef.current, options, 'rerun')}>
+              {copy.applyTo(items.length)}
+            </Button>
+          </div>
+        )}
+
+        {/* Results replace the picker as soon as a run starts (no layout shift when it ends); the file input stays mounted (hidden) for "Compress another". */}
+        <div className={m > 0 ? 'hidden' : undefined}>
+          <FilePicker
+            inputId={inputId}
+            disabled={running}
+            onFiles={handleFiles}
+            onWarmUp={() => void loadEngine().catch(() => {})}
+          />
+        </div>
+
+        <div className="grid gap-4 [&>*]:min-w-0">
+          {m > 0 ? (
+            <>
+              <div className="im-anim animate-[im-fade-in_150ms_ease-out]">
+                <ResultList headingRef={headingRef} status={statusSlot}>
+                  {items.map((it) => (
+                    <li key={`${it.id}-${it.file.name}`}>
+                      <ResultCard
+                        item={it}
+                        fileName={nameOf.get(it.id)}
+                        noteText={noteText}
+                        errorText={it.error ? errorText(it.error, runOpts) : undefined}
+                        actions={suggestionsFor(it, runOpts)}
+                        onAction={onSuggestion}
+                        onDownload={() => onDownloaded('single')}
+                        shareSupported={shareSupported}
+                        onShared={onShared}
+                        reserve={reserveFor(it)}
+                      />
+                    </li>
+                  ))}
+                </ResultList>
+              </div>
+              {(flattened || mayFlatten) && (
+                <BackgroundField
+                  value={options.background}
+                  onChange={(background) => updateOptions({ background })}
+                />
+              )}
+              {/* Present (but hidden) while processing, so it doesn't push content down when done. */}
+              <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
+                <Button
+                  variant="ghost"
+                  disabled={running}
+                  onClick={() => document.getElementById(inputId)?.click()}
+                  className="-ml-4"
+                >
+                  {copy.again(verb)}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <ResultsPlaceholder />
+          )}
+        </div>
+
+        <AdSlot position="below-results" />
+
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {announce}
+        </div>
+        <Toast message={toast} onDone={hideToast} />
       </div>
-      <Toast message={toast} onDone={hideToast} />
     </div>
   );
 }
