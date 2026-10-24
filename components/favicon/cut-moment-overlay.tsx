@@ -39,9 +39,11 @@ export function CutMoment({
 }) {
   const reduced = useReducedMotion();
   const [doneKey, setDoneKey] = useState(0);
-  const [slashKey, setSlashKey] = useState(0);
+  const [slashA, setSlashA] = useState(0);
+  const [slashB, setSlashB] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const shardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const crossRef = useRef<HTMLDivElement>(null);
   const onDoneRef = useRef(onDone);
   const hasTile = tile != null;
 
@@ -88,9 +90,13 @@ export function CutMoment({
       el.style.left = `${sr.left + sr.width / 2 - TILE / 2}px`;
       el.style.top = `${sr.top + sr.height / 2 - TILE / 2}px`;
     }
+    if (crossRef.current) {
+      crossRef.current.style.left = `${sr.left + sr.width / 2 - TILE / 2}px`;
+      crossRef.current.style.top = `${sr.top + sr.height / 2 - TILE / 2}px`;
+    }
     const timers = [
-      window.setTimeout(() => setSlashKey((n) => n + 1), 0),
-      window.setTimeout(() => setSlashKey((n) => n + 1), 250),
+      window.setTimeout(() => setSlashA((n) => n + 1), 0),
+      window.setTimeout(() => setSlashB((n) => n + 1), 250),
     ];
     const scale = ICON / TILE;
     const animations = els.map((el, i) => {
@@ -143,8 +149,20 @@ export function CutMoment({
     <div ref={rootRef} aria-hidden="true" className="pointer-events-none">
       {active && (
         <>
-          <Slash fireKey={slashKey} />
           <div className="im-anim pointer-events-none fixed inset-0 z-30 overflow-visible">
+            {/* Two slashes crossing the tile as an X, placed like the shards. */}
+            <div
+              ref={crossRef}
+              className="absolute z-10"
+              style={{ width: TILE, height: TILE, left: -9999, top: -9999 }}
+            >
+              <div className="absolute inset-0 rotate-[28deg]">
+                <Slash fireKey={slashA} />
+              </div>
+              <div className="absolute inset-0 -rotate-[12deg]">
+                <Slash fireKey={slashB} />
+              </div>
+            </div>
             {SHARDS.map((s, i) => (
               <div
                 key={i}
