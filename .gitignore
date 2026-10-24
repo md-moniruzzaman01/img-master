@@ -52,3 +52,6 @@ next-env.d.ts
 
 # brainstorming mockups
 .superpowers/
+
+# owner's reference art (third-party, never shipped)
+ref/
