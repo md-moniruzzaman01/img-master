@@ -49,3 +49,6 @@ next-env.d.ts
 
 # raw QA run data
 /reports/data/
+
+# brainstorming mockups
+.superpowers/
