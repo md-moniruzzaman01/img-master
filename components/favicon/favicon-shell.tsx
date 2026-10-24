@@ -16,6 +16,7 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { AdSlot } from '@/components/content/ad-slot';
 import { SamuraiStage } from '@/components/samurai/samurai-stage';
+import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy, errorMessage } from '@/components/tool/copy';
@@ -281,6 +282,18 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
           ? 'success'
           : 'idle';
   const tileSrc = pkg?.previews[512];
+
+  // Sword sounds: the cut starts, the cut lands, a preview fails (no-ops unless sound is on).
+  const failedNow = failure !== null;
+  useEffect(() => {
+    if (cut.plays > 0) playSound('start');
+  }, [cut.plays]);
+  useEffect(() => {
+    if (cutDone) playSound('success');
+  }, [cutDone]);
+  useEffect(() => {
+    if (failedNow) playSound('error');
+  }, [failedNow]);
 
   return (
     <div

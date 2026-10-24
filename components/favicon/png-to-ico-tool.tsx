@@ -8,6 +8,7 @@ import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
 import { SamuraiStage } from '@/components/samurai/samurai-stage';
+import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
@@ -203,6 +204,13 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
         : success.length === 0
           ? 'error'
           : 'partial';
+
+  // Sword sounds follow the shell's state (no-ops unless the visitor turned sound on).
+  useEffect(() => {
+    if (state === 'processing') playSound('start');
+    else if (state === 'done' || state === 'partial') playSound('success');
+    else if (state === 'error') playSound('error');
+  }, [state]);
 
   async function downloadAll() {
     setZipping(true);

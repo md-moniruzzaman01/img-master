@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ToolNavGroup } from '@/lib/types';
 import { siteConfig } from '@/lib/site-config';
+import { SoundToggle } from '@/components/sound/sound-toggle';
 import { BrandSeal } from './brand-seal';
 import { MenuDisclosure } from './menu-disclosure';
 import { NavLink } from './nav-link';
@@ -76,9 +77,11 @@ export function SiteHeader({ groups }: { groups: ToolNavGroup[] }) {
           </ul>
         </nav>
 
-        {/* Right-hand controls. A later task mounts the sound toggle in the first slot. */}
+        {/* Right-hand controls. */}
         <div className="flex items-center gap-1">
-          <div data-slot="sound-toggle" className="empty:hidden" />
+          <div data-slot="sound-toggle" className="empty:hidden">
+            <SoundToggle />
+          </div>
           <MenuDisclosure>
             <nav
               aria-label="All tools"
