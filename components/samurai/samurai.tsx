@@ -106,7 +106,7 @@ export function Samurai({
       height={height}
       className={`text-ink${className ? ` ${className}` : ''}`}
     >
-      <InkDefs id={filterId} />
+      <InkDefs id={filterId} w={w} h={h} />
       {sun && set === KENDO ? (
         <circle cx={w * 0.62} cy={h * 0.36} r={h * 0.27} className="fill-primary" opacity=".9" />
       ) : null}

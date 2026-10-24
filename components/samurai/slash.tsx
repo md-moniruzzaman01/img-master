@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { cx } from '../ui/cx';
 import { useReducedMotion } from './use-reduced-motion';
 
 export function Slash({ fireKey }: { fireKey: number }) {
@@ -15,9 +16,10 @@ export function Slash({ fireKey }: { fireKey: number }) {
       data-testid="slash"
       aria-hidden="true"
       onAnimationEnd={() => setDoneKey(fireKey)}
-      className={`im-anim pointer-events-none absolute -left-[10%] top-[44%] h-0.5 w-[120%] origin-left -rotate-[8deg] bg-primary opacity-0${
-        cutting ? ' is-cutting im-slash' : ''
-      }`}
+      className={cx(
+        'im-anim pointer-events-none absolute -left-[10%] top-[44%] h-0.5 w-[120%] origin-left -rotate-[8deg] bg-primary opacity-0',
+        cutting && 'is-cutting im-slash',
+      )}
     />
   );
 }
