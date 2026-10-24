@@ -209,7 +209,7 @@ Plain reading layout: H1, "Last updated" date, text at max 680px.
 | Key | Text |
 |---|---|
 | Picker button | Choose images |
-| Picker hint (mobile) | JPG, PNG, WebP · up to 20 at once |
+| Picker hint (mobile) | JPG, PNG, WebP · up to {maxFiles} at once (10) |
 | Picker hint (desktop) | or drop images here, or paste with Ctrl+V |
 | Privacy note | 🔒 Your images never leave your device |
 | Processing | Compressing photo {n} of {m}… / Converting {n} of {m}… |

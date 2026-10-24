@@ -123,7 +123,7 @@ Accounts, uploads or any server processing, video tools, social-media downloader
 
 ### 4.5 Shared behavior on every tool
 
-- Batch: up to 20 files at once (configurable in `site-config.ts`). Results listed in order; "Download all (ZIP)" when there's more than one.
+- Batch: up to 10 files at once (owner decision 2026-10-24; configurable in `site-config.ts`). Results listed in order; "Download all (ZIP)" when there's more than one.
 - Desktop extras: drag and drop, paste with Ctrl+V.
 - Mobile extra: a Share button using the Web Share API with files, shown only where supported, so a user can send the result straight to WhatsApp or Messenger.
 - File names: `original-name-50kb.jpg`, `original-name.webp`, etc.

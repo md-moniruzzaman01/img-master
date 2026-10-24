@@ -27,7 +27,7 @@ export const siteConfig = {
   credit: { label: 'Built by Softwara', url: 'https://softwara.com' },
 
   /** Max files per batch (PRODUCT.md §4.5). */
-  maxFiles: 20,
+  maxFiles: 10,
 
   /** Sword sounds for new visitors. Off by default; visitors can turn them on in the header. */
   soundEnabled: false,
