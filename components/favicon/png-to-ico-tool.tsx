@@ -7,6 +7,7 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
+import { SamuraiStage } from '@/components/samurai/samurai-stage';
 import { Button } from '@/components/ui/button';
 import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
@@ -264,13 +265,24 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       statusLine
     );
 
+  const stageState =
+    state === 'processing'
+      ? 'working'
+      : state === 'done' || state === 'partial'
+        ? 'success'
+        : state === 'error'
+          ? 'error'
+          : 'idle';
+
   return (
     <div
       data-testid="favicon-shell"
       data-kind={tool.kind}
       data-state={state}
-      className="grid gap-4 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-4 overflow-clip border-y border-border bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
+      <SamuraiStage state={stageState} height={126} heightSm={200} />
+
       <FilePicker
         inputId={inputId}
         disabled={running}

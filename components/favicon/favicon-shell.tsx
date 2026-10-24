@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useReducer,
   useRef,
   useState,
   useSyncExternalStore,
@@ -14,6 +15,7 @@ import { isEngineError } from '@/lib/types';
 import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { AdSlot } from '@/components/content/ad-slot';
+import { SamuraiStage } from '@/components/samurai/samurai-stage';
 import { Button } from '@/components/ui/button';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy, errorMessage } from '@/components/tool/copy';
@@ -21,6 +23,8 @@ import { ErrorBanner } from '@/components/tool/error-banner';
 import { FilePicker } from '@/components/tool/file-picker';
 import { PrivacyNote } from '@/components/tool/privacy-note';
 import { faviconCopy as t } from './copy';
+import { cutReducer, initialCut } from './cut-moment';
+import { CutMoment } from './cut-moment-overlay';
 import { FaviconControls } from './favicon-controls';
 import { FaviconModeTabs } from './favicon-mode-tabs';
 import {
@@ -86,6 +90,9 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   const [announce, setAnnounce] = useState('');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [zipping, setZipping] = useState(false);
+
+  const [cut, dispatchCut] = useReducer(cutReducer, mode, initialCut);
+  const [donePlays, setDonePlays] = useState(0);
 
   const startedRef = useRef(false);
   const succeededRef = useRef(false);
@@ -180,6 +187,11 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
     };
   }, [source, slug]);
 
+  // A new package may start the cut moment (the reducer decides).
+  useEffect(() => {
+    if (made) dispatchCut({ type: 'built' });
+  }, [made]);
+
   // Start loading the engine early on the pages that preview right away.
   useEffect(() => {
     void loadEngine().catch(() => {});
@@ -194,6 +206,7 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   function change<M extends FaviconMode>(m: M, patch: Partial<FaviconOptions[M]>) {
     const next: FaviconOptions = { ...options, [m]: { ...options[m], ...patch } };
     setUserOptions(next);
+    dispatchCut({ type: 'edit' });
     saveOptions(tool, next);
     markStarted(0);
   }
@@ -202,9 +215,15 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
     const f = files[0];
     if (!f) return;
     setFile(f);
+    dispatchCut({ type: 'file' });
     startedRef.current = false;
     succeededRef.current = false;
     markStarted(1);
+  }
+
+  function switchMode(m: FaviconMode) {
+    setMode(m);
+    dispatchCut({ type: 'mode', mode: m });
   }
 
   const hideToast = useCallback(() => setToast(null), []);
@@ -250,14 +269,41 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   const state =
     source === null ? 'idle' : failure ? 'error' : busy ? 'processing' : pkg ? 'done' : 'idle';
 
+  const cutPlaying = cut.plays > 0 && donePlays !== cut.plays;
+  const cutDone = cut.plays > 0 && donePlays === cut.plays && pkg !== null;
+  const stageState = cutPlaying
+    ? 'working'
+    : failure
+      ? 'error'
+      : busy
+        ? 'working'
+        : cutDone
+          ? 'success'
+          : 'idle';
+  const tileSrc = pkg?.previews[512];
+
   return (
     <div
       data-testid="favicon-shell"
       data-kind={tool.kind}
       data-mode={mode}
       data-state={state}
-      className="grid gap-4 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-4 overflow-clip border-y border-border bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
+      <SamuraiStage state={stageState} height={126} heightSm={200}>
+        <CutMoment
+          playKey={cut.plays}
+          onDone={() => setDonePlays(cut.plays)}
+          tile={
+            tileSrc ? (
+              // Object URL from the engine; next/image adds nothing here.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={tileSrc} alt="" className="size-full" />
+            ) : null
+          }
+        />
+      </SamuraiStage>
+
       {mode === 'image' ? (
         <FilePicker
           inputId={inputId}
@@ -277,7 +323,7 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
         />
       )}
 
-      <FaviconModeTabs mode={mode} onChange={setMode} />
+      <FaviconModeTabs mode={mode} onChange={switchMode} />
 
       {failure && (
         <ErrorBanner
@@ -297,6 +343,7 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
         emptyText={
           mode === 'text' ? t.previewEmptyText : mode === 'emoji' ? t.previewEmptyEmoji : undefined
         }
+        popKey={cutDone ? donePlays : 0}
       />
 
       <div className="grid gap-2">

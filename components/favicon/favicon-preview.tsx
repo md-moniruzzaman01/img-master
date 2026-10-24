@@ -14,11 +14,14 @@ function Icon({
   size,
   loading,
   className,
+  cutTarget,
 }: {
   src: string | undefined;
   size: number;
   loading: boolean;
   className?: string;
+  /** Marks the icon the cut-to-icon shards fly to. */
+  cutTarget?: boolean;
 }) {
   const box = { width: size, height: size };
   if (!src) {
@@ -26,6 +29,7 @@ function Icon({
       <span
         aria-hidden="true"
         style={box}
+        data-cut-target={cutTarget ? '' : undefined}
         className={cx(
           'block shrink-0 rounded-[3px] bg-border',
           loading && 'animate-pulse',
@@ -43,6 +47,7 @@ function Icon({
       width={size}
       height={size}
       style={box}
+      data-cut-target={cutTarget ? '' : undefined}
       className={cx('block shrink-0', className)}
     />
   );
@@ -53,10 +58,12 @@ function TabMock({
   scheme,
   src,
   loading,
+  popKey,
 }: {
   scheme: 'light' | 'dark';
   src: string | undefined;
   loading: boolean;
+  popKey: number;
 }) {
   return (
     <div className="min-w-0">
@@ -69,7 +76,14 @@ function TabMock({
       >
         <div className="px-2 pt-2">
           <div className="flex h-9 items-center gap-2 rounded-t-[8px] bg-bg px-2.5">
-            <Icon src={src} size={16} loading={loading} />
+            <Icon
+              key={popKey}
+              src={src}
+              size={16}
+              loading={loading}
+              cutTarget={scheme === 'light'}
+              className={popKey > 0 ? 'im-anim animate-[im-pop_300ms_ease-out]' : undefined}
+            />
             <span className="min-w-0 flex-1 truncate type-small text-text">{t.siteTitle}</span>
             <XIcon size={20} className="size-3.5 shrink-0 text-muted" />
           </div>
@@ -95,6 +109,7 @@ export function FaviconPreview({
   busy,
   empty,
   emptyText,
+  popKey = 0,
 }: {
   /** Latest package previews; kept on screen while the next one renders. */
   previews: Previews | null;
@@ -103,6 +118,8 @@ export function FaviconPreview({
   empty: boolean;
   /** Overrides the default empty-state sentence (text and emoji modes). */
   emptyText?: string;
+  /** Counts finished cut moments; the tab icons pop when it goes up. 0 = never. */
+  popKey?: number;
 }) {
   const headingId = useId();
   const descId = useId();
@@ -136,8 +153,8 @@ export function FaviconPreview({
         <div className="grid gap-3">
           {/* The tabs stay drawn (with an empty icon slot) so the box reads as a preview. */}
           <div className="grid grid-cols-2 gap-2">
-            <TabMock scheme="light" src={p?.[16]} loading={loading} />
-            <TabMock scheme="dark" src={p?.[16]} loading={loading} />
+            <TabMock scheme="light" src={p?.[16]} loading={loading} popKey={popKey} />
+            <TabMock scheme="dark" src={p?.[16]} loading={loading} popKey={popKey} />
           </div>
 
           {/* Until there is an icon, this row is held empty (same height) and the
