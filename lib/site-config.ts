@@ -29,6 +29,9 @@ export const siteConfig = {
   /** Max files per batch (PRODUCT.md §4.5). */
   maxFiles: 20,
 
+  /** Sword sounds for new visitors. Off by default; visitors can turn them on in the header. */
+  soundEnabled: false,
+
   ads: {
     enabled: false,
     /** Allowed positions only (GROWTH.md §5). */
