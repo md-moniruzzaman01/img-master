@@ -1,5 +1,6 @@
 import { PageIntro } from '@/components/content/page-intro';
 import { ToolGrid } from '@/components/content/tool-grid';
+import { HeroScene } from '@/components/home/hero-scene';
 import { Container } from '@/components/layout/container';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getNavGroups } from '@/lib/tools';
@@ -18,6 +19,7 @@ export default function NotFound() {
         h1="This page doesn't exist"
         subtitle="The link may be old or mistyped. Pick a tool below instead."
       />
+      <HeroScene animate={false} compact />
       <ToolGrid groups={getNavGroups()} />
     </Container>
   );

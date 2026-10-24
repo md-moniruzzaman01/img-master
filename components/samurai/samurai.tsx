@@ -16,6 +16,7 @@ export function Samurai({
   onCut,
   onShownChange,
   sun = true,
+  animate = true,
   className,
 }: {
   state: SamuraiState;
@@ -24,10 +25,12 @@ export function Samurai({
   onCut?: () => void;
   onShownChange?: (s: SamuraiState) => void;
   sun?: boolean;
+  animate?: boolean;
   className?: string;
 }) {
   const filterId = useId();
-  const reduced = useReducedMotion();
+  const reducedPref = useReducedMotion();
+  const reduced = reducedPref || !animate;
   const tlRef = useRef<Timeline | null>(null);
   const onCutRef = useRef(onCut);
   const onShownRef = useRef(onShownChange);

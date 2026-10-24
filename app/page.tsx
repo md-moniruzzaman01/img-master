@@ -15,11 +15,21 @@ export const metadata = buildPageMetadata({
   path: '/',
 });
 
+const HERO_CATEGORIES = [
+  { label: 'Compress', href: '/compress-image' },
+  { label: 'Convert', href: '/image-converter' },
+  { label: 'Favicon', href: '/favicon-generator' },
+];
+
 export default function HomePage() {
   return (
     <>
       <Container size="wide">
-        <HomeHero h1={homeContent.h1} subtitle={homeContent.subtitle} />
+        <HomeHero
+          h1={homeContent.h1}
+          subtitle={homeContent.subtitle}
+          categories={HERO_CATEGORIES}
+        />
         <ToolGrid groups={getNavGroups()} />
       </Container>
       <Container size="text">
