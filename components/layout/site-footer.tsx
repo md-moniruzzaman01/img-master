@@ -20,7 +20,7 @@ export function SiteFooter(props: { groups: ToolNavGroup[] }) {
   void props;
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-12 border-t border-border bg-surface lg:mt-16">
+    <footer className="mt-12 border-t border-border bg-bg lg:mt-16">
       <div className="mx-auto flex w-full max-w-[1024px] flex-col px-4 py-3 type-small text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p>
           © {year} {siteConfig.name} · Built by{' '}

@@ -56,4 +56,3 @@ export const ChevronDownIcon = /* @__PURE__ */ make('ChevronDownIcon', <path d="
 export const ChevronRightIcon = /* @__PURE__ */ make('ChevronRightIcon', <path d="m9 6 6 6-6 6" />);
 
 export const MenuIcon = /* @__PURE__ */ make('MenuIcon', <path d="M4 7h16M4 12h16M4 17h16" />);
-

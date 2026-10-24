@@ -7,7 +7,7 @@ export function RichText({ sections }: { sections: RichSection[] }) {
     <>
       {sections.map((s, si) => (
         <section key={`${s.heading}-${si}`} className="mt-8 lg:mt-12">
-          <h2 className="type-h2 text-balance text-text">{s.heading}</h2>
+          <h2 className="type-h2 text-balance">{s.heading}</h2>
           {s.paragraphs.map((p, pi) => (
             <p key={pi} className="mt-3 text-text">
               <InlineText text={p} />

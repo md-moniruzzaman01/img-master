@@ -74,7 +74,7 @@ export function NumberInput({
             }
           }}
           className={cx(
-            'h-12 w-28 rounded-control border bg-bg px-3 text-base tabular-nums text-text',
+            'h-12 w-28 rounded-control border bg-card px-3 text-base tabular-nums text-text',
             error ? 'border-danger' : 'border-border-strong',
           )}
         />

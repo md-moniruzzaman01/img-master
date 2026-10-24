@@ -25,14 +25,14 @@ export function ErrorBanner({
       role="alert"
       data-testid="error-banner"
       className={cx(
-        'flex flex-col gap-3 rounded-card border bg-bg p-4 sm:flex-row sm:items-center sm:justify-between',
+        'flex flex-col gap-3 rounded-card border bg-card p-4 sm:flex-row sm:items-center sm:justify-between',
         danger ? 'border-danger' : 'border-border-strong',
         className,
       )}
     >
       <p className={cx('flex items-start gap-2', danger ? 'text-danger' : 'text-text')}>
         <AlertIcon size={20} className="mt-0.5 shrink-0" />
-        <span className="min-w-0 [overflow-wrap:anywhere]">{message}</span>
+        <span className="min-w-0 font-display text-lg [overflow-wrap:anywhere]">{message}</span>
       </p>
       {action && (
         <Button variant="secondary" onClick={action.onClick} className="shrink-0">

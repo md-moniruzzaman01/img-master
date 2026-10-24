@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import type { ToolNavGroup } from '@/lib/types';
 import { siteConfig } from '@/lib/site-config';
+import { BrandSeal } from './brand-seal';
 import { MenuDisclosure } from './menu-disclosure';
+import { NavLink } from './nav-link';
 
 export const INFO_LINKS = [
   { label: 'About', href: '/about' },
@@ -41,18 +43,19 @@ function menuGrid(g: ToolNavGroup) {
 export function SiteHeader({ groups }: { groups: ToolNavGroup[] }) {
   const hubs = groups.filter((g) => g.hubHref);
   return (
-    <header className="relative border-b border-border bg-bg">
+    <header className="relative border-b border-border bg-card">
       <a
         href="#main"
         className="sr-only z-50 rounded-control bg-primary px-4 py-3 font-semibold text-on-primary focus:not-sr-only focus:fixed focus:inline-flex focus:min-h-12 focus:items-center focus:top-2 focus:left-2"
       >
         Skip to content
       </a>
-      <div className="mx-auto flex h-[51px] w-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-[51px] w-full max-w-[1024px] items-center px-4 sm:px-6">
         <Link
           href="/"
-          className="-ml-1 inline-flex min-h-12 items-center rounded-control px-1 text-lg font-bold tracking-tight text-text no-underline"
+          className="-ml-1 inline-flex min-h-12 items-center mr-auto gap-2 rounded-control px-1 font-display text-lg font-bold text-steel no-underline"
         >
+          <BrandSeal />
           {siteConfig.name}
         </Link>
 
@@ -60,54 +63,58 @@ export function SiteHeader({ groups }: { groups: ToolNavGroup[] }) {
           <ul className="-mr-3 flex items-center">
             {hubs.map((g) => (
               <li key={g.category}>
-                <Link href={g.hubHref!} className={desktopLink}>
+                <NavLink href={g.hubHref!} className={desktopLink}>
                   {g.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
             <li>
-              <Link href="/about" className={desktopLink}>
+              <NavLink href="/about" className={desktopLink}>
                 About
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </nav>
 
-        <MenuDisclosure>
-          <nav
-            aria-label="All tools"
-            className="mx-auto w-full max-w-[1024px] px-4 pt-1 pb-2 sm:px-6"
-          >
-            {groups.map((g) => {
-              const grid = menuGrid(g);
-              return (
-                <section key={g.category} className="border-b border-border pb-1">
-                  <h2 className="flex h-6 items-end type-caption tracking-wide text-muted uppercase">
-                    {g.label}
-                  </h2>
-                  <ul className={`-mx-2 grid ${grid.list}`}>
-                    {g.tools.map((t) => (
-                      <li key={t.slug} className={grid.item(t.href)}>
-                        <Link href={t.href} className={menuLink}>
-                          {t.shortName}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              );
-            })}
-            <ul className="-mx-2 grid grid-cols-4 pt-1">
-              {INFO_LINKS.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className={`${menuLink} type-small`}>
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </MenuDisclosure>
+        {/* Right-hand controls. A later task mounts the sound toggle in the first slot. */}
+        <div className="flex items-center gap-1">
+          <div data-slot="sound-toggle" className="empty:hidden" />
+          <MenuDisclosure>
+            <nav
+              aria-label="All tools"
+              className="mx-auto w-full max-w-[1024px] px-4 pt-1 pb-2 sm:px-6"
+            >
+              {groups.map((g) => {
+                const grid = menuGrid(g);
+                return (
+                  <section key={g.category} className="border-b border-border pb-1">
+                    <h2 className="flex h-6 items-end type-caption tracking-wide text-muted uppercase">
+                      {g.label}
+                    </h2>
+                    <ul className={`-mx-2 grid ${grid.list}`}>
+                      {g.tools.map((t) => (
+                        <li key={t.slug} className={grid.item(t.href)}>
+                          <Link href={t.href} className={menuLink}>
+                            {t.shortName}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+              <ul className="-mx-2 grid grid-cols-4 pt-1">
+                {INFO_LINKS.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className={`${menuLink} type-small`}>
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </MenuDisclosure>
+        </div>
       </div>
     </header>
   );

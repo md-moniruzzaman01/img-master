@@ -5,10 +5,11 @@ import { buttonClasses } from '@/components/ui/button-styles';
 import { cx } from '@/components/ui/cx';
 import { copy } from './copy';
 import { PrivacyNote } from './privacy-note';
+import { siteConfig } from '@/lib/site-config';
 
 /**
  * Big "Choose images" control (DESIGN.md §4.3), with the privacy line right
- * under the button. Mobile: button + privacy line. Desktop (≥ 768px): a dashed
+ * under the button. Mobile: button + privacy line. From sm (640px): a dashed
  * drop zone around both, plus the drop/paste hint.
  *
  * The visible button is a <label> for a real file input, so it opens the
@@ -94,9 +95,9 @@ export function FilePicker({
       onDrop={onDrop}
       className={cx(
         'flex flex-col items-center text-center transition-colors duration-150 ease-out',
-        // Desktop: a dashed drop zone around the button.
-        'md:rounded-card md:border-2 md:border-dashed md:px-6 md:py-10',
-        dragOver ? 'md:border-primary md:bg-surface' : 'md:border-border-strong/50',
+        // From sm up: a dashed drop zone around the button.
+        'sm:rounded-card sm:border-2 sm:border-dashed sm:bg-card sm:px-6 sm:py-10',
+        dragOver ? 'sm:border-primary sm:bg-gold-tint' : 'sm:border-border-strong',
       )}
     >
       <label
@@ -105,7 +106,7 @@ export function FilePicker({
         aria-disabled={disabled || undefined}
         className={cx(
           buttonClasses('primary', 'lg'),
-          'cursor-pointer text-[1.0625rem] md:w-auto md:min-w-80 md:px-10',
+          'cursor-pointer text-[1.0625rem] sm:w-auto sm:min-w-80 sm:px-10',
           'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
           disabled && 'pointer-events-none',
         )}
@@ -129,8 +130,13 @@ export function FilePicker({
         />
       </label>
       <PrivacyNote className="mt-2" />
+      {multiple && accept === 'image/*' && (
+        <p className="mt-1 type-small text-muted sm:hidden">
+          {copy.pickerHintMobile(siteConfig.maxFiles)}
+        </p>
+      )}
       {desktopHint !== null && (
-        <p className="mt-1 hidden type-small text-muted md:block">
+        <p className="mt-1 hidden type-small text-muted sm:block">
           {desktopHint ?? copy.pickerHintDesktop}
         </p>
       )}

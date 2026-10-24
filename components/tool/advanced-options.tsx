@@ -7,7 +7,7 @@ import { copy } from './copy';
 /** "More options" disclosure, collapsed by default (native <details>). */
 export function AdvancedOptions({ children }: { children: ReactNode }) {
   return (
-    <details className="group rounded-card border border-border" data-testid="more-options">
+    <details className="group rounded-card border border-border bg-card" data-testid="more-options">
       <summary className="flex min-h-12 list-none items-center justify-between gap-3 rounded-card px-4 font-semibold text-text">
         {copy.moreOptions}
         <ChevronDownIcon

@@ -645,7 +645,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       data-testid="tool-shell"
       data-kind={kind}
       data-state={state}
-      className="relative -mx-4 grid gap-3 overflow-hidden border-y border-border bg-card px-4 py-3 sm:mx-0 sm:grid-cols-[1fr_auto] sm:gap-5 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-3 overflow-clip border-y border-border bg-card px-4 py-3 sm:mx-0 sm:grid-cols-[1fr_auto] sm:gap-5 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
       <SamuraiStage
         state={stageState}

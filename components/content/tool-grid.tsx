@@ -14,9 +14,7 @@ export function ToolGrid({
     <div className="mt-6 grid gap-8 lg:mt-10">
       {groups.map((g) => (
         <section key={g.category}>
-          <H className={headingLevel === 2 ? 'type-h2 text-text' : 'type-h3 text-text'}>
-            {g.label}
-          </H>
+          <H className={headingLevel === 2 ? 'type-h2' : 'type-h3'}>{g.label}</H>
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {g.tools.map((t) => (
               <li key={t.slug}>

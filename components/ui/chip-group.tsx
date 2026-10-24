@@ -123,13 +123,15 @@ export function ChipGroup<V extends string>({
                 segmented
                   ? cx(
                       'min-h-12 min-w-12 flex-1 rounded-[6px] px-4',
-                      checked ? 'bg-primary text-on-primary' : 'text-text hover:bg-bg',
+                      checked
+                        ? 'border border-gold bg-gold-tint text-text'
+                        : 'border border-transparent text-text hover:bg-card',
                     )
                   : cx(
                       'min-h-12 rounded-full border px-4',
                       checked
-                        ? 'border-primary bg-primary text-on-primary'
-                        : 'border-border bg-bg text-text hover:border-border-strong',
+                        ? 'border-gold bg-gold-tint text-text'
+                        : 'border-border-strong bg-card text-text hover:bg-surface',
                     ),
               )}
             >

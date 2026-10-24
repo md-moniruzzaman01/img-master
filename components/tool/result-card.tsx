@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cx } from '@/components/ui/cx';
 import { AlertIcon, InfoIcon } from '@/components/ui/icons';
 import { copy, errorMessage, WARNING_NOTES } from './copy';
-import { FORMAT_LABEL, FORMAT_MIME } from './format';
+import { FORMAT_LABEL, FORMAT_MIME, formatBytes } from './format';
 import { ShareButton } from './share-button';
 
 export type ItemStatus = 'queued' | 'processing' | 'success' | 'failed';
@@ -134,14 +134,14 @@ export function ResultCard({
       data-error={item.error?.code}
       aria-busy={busy || undefined}
       className={cx(
-        'min-w-0 rounded-card border bg-bg p-4',
+        'min-w-0 rounded-card border bg-card p-4',
         status === 'failed' ? 'border-danger' : 'border-border',
       )}
     >
       <div className="flex gap-3">
         <div
           className={cx(
-            'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px]',
+            'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-border',
             busy ? 'animate-pulse bg-surface' : transparent ? 'checkerboard' : 'bg-surface',
           )}
         >
@@ -178,9 +178,10 @@ export function ResultCard({
               ) : (
                 <>
                   <p className="leading-6 font-bold tabular-nums text-text">
-                    {copy.sizes(r.inputBytes, r.outputBytes)}
+                    {formatBytes(r.inputBytes)} <span className="text-primary">→</span>{' '}
+                    {formatBytes(r.outputBytes)}
                   </p>
-                  <p className="leading-6 tabular-nums text-text">
+                  <p className="leading-6 font-semibold tabular-nums text-primary">
                     {copy.change(r.inputBytes, r.outputBytes)}
                   </p>
                 </>
@@ -194,7 +195,7 @@ export function ResultCard({
           {status === 'failed' && item.error && (
             <p className="mt-1 flex items-start gap-1.5 text-danger">
               <AlertIcon size={20} className="mt-0.5 shrink-0" />
-              <span className="min-w-0 [overflow-wrap:anywhere]">
+              <span className="min-w-0 font-display text-lg [overflow-wrap:anywhere]">
                 {errorText ?? errorMessage(item.error.code)}
               </span>
             </p>

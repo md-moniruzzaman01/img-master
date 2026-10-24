@@ -87,14 +87,14 @@ export function MenuDisclosure({ children }: { children: ReactNode }) {
       </summary>
       <div
         ref={panelRef}
-        className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-52px)] overflow-y-auto overscroll-contain border-b border-border bg-bg"
+        className="im-anim im-slide-down absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-52px)] overflow-y-auto overscroll-contain border-b border-border bg-card"
       >
         {children}
         {more && (
           <div
             aria-hidden="true"
             data-testid="menu-more"
-            className="pointer-events-none sticky bottom-0 -mt-14 flex h-14 items-end justify-center bg-linear-to-t from-bg from-40% to-transparent pb-1.5"
+            className="pointer-events-none sticky bottom-0 -mt-14 flex h-14 items-end justify-center bg-linear-to-t from-card from-40% to-transparent pb-1.5"
           >
             <span className="flex items-center gap-1 type-caption text-muted">
               More below

@@ -12,10 +12,10 @@ export function ProgressBar({ label, value }: { label: string; value: number }) 
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={pct}
-        className="h-1.5 w-full overflow-hidden rounded-full bg-border"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-surface"
       >
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-150 ease-out"
+          className="h-full rounded-full bg-ink transition-[width] duration-150 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -11,16 +11,15 @@ const base =
 const variants: Record<ButtonVariant, string> = {
   // The one brand color.
   primary: 'bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover',
-  // Gray button: light gray fill, 1px border.
-  secondary:
-    'border border-border bg-surface text-text hover:border-border-strong active:border-border-strong',
+  // Card-white button with a strong 1px border.
+  secondary: 'border border-border-strong bg-card text-text hover:bg-surface active:bg-surface',
   // Plain text button (low emphasis, e.g. "Compress another").
   ghost: 'bg-transparent text-primary underline-offset-4 hover:underline',
   danger: 'bg-danger text-on-primary hover:opacity-90 active:opacity-90',
 };
 
 const sizes: Record<ButtonSize, string> = {
-  lg: 'min-h-[52px] w-full px-5 text-base',
+  lg: 'min-h-14 w-full px-5 text-base',
   md: 'min-h-12 px-4 text-base',
 };
 

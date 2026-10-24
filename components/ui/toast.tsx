@@ -30,7 +30,7 @@ export function Toast({ message, onDone }: { message: ToastMessage | null; onDon
       {message && (
         <div
           key={message.id}
-          className="flex max-w-sm items-center gap-2 rounded-control border border-border-strong bg-bg px-4 py-3 text-text"
+          className="flex max-w-sm items-center gap-2 rounded-control border border-border-strong bg-card px-4 py-3 text-text"
         >
           {message.tone === 'info' ? <InfoIcon size={20} /> : <CheckIcon size={20} />}
           <span className="font-medium">{message.text}</span>

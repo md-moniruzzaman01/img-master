@@ -8,13 +8,13 @@ export function HowToSteps({
 }) {
   return (
     <section className="mt-8 lg:mt-12">
-      <h2 className="type-h2 text-balance text-text">{heading}</h2>
+      <h2 className="type-h2 text-balance">{heading}</h2>
       <ol className="mt-4 grid gap-3">
         {steps.map((s, i) => (
           <li key={i} className="flex gap-3">
             <span
               aria-hidden="true"
-              className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border font-bold tabular-nums text-primary"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full border border-gold bg-gold-tint font-bold tabular-nums text-text"
             >
               {i + 1}
             </span>
