@@ -425,19 +425,19 @@ test('edge: animated GIF -> first frame with the animation note', async ({ page 
   expect([d.width, d.height]).toEqual([96, 64]);
 });
 
-test('edge: 21 files -> first 20 are taken, with the "too many" message', async ({ page }) => {
+test('edge: 11 files -> first 10 are taken, with the "too many" message', async ({ page }) => {
   test.setTimeout(240_000);
   const src = fixtureBytes('photo-small.jpg');
-  const files = Array.from({ length: 21 }, (_, i) => ({
+  const files = Array.from({ length: 11 }, (_, i) => ({
     name: `p${i}.jpg`,
     mimeType: 'image/jpeg',
     buffer: src,
   }));
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, files);
-  await expect(cards(page)).toHaveCount(20);
+  await expect(cards(page)).toHaveCount(10);
   await expect(page.getByTestId('error-banner')).toContainText(
-    'You can add up to 20 images at once. We took the first 20.',
+    'You can add up to 10 images at once. We took the first 10.',
   );
 });
 

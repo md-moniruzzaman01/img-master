@@ -2,7 +2,14 @@
 // flat cards, allowed colours, single-result Download in view.
 import { expect, test, type Page } from '@playwright/test';
 import { ensureFixtures, fixture } from './helpers/fixtures';
-import { ALL_PATHS, FAVICON_SLUGS, TOOL_SLUGS, gotoTool, logMetric, pickAndWait } from './helpers/tool';
+import {
+  ALL_PATHS,
+  FAVICON_SLUGS,
+  TOOL_SLUGS,
+  gotoTool,
+  logMetric,
+  pickAndWait,
+} from './helpers/tool';
 
 test.use({ viewport: { width: 360, height: 640 } });
 test.beforeAll(ensureFixtures);
@@ -17,7 +24,10 @@ for (const path of ALL_PATHS) {
     await page.goto(path);
     const h = await page.locator('header').first().boundingBox();
     expect(h!.height).toBeLessThanOrEqual(52);
-    const pos = await page.locator('header').first().evaluate((e) => getComputedStyle(e).position);
+    const pos = await page
+      .locator('header')
+      .first()
+      .evaluate((e) => getComputedStyle(e).position);
     expect(pos).not.toBe('sticky');
     expect(pos).not.toBe('fixed');
   });
@@ -90,7 +100,9 @@ test('desktop 1280: no menu button; Compress, Convert, Favicon, About links', as
 // ── Footer ──────────────────────────────────────────────────────────────
 
 for (const path of ['/', '/compress-image-to-50kb', '/png-to-ico', '/about']) {
-  test(`footer is exactly two lines: copyright + Privacy, Terms, Contact: ${path}`, async ({ page }) => {
+  test(`footer is exactly two lines: copyright + Privacy, Terms, Contact: ${path}`, async ({
+    page,
+  }) => {
     await page.goto(path);
     const footer = page.locator('footer');
     await expect(footer).toHaveCount(1);
@@ -104,7 +116,9 @@ for (const path of ['/', '/compress-image-to-50kb', '/png-to-ico', '/about']) {
     expect(await footer.locator('h2, h3, nav').count()).toBe(0);
     const lines = await footer.evaluate((f) => {
       const tops = new Set<number>();
-      f.querySelectorAll('p, ul').forEach((e) => tops.add(Math.round(e.getBoundingClientRect().top)));
+      f.querySelectorAll('p, ul').forEach((e) =>
+        tops.add(Math.round(e.getBoundingClientRect().top)),
+      );
       return tops.size;
     });
     expect(lines).toBe(2);
@@ -153,7 +167,9 @@ for (const slug of ALL_TOOLS) {
         const cs = getComputedStyle(e);
         if (r.width === 0 || r.height === 0 || cs.visibility === 'hidden' || cs.display === 'none')
           continue;
-        return e.getAttribute('data-testid') ?? e.tagName + ':' + (e.textContent ?? '').slice(0, 30);
+        return (
+          e.getAttribute('data-testid') ?? e.tagName + ':' + (e.textContent ?? '').slice(0, 30)
+        );
       }
       return null;
     });
@@ -163,14 +179,18 @@ for (const slug of ALL_TOOLS) {
 
 // ── Flat cards, allowed colours ─────────────────────────────────────────
 
+// Ink Samurai palette (DESIGN.md colour tokens; spec 2026-10-24 section 4).
 const ALLOWED_BG = new Set([
   'rgba(0, 0, 0, 0)',
-  'rgb(255, 255, 255)', // #FFFFFF
-  'rgb(245, 245, 245)', // #F5F5F5
-  'rgb(29, 78, 216)', // #1D4ED8
-  'rgb(30, 64, 175)', // #1E40AF
-  'rgb(224, 224, 224)', // --border #E0E0E0 (skeleton bars, dividers)
-  'rgb(138, 138, 138)', // --border-strong (switch knob when off)
+  'rgb(250, 248, 244)', // --bg #FAF8F4 paper
+  'rgb(255, 255, 255)', // --card #FFFFFF
+  'rgb(240, 236, 228)', // --surface #F0ECE4
+  'rgb(192, 57, 43)', // --primary #C0392B crimson
+  'rgb(169, 50, 38)', // --primary-hover #A93226
+  'rgb(251, 244, 226)', // --gold-tint #FBF4E2
+  'rgb(26, 18, 18)', // --ink #1A1212 (progress fill, silhouettes)
+  'rgb(226, 221, 214)', // --border #E2DDD6 (skeleton bars, dividers)
+  'rgb(138, 129, 119)', // --border-strong #8A8177 (switch knob when off)
 ]);
 
 async function colourScan(page: Page, allowExtra: string[] = []) {
@@ -226,7 +246,13 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'image-converter', 
       .getByTestId('download')
       .first()
       .evaluate((e) => getComputedStyle(e).backgroundColor);
-    expect(['rgb(29, 78, 216)', 'rgb(255, 255, 255)', 'rgb(245, 245, 245)']).toContain(btn);
+    // The primary Download button is crimson (redesign); secondary variants stay white or surface.
+    expect([
+      'rgb(192, 57, 43)',
+      'rgb(169, 50, 38)',
+      'rgb(255, 255, 255)',
+      'rgb(240, 236, 228)',
+    ]).toContain(btn);
     await page.locator('header summary').click();
     await page.waitForTimeout(500); // let the button's colour transition finish
     const withMenu = await colourScan(page, ['rgb(180, 35, 24)']);
@@ -238,10 +264,12 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'image-converter', 
 for (const path of ['/', '/about', '/privacy', '/favicon-generator', '/png-to-ico']) {
   test(`flat design and allowed colours on ${path}`, async ({ page }) => {
     await page.goto(path);
-    // The favicon preview draws mock light and dark browser tabs on purpose (.pin-dark).
+    // The favicon preview keeps its own neutral light and dark browser-tab mocks on purpose (.pin-dark).
     const res = await colourScan(
       page,
-      path.startsWith('/favicon') ? ['rgb(43, 43, 43)', 'rgb(26, 26, 26)'] : [],
+      path.startsWith('/favicon')
+        ? ['rgb(43, 43, 43)', 'rgb(26, 26, 26)', 'rgb(245, 245, 245)', 'rgb(224, 224, 224)']
+        : [],
     );
     expect(res.badBg).toEqual([]);
     expect(res.shadows).toEqual([]);
