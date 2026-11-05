@@ -1,11 +1,12 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { EngineErrorCode, EngineErrorDetail, EngineNote, EngineResult } from '@/lib/types';
 import { buttonClasses } from '@/components/ui/button-styles';
 import { Button } from '@/components/ui/button';
 import { cx } from '@/components/ui/cx';
-import { AlertIcon, InfoIcon } from '@/components/ui/icons';
+import { AlertIcon, CompareIcon, InfoIcon } from '@/components/ui/icons';
+import { Compare } from './compare';
 import { copy, errorMessage, WARNING_NOTES } from './copy';
 import { FORMAT_LABEL, FORMAT_MIME, formatBytes } from './format';
 import { ShareButton } from './share-button';
@@ -28,8 +29,6 @@ export interface ResultItem {
 export interface CardReserve {
   /** One note (two short lines on phones). */
   note: boolean;
-  /** The Share button (only where the browser can share files). */
-  share: boolean;
 }
 
 export interface CardAction {
@@ -44,7 +43,7 @@ function SkeletonLine({ width, small }: { width: string; small?: boolean }) {
       &nbsp;
       <span
         className={cx(
-          'absolute left-0 animate-pulse rounded bg-surface',
+          'absolute left-0 animate-pulse rounded bg-paper-2',
           small ? 'top-1 h-3' : 'top-1 h-4',
           width,
         )}
@@ -100,6 +99,23 @@ export function ResultCard({
   const name = fileName ?? r?.fileName ?? file.name;
   const ref = useRef<HTMLElement>(null);
 
+  // "Compare": the original's object URL is ours to manage — created when the
+  // dialog opens, revoked when it closes (or the card unmounts) so nothing leaks.
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  function openCompare() {
+    setOriginalUrl(URL.createObjectURL(file));
+    setCompareOpen(true);
+  }
+  function closeCompare() {
+    setCompareOpen(false);
+    setOriginalUrl(null);
+  }
+  useEffect(() => {
+    if (!originalUrl) return;
+    return () => URL.revokeObjectURL(originalUrl);
+  }, [originalUrl]);
+
   // The skeleton is drawn at the expected final height. Keep that height as a
   // floor so a shorter result never pulls the content below it upward.
   useLayoutEffect(() => {
@@ -107,7 +123,7 @@ export function ResultCard({
     if (!el || !busy) return;
     const h = el.offsetHeight;
     if (h > (parseFloat(el.style.minHeight) || 0)) el.style.minHeight = `${h}px`;
-  }, [busy, reserve?.note, reserve?.share]);
+  }, [busy, reserve?.note]);
 
   const notes =
     status === 'success' && r
@@ -134,15 +150,15 @@ export function ResultCard({
       data-error={item.error?.code}
       aria-busy={busy || undefined}
       className={cx(
-        'min-w-0 rounded-card border bg-card p-4',
-        status === 'failed' ? 'border-danger' : 'border-border',
+        'min-w-0 rounded-card border bg-card p-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6',
+        status === 'failed' ? 'border-shu' : 'border-line',
       )}
     >
-      <div className="flex gap-3">
+      <div className="flex gap-3 md:col-start-1">
         <div
           className={cx(
-            'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-border',
-            busy ? 'animate-pulse bg-surface' : transparent ? 'checkerboard' : 'bg-surface',
+            'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-line',
+            busy ? 'animate-pulse bg-paper-2' : transparent ? 'checkerboard' : 'bg-paper-2',
           )}
         >
           {item.thumb && (
@@ -155,7 +171,7 @@ export function ResultCard({
         <div className="min-w-0 flex-1">
           <p
             data-testid="file-name"
-            className="truncate leading-6 font-semibold text-text"
+            className="truncate leading-6 font-semibold text-ink"
             title={name}
           >
             {name}
@@ -174,14 +190,19 @@ export function ResultCard({
           {status === 'success' && r && (
             <>
               {summary ? (
-                <p className="min-h-12 leading-6 tabular-nums text-text">{summary}</p>
+                <p className="min-h-12 leading-6 tabular-nums text-ink">{summary}</p>
               ) : (
                 <>
-                  <p className="leading-6 font-bold tabular-nums text-text">
-                    {formatBytes(r.inputBytes)} <span className="text-primary">→</span>{' '}
-                    {formatBytes(r.outputBytes)}
+                  <p className="flex flex-wrap items-baseline gap-x-2 leading-7 tabular-nums text-ink">
+                    <span className="text-muted line-through">{formatBytes(r.inputBytes)}</span>
+                    <span aria-hidden="true" className="text-muted">
+                      →
+                    </span>
+                    <span className="font-display text-xl font-extrabold">
+                      {formatBytes(r.outputBytes)}
+                    </span>
                   </p>
-                  <p className="leading-6 font-semibold tabular-nums text-primary">
+                  <p className="leading-6 font-semibold tabular-nums text-accent">
                     {copy.change(r.inputBytes, r.outputBytes)}
                   </p>
                 </>
@@ -193,7 +214,7 @@ export function ResultCard({
           )}
 
           {status === 'failed' && item.error && (
-            <p className="mt-1 flex items-start gap-1.5 text-danger">
+            <p className="mt-1 flex items-start gap-1.5 text-accent-strong">
               <AlertIcon size={20} className="mt-0.5 shrink-0" />
               <span className="min-w-0 font-display text-lg [overflow-wrap:anywhere]">
                 {errorText ?? errorMessage(item.error.code)}
@@ -212,13 +233,13 @@ export function ResultCard({
         </p>
       )}
       {notes.length > 0 && (
-        <div className="mt-3 grid gap-1">
+        <div className="mt-3 grid gap-1 md:col-start-1">
           {notes.map(({ n, text, warn }) => (
             <p
               key={n}
               className={cx(
                 'flex items-start gap-1.5 type-small',
-                warn ? 'text-text' : 'text-muted',
+                warn ? 'text-ink' : 'text-muted',
               )}
             >
               {warn ? (
@@ -233,36 +254,49 @@ export function ResultCard({
       )}
 
       {busy && (
-        <div aria-hidden="true" className="mt-4 grid gap-2">
-          <div className="h-[52px]" />
-          {reserve?.share && <div className="h-12" />}
+        <div aria-hidden="true" className="mt-4 md:col-start-2 md:row-start-1 md:row-span-2 md:mt-0">
+          {/* Compare + Download row. */}
+          <div className="h-12 md:w-72" />
         </div>
       )}
 
       {status === 'success' && r && item.url && (
-        <div className="mt-4 grid gap-2">
+        <div className="mt-4 grid grid-cols-2 gap-2 md:col-start-2 md:row-start-1 md:row-span-2 md:mt-0 md:flex">
+          <Button variant="secondary" data-testid="compare" onClick={openCompare} className="md:order-1">
+            <CompareIcon size={18} aria-hidden="true" />
+            {copy.compare}
+          </Button>
           <a
             href={item.url}
             download={name}
             data-testid="download"
             onClick={onDownload}
-            className={buttonClasses('primary', 'lg')}
+            className={buttonClasses('solid', 'md', 'whitespace-nowrap !px-3 md:order-2 md:!px-5')}
           >
             {copy.download(r.outputBytes)}
           </a>
-          <ShareButton
-            supported={shareSupported}
-            getFiles={() => [
-              new File([r.blob], name, { type: FORMAT_MIME[r.format] ?? r.blob.type }),
-            ]}
-            onShared={onShared}
-            className="w-full"
+          {shareSupported && (
+            <ShareButton
+              supported={shareSupported}
+              getFiles={() => [
+                new File([r.blob], name, { type: FORMAT_MIME[r.format] ?? r.blob.type }),
+              ]}
+              onShared={onShared}
+              className="col-span-2 w-full md:order-3 md:col-span-1 md:w-auto"
+            />
+          )}
+          <Compare
+            open={compareOpen}
+            onClose={closeCompare}
+            fileName={name}
+            originalUrl={originalUrl ?? ''}
+            resultUrl={item.url}
           />
         </div>
       )}
 
       {status === 'failed' && actions && actions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2 md:col-start-1">
           {actions.map((a) => (
             <Button key={a.id} variant="secondary" onClick={() => onAction?.(a.id)}>
               {a.label}

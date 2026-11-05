@@ -1,7 +1,14 @@
 // Favicon package metadata: input checks, snippet, manifest, README (ENGINE.md §9). Pure.
 import type { FaviconShape, FaviconSource } from '../../types';
 import { EngineError } from '../errors';
-import { clamp, clampZoom } from './geometry';
+import {
+  EMOJI_STACK,
+  FONT_STACK,
+  clamp,
+  clampZoom,
+  cleanFontFamily,
+  textFontStack,
+} from './geometry';
 import { isSafeColor } from './svg';
 
 export type FaviconMode = 'image' | 'text' | 'emoji';
@@ -25,7 +32,19 @@ export interface FaviconSpec {
   /** Percent per side, 0–40. */
   padding: number;
   zoom: number;
+  /** CSS font stack used to draw text or emoji. */
+  fontStack: string;
+  /**
+   * True when text uses a font the page loaded (FaviconSource.fontFamily).
+   * That font won't exist on the visitor's own site, so no favicon.svg is made
+   * (it would show a different font than the PNGs and the ICO).
+   */
+  customFont: boolean;
 }
+
+/** favicon.svg is made for text and emoji, but not for text in a page-loaded font. */
+export const hasSvg = (spec: Pick<FaviconSpec, 'mode' | 'customFont'>): boolean =>
+  spec.mode !== 'image' && !spec.customFont;
 
 const SHAPES: readonly FaviconShape[] = ['square', 'rounded', 'circle'];
 
@@ -66,6 +85,8 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
       shape,
       padding,
       zoom: clampZoom(src.zoom),
+      fontStack: FONT_STACK,
+      customFont: false,
     };
   }
   if (src.mode === 'text') {
@@ -78,6 +99,7 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
       .join('');
     if (!text) throw new EngineError('DECODE_FAILED', 'Type 1 to 3 characters for the icon.');
     const w = src.fontWeight === 400 || src.fontWeight === 800 ? src.fontWeight : 600;
+    const family = cleanFontFamily(src.fontFamily);
     return {
       mode: 'text',
       text,
@@ -87,6 +109,8 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
       shape,
       padding,
       zoom: 1,
+      fontStack: textFontStack(src.typeface, family),
+      customFont: family !== null,
     };
   }
   if (src.mode === 'emoji') {
@@ -105,13 +129,15 @@ export function normalizeSpec(src: WireFaviconSource): FaviconSpec {
       shape,
       padding,
       zoom: 1,
+      fontStack: EMOJI_STACK,
+      customFont: false,
     };
   }
   throw new EngineError('DECODE_FAILED', 'Unknown favicon mode.');
 }
 
 /** File names in the ZIP, in order. favicon.svg only for text and emoji. */
-export function packageFileNames(mode: FaviconMode): string[] {
+export function packageFileNames(mode: FaviconMode, withSvg = mode !== 'image'): string[] {
   const names = [
     'favicon.ico',
     'favicon-16x16.png',
@@ -120,14 +146,14 @@ export function packageFileNames(mode: FaviconMode): string[] {
     'android-chrome-192x192.png',
     'android-chrome-512x512.png',
   ];
-  if (mode !== 'image') names.push('favicon.svg');
+  if (withSvg) names.push('favicon.svg');
   names.push('site.webmanifest', 'README.txt');
   return names;
 }
 
-export function buildSnippet(mode: FaviconMode): string {
+export function buildSnippet(mode: FaviconMode, withSvg = mode !== 'image'): string {
   const lines = ['<link rel="icon" href="/favicon.ico" sizes="48x48">'];
-  if (mode !== 'image') lines.push('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+  if (withSvg) lines.push('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
   lines.push('<link rel="apple-touch-icon" href="/apple-touch-icon.png">');
   lines.push('<link rel="manifest" href="/site.webmanifest">');
   return lines.join('\n');
@@ -164,11 +190,14 @@ export function buildManifest(spec: FaviconSpec): string {
   );
 }
 
-export function buildReadme(mode: FaviconMode, snippet: string): string {
-  const svgLine =
-    mode === 'image'
-      ? ''
-      : 'favicon.svg                   Sharp icon at any size. Used by modern browsers.\n';
+export function buildReadme(
+  mode: FaviconMode,
+  snippet: string,
+  withSvg = mode !== 'image',
+): string {
+  const svgLine = !withSvg
+    ? ''
+    : 'favicon.svg                   Sharp icon at any size. Used by modern browsers.\n';
   return `Your favicon package
 ====================
 

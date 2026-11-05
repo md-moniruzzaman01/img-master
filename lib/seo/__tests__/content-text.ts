@@ -2,9 +2,14 @@
 import type { ToolContent } from '@/lib/types';
 import { toPlainText } from '@/lib/seo/url';
 
-/** All text shown below the tool (how-to heading and steps, sections, tips, FAQs), as plain text. */
+/** All text shown below the tool (use cases, how-to heading and steps, sections, tips, FAQs), as plain text. */
 export function belowToolText(c: ToolContent): string {
-  const parts: string[] = [...(c.howToHeading ? [c.howToHeading] : []), ...c.howTo];
+  const parts: string[] = [];
+  if (c.useCases) {
+    parts.push(c.useCases.heading, ...(c.useCases.intro ? [c.useCases.intro] : []));
+    for (const u of c.useCases.items) parts.push(u.title, u.text);
+  }
+  parts.push(...(c.howToHeading ? [c.howToHeading] : []), ...c.howTo);
   for (const s of c.sections) {
     parts.push(s.heading, ...s.paragraphs, ...(s.list ?? []));
     if (s.table) {
@@ -43,9 +48,14 @@ export function overlap(a: Set<string>, b: Set<string>): number {
   return shared / Math.min(a.size, b.size);
 }
 
-/** Lowercase, drop articles and possessives, so "an image" matches "image". */
+/**
+ * Lowercase, drop articles and possessives, so "an image" matches "image".
+ * "50 KB" and "50KB" count as the same word, so the H1 "Compress image to 50 KB"
+ * matches the keyword "compress image to 50kb".
+ */
 export function normalizeForKeyword(text: string): string {
-  return ` ${words(toPlainText(text))
+  const joined = toPlainText(text).replace(/(\d)\s+(kb|mb)\b/gi, '$1$2');
+  return ` ${words(joined)
     .filter((w) => !['a', 'an', 'the', 'your', 'my'].includes(w))
     .join(' ')} `;
 }

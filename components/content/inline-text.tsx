@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 const TOKEN = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
 
 const linkClass =
-  'inline-block py-[13.5px] -my-[13.5px] font-medium text-primary underline underline-offset-4 [overflow-wrap:anywhere] hover:text-primary-hover';
+  'inline-block py-[13.5px] -my-[13.5px] font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere] hover:text-shu-deep';
 
 function parse(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];

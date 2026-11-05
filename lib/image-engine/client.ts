@@ -19,6 +19,8 @@ interface Job {
   reject(e: unknown): void;
   settled: boolean;
   cancelled: boolean;
+  /** Always run on the main thread (needs page fonts). */
+  main: boolean;
 }
 
 interface Slot {
@@ -35,6 +37,8 @@ let initPromise: Promise<void> | null = null;
 let capsPromise: Promise<Capabilities> | null = null;
 let mainBusy = false;
 const queue: Job[] = [];
+/** Jobs that must run on the main thread even when workers are available. */
+const mainQueue: Job[] = [];
 const slots: Slot[] = [];
 
 function spawnWorker(): Worker {
@@ -132,6 +136,7 @@ function onWorkerCrash(slot: Slot): void {
 }
 
 function pump(): void {
+  if (mainQueue.length > 0) void pumpMain();
   if (mode === 'main') {
     void pumpMain();
     return;
@@ -171,8 +176,9 @@ async function pumpMain(): Promise<void> {
   if (mainBusy) return;
   mainBusy = true;
   try {
-    while (queue.length > 0) {
-      const job = queue.shift() as Job;
+    for (;;) {
+      const job = mainQueue.shift() ?? (mode === 'main' ? queue.shift() : undefined);
+      if (!job) break;
       if (job.settled) continue;
       try {
         const { runJob } = await import('./run-job');
@@ -195,11 +201,17 @@ async function pumpMain(): Promise<void> {
   }
 }
 
+export interface SubmitOptions {
+  /** Run on the main thread even when a worker is available. */
+  main?: boolean;
+}
+
 export function submit<T>(
   type: JobType,
   file: File | null,
   options: unknown,
   onProgress?: ProgressFn,
+  submitOpts: SubmitOptions = {},
 ): JobHandle<T> {
   let job!: Job;
   const promise = new Promise<T>((resolve, reject) => {
@@ -213,11 +225,12 @@ export function submit<T>(
       reject,
       settled: false,
       cancelled: false,
+      main: submitOpts.main === true,
     };
   });
   void init().then(() => {
     if (job.settled) return;
-    queue.push(job);
+    (job.main ? mainQueue : queue).push(job);
     pump();
   });
   return {
@@ -225,8 +238,10 @@ export function submit<T>(
     cancel() {
       if (job.settled) return;
       job.cancelled = true;
-      const i = queue.indexOf(job);
-      if (i >= 0) queue.splice(i, 1);
+      for (const q of [queue, mainQueue]) {
+        const i = q.indexOf(job);
+        if (i >= 0) q.splice(i, 1);
+      }
       const slot = slots.find((s) => s.job === job);
       if (slot) send(slot.worker, { id: job.id, type: 'cancel' });
       settle(job, { err: cancelled() });

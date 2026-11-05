@@ -13,31 +13,56 @@ export const content: ToolContent = {
     'resize photo to 50kb',
     'compress jpeg to 50kb',
   ],
-  shortName: 'To 50KB',
-  cardDescription: 'Get a clear JPG under 50KB for forms and applications.',
+  shortName: 'To 50 KB',
+  cardDescription: 'Job applications, exam and admission forms.',
   title: 'Compress Image to 50KB Online – Free, No Upload | Img Master',
   description:
-    'Reduce any photo to under 50KB in seconds. Works on your phone, keeps faces clear, and your image never leaves your device. Free, no signup.',
-  h1: 'Compress Image to 50KB',
-  subtitle: 'Get a clear JPG under 50KB for online forms in seconds, right on your phone.',
+    'Reduce any photo to under 50 KB on your phone. We keep the sharpest version that fits, faces stay clear, and your image never leaves your device. Free.',
+  h1: 'Compress image to 50 KB',
+  h1Accent: '50 KB',
+  subtitle: 'Get a clear JPG under 50 KB for job, exam and admission forms, right on your phone.',
+  sideTip:
+    'If your form also asks for a pixel size, resize the photo first, then set Pixel size to Keep exact here.',
+  useCases: {
+    heading: 'Where a 50 KB limit shows up',
+    intro: 'Check the exact rule on your form. Some also ask for a pixel size or JPG only.',
+    items: [
+      {
+        icon: 'document',
+        title: 'Job applications',
+        text: 'Photo and signature uploads on hiring portals',
+      },
+      {
+        icon: 'cap',
+        title: 'Exam & admission forms',
+        text: 'Applicant photos with strict size caps',
+      },
+      {
+        icon: 'globe',
+        title: 'Government portals',
+        text: 'Online applications with upload limits',
+      },
+      { icon: 'mail', title: 'Email & chat', text: 'Light enough to send on slow connections' },
+    ],
+  },
+  howToHeading: 'How we land under 50 KB',
   howTo: [
-    'Tap Choose images and select your photo from the gallery.',
-    'The 50KB target is already on, so compression starts right away.',
-    'Check the new size and dimensions, then tap Download or Share.',
+    'Read: your browser opens the image. Nothing is sent anywhere.',
+    'Search: we try quality levels (high, low, then in between) until the file sits just under 50 KB.',
+    'Shrink only if needed: if the lowest good quality is still too big, we reduce the pixel size a little and try again.',
   ],
-  howToHeading: 'How to compress an image to 50KB',
   sections: [
     {
-      heading: 'Why so many forms ask for a 50KB photo',
+      heading: 'Compress an image to 50 KB for an online form',
       paragraphs: [
-        'If you need to compress an image to 50KB, an online form is probably the reason. Application, admission and job websites store a lot of photos, so they set a small size limit. Many forms set a limit such as 50KB for a photo. The exact rule is different for each form, so always read the instructions on the form itself.',
+        'If you need to compress an image to 50 KB, an online form is probably the reason. Application, admission and job websites store a lot of photos, so they set a small size limit. The exact rule is different for each form, so always read the instructions on the form itself.',
         'This page gives you a JPG that is under the limit. JPG is the format that nearly every form accepts.',
       ],
     },
     {
-      heading: 'Take a photo that stays clear at 50KB',
+      heading: 'Take a photo that stays clear at 50 KB',
       paragraphs: [
-        'At 50KB there is enough room for a sharp face if the photo is simple. A plain photo spends its bytes on your face instead of on the background.',
+        'At 50 KB there is enough room for a sharp face if the photo is simple. A plain photo spends its bytes on your face instead of on the background.',
       ],
       list: [
         'Stand in front of a plain, light-colored wall.',
@@ -49,38 +74,36 @@ export const content: ToolContent = {
     {
       heading: 'The form still says the file is too big',
       paragraphs: [
-        'There are two ways to count a kilobyte. Some sites use 1,000 bytes and others use 1,024 bytes. A file of 50,500 bytes is 49.3KB on one site and 50.5KB on another, so it can pass one check and fail the next.',
+        'There are two ways to count a kilobyte. Some sites use 1,000 bytes and others use 1,024 bytes. A file of 50,500 bytes is 49.3 KB on one site and 50.5 KB on another, so it can pass one check and fail the next.',
         'Img Master keeps every result under the limit in both systems, so a file from this page should pass either way. If a form still rejects it, look at its other rules. It may also ask for exact pixel dimensions, a minimum size, or a JPG file only.',
-      ],
-    },
-    {
-      heading: 'JPG or WebP at 50KB?',
-      paragraphs: [
-        'WebP can hold a little more detail in the same number of bytes. But many forms only accept JPG or JPEG. Keep the default JPG unless the form clearly lists WebP. You can switch the format in the options below the result.',
       ],
     },
   ],
   tips: [
-    'Need a smaller file for a signature? Use [Compress to 20KB](/compress-image-to-20kb).',
+    'Need a smaller file for a signature? Use [Compress to 20 KB](/compress-image-to-20kb).',
     'Your phone saved the photo as WebP or PNG? You can still pick it here. The result will be a JPG.',
-    'Your last settings are remembered on this device, so the next photo uses the same options.',
+    'WebP can hold a little more detail in 50 KB, but many forms accept only JPG. Keep the JPG output unless the form clearly lists WebP.',
   ],
   faqs: [
     {
-      q: 'How do I reduce my photo size to 50KB on my phone?',
-      a: 'Open this page in your phone browser, tap Choose images and pick the photo. It is compressed to under 50KB right away. Tap Download to save it, or Share to send it to another app.',
+      q: 'Why is the result under 50 KB, not exactly 50?',
+      a: 'Upload forms reject anything over the limit, even by one byte. We stop at the highest quality that stays below 50 KB, so the file passes the size check.',
     },
     {
-      q: 'Will the photo lose quality?',
+      q: 'Will the photo still be clear?',
       a: 'Some detail is removed, because that is how a file gets smaller. The tool removes as little as it can, and it reduces the dimensions only when quality alone is not enough. A plain background and good light help your face stay sharp.',
     },
     {
-      q: 'Can I compress several photos to 50KB at once?',
-      a: `Yes. You can pick up to ${siteConfig.maxFiles} images at once. Each one is compressed to under 50KB, and you can download them one by one or all together as a ZIP file.`,
+      q: 'Can I set the exact pixel size too?',
+      a: 'This page can keep the original width and height: set Pixel size to Keep exact. To choose a new width and height, use [Resize image](/resize-image) first, then compress the resized photo here.',
     },
     {
-      q: 'My photo is already under 50KB. What happens?',
-      a: 'You still get a fresh copy under 50KB. It is saved again without hidden photo data, such as the camera model or GPS location.',
+      q: 'My form says JPG only. Is that the default?',
+      a: 'Yes. Every result on this page is a JPG unless you change Output to WebP. JPG and JPEG are two names for the same format, so a form that asks for JPEG accepts it.',
+    },
+    {
+      q: 'Can I compress many photos at once?',
+      a: `Yes. You can pick up to ${siteConfig.maxFiles} images at once. Each one is compressed to under 50 KB, and you can download them one by one or all together as a ZIP file.`,
     },
     {
       q: 'Does the website keep a copy of my photo?',
@@ -91,8 +114,8 @@ export const content: ToolContent = {
     'compress-image-to-20kb',
     'compress-image-to-100kb',
     'compress-image',
-    'png-to-jpg',
+    'resize-image',
     'webp-to-jpg',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

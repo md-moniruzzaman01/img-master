@@ -54,7 +54,24 @@ export interface ToolCardData {
   category: ToolCategory;
   shortName: string;
   description: string; // content.cardDescription
+  /** Decorative kanji for the card (e.g. "五十" for 50KB). From lib/tools/glyphs.ts. Always aria-hidden. */
+  glyph: string;
 }
+
+/** One entry in the Ctrl+K search and the "Every tool" filter (built by lib/tools). */
+export interface SearchItem {
+  slug: string;
+  href: string;
+  title: string; // content.shortName, e.g. "To 50KB"
+  description: string; // content.cardDescription
+  glyph: string;
+  category: ToolCategory;
+  /** Lower-case words to match on: h1, primary and secondary keywords, slug parts. */
+  keywords: string[];
+}
+
+/** Colour theme. Stored in localStorage under siteConfig.theme.storageKey. */
+export type Theme = 'light' | 'dark';
 
 /** A category with its live tools (menus, footer, home grid, 404). */
 export interface ToolNavGroup {
@@ -80,6 +97,29 @@ export interface FaqItem {
   a: string;
 }
 
+/** Icons a use-case card may show (components/ui/icons.tsx draws them). */
+export type UseCaseIcon = 'document' | 'cap' | 'globe' | 'mail' | 'phone' | 'image' | 'print' | 'code';
+
+/** "Where a 50 KB limit shows up" cards on a tool page. */
+export interface UseCase {
+  icon: UseCaseIcon;
+  title: string; // ≤ 28 chars
+  text: string; // ≤ 70 chars
+}
+
+/** Heading + optional one-line intro for a page section. */
+export interface SectionIntro {
+  heading: string;
+  intro?: string;
+}
+
+/** Three short value statements (dark band on home and About). */
+export interface ValueItem {
+  glyph: string; // one decorative kanji, aria-hidden
+  title: string;
+  text: string;
+}
+
 export interface ToolContent {
   primaryKeyword: string;
   secondaryKeywords: string[]; // 3–8 real variants
@@ -88,7 +128,13 @@ export interface ToolContent {
   title: string; // ≤ 60 chars including " | Img Master"
   description: string; // 120–155 chars
   h1: string;
+  /** Exact substring of h1 drawn in crimson, e.g. "50 KB" in "Compress image to 50 KB". */
+  h1Accent?: string;
   subtitle: string; // ≤ 100 chars, shown above the tool
+  /** One line in the samurai panel's Tip card (desktop). */
+  sideTip?: string;
+  /** Use-case cards shown right after the tool (2–4). */
+  useCases?: { heading: string; intro?: string; items: UseCase[] };
   howTo: [string, string, string];
   /** H2 above the three steps, e.g. "How to compress an image to 50KB". Default: "How it works". */
   howToHeading?: string;
@@ -99,16 +145,35 @@ export interface ToolContent {
   updatedAt: string; // ISO date
 }
 
-/** content/home.ts (DESIGN.md §3.2). */
+/** content/home.ts (spec docs/superpowers/specs/2026-10-25-figma-redesign.md §5.1). */
 export interface HomeContent {
+  title: string; // ≤ 60 chars
+  description: string; // 120–155 chars
+  eyebrow: string; // "Free image tools"
+  h1: string;
+  h1Accent?: string; // substring of h1 in crimson ("size.")
+  subtitle: string;
+  trustItems: string[]; // exactly 3, under the hero tool
+  compress: SectionIntro;
+  convert: SectionIntro;
+  compare: SectionIntro & { originalLabel: string; resultLabel: string };
+  values: ValueItem[]; // exactly 3
+  favicon: SectionIntro;
+  howItWorks?: RichSection;
+  faqHeading: string;
+  faqs: FaqItem[]; // 4
+  cta: { heading: string; text: string; button: string };
+  updatedAt: string;
+}
+
+/** content/pages/how-it-works.ts and content/pages/tools-index.ts. */
+export interface InfoPageContent {
   title: string; // ≤ 60 chars
   description: string; // 120–155 chars
   h1: string;
   subtitle: string;
-  sizeRowHeading: string; // "Compress to a size"
-  trustItems: string[]; // "No upload", "No signup", "No watermark", "Free"
-  howItWorks: RichSection;
-  faqs: FaqItem[]; // 4
+  sections: RichSection[];
+  faqs?: FaqItem[];
   updatedAt: string;
 }
 
@@ -120,6 +185,11 @@ export interface LegalContent {
   title: string;
   description: string;
   h1: string;
+  /** About only: small label above the H1 and a short hero intro. */
+  eyebrow?: string;
+  intro?: string[];
+  /** About only: the three values band. */
+  values?: ValueItem[];
   sections: RichSection[];
   updatedAt: string;
 }
@@ -157,6 +227,7 @@ export type EngineErrorCode =
   | 'TARGET_UNREACHABLE'
   | 'ENCODE_UNSUPPORTED' // e.g. browser can't encode WebP
   | 'OUT_OF_MEMORY'
+  | 'INVALID_OPTIONS' // bad user input (e.g. resize to 0 px); show error.message
   | 'CANCELLED';
 
 /** Extra data an engine error may carry, so the UI can suggest a next step. */
@@ -189,8 +260,22 @@ export function isEngineError(e: unknown): e is EngineErrorShape {
 export interface CompressToSizeOptions {
   targetKB: number; // decimal KB as shown to users (1MB page uses 1000)
   format?: 'jpeg' | 'webp'; // default 'jpeg'
-  keepDimensions?: boolean; // default false
+  keepDimensions?: boolean; // default false ("Pixel size: Keep exact" in the UI = true)
+  /** Scale down first so width ≤ maxWidth (aspect ratio kept). Undefined = keep original. */
+  maxWidth?: number;
   background?: string; // for alpha → JPG, default '#ffffff'
+}
+
+export interface ResizeOptions {
+  /** Target size. Give width and/or height in px, or percent (1–400). */
+  width?: number;
+  height?: number;
+  percent?: number;
+  /** Default true: when only one side is given, or both with keepRatio, fit inside and keep the ratio. */
+  keepRatio?: boolean;
+  format?: ImageFormat | 'same'; // default 'same'
+  quality?: number; // 0–1 for lossy output, default 0.9
+  background?: string; // alpha → JPG
 }
 
 export interface ConvertOptions {
@@ -207,6 +292,8 @@ export interface CompressOptions {
 
 export type FaviconShape = 'square' | 'rounded' | 'circle';
 
+export type FaviconTypeface = 'brush' | 'mincho' | 'gothic';
+
 export type FaviconSource =
   | {
       mode: 'image';
@@ -219,6 +306,13 @@ export type FaviconSource =
   | {
       mode: 'text';
       text: string;
+      /** Typeface style picked in the UI (default 'mincho'). */
+      typeface?: FaviconTypeface;
+      /**
+       * CSS font-family string the UI has already loaded with document.fonts.load()
+       * (from next/font). The engine draws with it and falls back to serif/sans.
+       */
+      fontFamily?: string;
       fontWeight: 400 | 600 | 800;
       color: string;
       background: string;
@@ -262,6 +356,7 @@ export interface ImageEngine {
   ): JobHandle<EngineResult>;
   convert(file: File, opts: ConvertOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
   compress(file: File, opts: CompressOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
+  resize(file: File, opts: ResizeOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
   pngToIco(file: File): JobHandle<EngineResult>;
   makeFavicons(src: FaviconSource): JobHandle<FaviconPackage>;
   zip(files: { name: string; blob: Blob }[]): Promise<Blob>;

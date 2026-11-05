@@ -10,12 +10,14 @@ export const content: ToolContent = {
     'webp to png converter',
   ],
   shortName: 'WebP to PNG',
-  cardDescription: 'Convert WebP to PNG and keep transparent backgrounds.',
+  cardDescription: 'Keep transparency, edit anywhere.',
   title: 'Convert WebP to PNG Online – Free, No Upload | Img Master',
   description:
     'Turn WebP images into PNG files and keep transparent backgrounds intact. Good for logos, icons and editing. Runs on your phone, no upload, free.',
   h1: 'Convert WebP to PNG',
+  h1Accent: 'PNG',
   subtitle: 'Save WebP images as PNG files with clear backgrounds kept, ready for editing apps.',
+  sideTip: 'A PNG keeps every pixel, so expect a bigger file than the WebP you started with.',
   howTo: [
     'Select one WebP image, or several at once.',
     'Each one is saved as a PNG straight away, with no settings to change.',
@@ -69,7 +71,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Can I convert an animated WebP to PNG?',
-      a: 'Only the first frame is saved, because the PNG files made here are still images. The result card tells you when this happens.',
+      a: 'Only the first frame is saved, because the PNG files made here are still images. The result tells you when this happens.',
     },
     {
       q: 'Do I need an account to convert files?',
@@ -77,5 +79,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['webp-to-jpg', 'png-to-webp', 'image-converter', 'jpg-to-png', 'compress-image'],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

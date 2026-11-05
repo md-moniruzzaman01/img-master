@@ -1,5 +1,5 @@
 // Open Graph image for every live tool page, generated at build time.
-// Owned by seo-content. Design: brand background, white H1, small logo.
+// Owned by seo-content. Design: lib/seo/og-card.tsx (paper, ink H1 with crimson accent, sun).
 import { ImageResponse } from 'next/og';
 import { getLiveToolPage, getLiveTools } from '@/lib/tools';
 import { OG_SIZE, OgCard } from '@/lib/seo/og-card';
@@ -18,7 +18,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const { slug } = await params;
   const { content } = getLiveToolPage(slug);
   return new ImageResponse(
-    <OgCard heading={content.h1} tagline="Free · No upload · Works on your phone" />,
+    <OgCard
+      heading={content.h1}
+      accent={content.h1Accent}
+      tagline="Free · No upload · Works on your phone"
+    />,
     { ...OG_SIZE },
   );
 }

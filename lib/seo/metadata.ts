@@ -5,7 +5,7 @@
 import type { Metadata } from 'next';
 import { homeContent } from '@/content/home';
 import { siteConfig } from '@/lib/site-config';
-import type { ToolContent, ToolDefinition } from '@/lib/types';
+import type { InfoPageContent, ToolContent, ToolDefinition } from '@/lib/types';
 import { absoluteUrl, siteOrigin } from './url';
 
 export { absoluteUrl, siteOrigin, toPlainText } from './url';
@@ -107,4 +107,12 @@ export function buildToolMetadata(tool: ToolDefinition, content: ToolContent): M
     path: `/${tool.slug}`,
     sharedImage: false,
   });
+}
+
+/**
+ * Info pages: "How it works" (/how-it-works) and "Every tool" (/tools).
+ * They use the shared site card for og:image.
+ */
+export function buildInfoMetadata(content: InfoPageContent, path: string): Metadata {
+  return buildPageMetadata({ title: content.title, description: content.description, path });
 }

@@ -31,11 +31,11 @@ export function Slider({
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className={cx('min-w-0', className)}>
-      <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="type-small font-semibold text-text">
+      <div className="flex items-baseline gap-2">
+        <label htmlFor={id} className="type-small text-muted">
           {label}
         </label>
-        <output htmlFor={id} className="font-semibold tabular-nums text-text">
+        <output htmlFor={id} className="type-small font-bold tabular-nums text-ink">
           {format(value)}
         </output>
       </div>
@@ -50,7 +50,7 @@ export function Slider({
         aria-valuetext={format(value)}
         onChange={(e) => onChange(Number(e.target.value))}
         style={{ '--pct': `${pct}%` } as CSSProperties}
-        className="im-range block h-12 w-full cursor-pointer appearance-none bg-transparent disabled:opacity-60"
+        className="im-range block h-10 w-full cursor-pointer appearance-none bg-transparent disabled:opacity-60"
       />
       {hint && <p className="type-small text-muted">{hint}</p>}
     </div>

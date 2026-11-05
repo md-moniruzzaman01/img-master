@@ -24,6 +24,8 @@ export interface ChipGroupProps<V extends string> {
   className?: string;
   /** Layout of the label: above (default) or inline to the left. */
   inlineLabel?: boolean;
+  /** Segmented only: selected segment ink-filled (default) or card-white. */
+  tone?: 'solid' | 'card';
 }
 
 /**
@@ -40,6 +42,7 @@ export function ChipGroup<V extends string>({
   disabled,
   className,
   inlineLabel,
+  tone = 'solid',
 }: ChipGroupProps<V>) {
   const labelId = useId();
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -85,8 +88,8 @@ export function ChipGroup<V extends string>({
           hideLabel
             ? 'sr-only'
             : inlineLabel
-              ? 'shrink-0 type-small font-semibold text-text'
-              : 'mb-2 block type-small font-semibold text-text',
+              ? 'shrink-0 type-small font-bold text-ink'
+              : 'mb-2 block type-small font-bold text-ink',
         )}
       >
         {label}
@@ -98,8 +101,8 @@ export function ChipGroup<V extends string>({
         onKeyDown={onKeyDown}
         className={cx(
           segmented
-            ? 'inline-flex max-w-full gap-1 rounded-control border border-border bg-surface p-1'
-            : 'no-scrollbar fade-end -mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 py-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0',
+            ? 'inline-flex max-w-full gap-1 rounded-card bg-paper-2 p-1'
+            : 'no-scrollbar fade-end -mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 py-0.5 md:mx-0 md:flex-wrap md:gap-1.5 md:overflow-visible md:px-0',
         )}
       >
         {options.map((o, i) => {
@@ -118,20 +121,22 @@ export function ChipGroup<V extends string>({
               disabled={disabled}
               onClick={() => onChange(o.value)}
               className={cx(
-                'shrink-0 whitespace-nowrap text-base font-semibold tabular-nums',
-                'transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-60',
+                'shrink-0 whitespace-nowrap text-[0.9375rem] font-bold tabular-nums',
+                'transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-45',
                 segmented
                   ? cx(
-                      'min-h-12 min-w-12 flex-1 rounded-[6px] px-4',
+                      'min-h-12 min-w-12 flex-1 rounded-control px-4',
                       checked
-                        ? 'border border-gold bg-gold-tint text-text'
-                        : 'border border-transparent text-text hover:bg-card',
+                        ? tone === 'solid'
+                          ? 'bg-strong text-on-strong'
+                          : 'bg-card text-ink'
+                        : 'text-ink-2 hover:text-ink',
                     )
                   : cx(
-                      'min-h-12 rounded-full border px-4',
+                      'min-h-12 rounded-control border px-4 md:px-2.5',
                       checked
-                        ? 'border-gold bg-gold-tint text-text'
-                        : 'border-border-strong bg-card text-text hover:bg-surface',
+                        ? 'border-strong bg-strong text-on-strong'
+                        : 'border-line bg-card text-ink-2 hover:border-line-strong hover:text-ink',
                     ),
               )}
             >

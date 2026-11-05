@@ -7,7 +7,7 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
-import { SamuraiStage } from '@/components/samurai/samurai-stage';
+import { SamuraiStage, type SamuraiState } from '@/components/samurai/samurai';
 import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { AlertIcon, CheckIcon } from '@/components/ui/icons';
@@ -240,12 +240,12 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       value={m ? (progress.index + progress.ratio) / m : 0}
     />
   ) : state === 'error' ? (
-    <p className="flex items-center gap-2 font-semibold text-danger">
+    <p className="flex items-center gap-2 font-semibold text-accent-strong">
       <AlertIcon size={20} />
       {m === 1 ? toolCopy.failedOne : toolCopy.noneWorked}
     </p>
   ) : m > 0 ? (
-    <p className="flex items-center gap-2 font-semibold text-text">
+    <p className="flex items-center gap-2 font-semibold text-ink">
       <CheckIcon size={20} />
       {state === 'done' ? t.icoDone(m) : toolCopy.doneMany(success.length, m)}
     </p>
@@ -273,23 +273,32 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       statusLine
     );
 
-  const stageState =
+  const stageState: SamuraiState =
     state === 'processing'
-      ? 'working'
+      ? 'cutting'
       : state === 'done' || state === 'partial'
-        ? 'success'
+        ? 'done'
         : state === 'error'
           ? 'error'
           : 'idle';
+
+  const stageText =
+    stageState === 'cutting'
+      ? toolCopy.stage.cutting
+      : stageState === 'done'
+        ? toolCopy.stage.done
+        : stageState === 'error'
+          ? toolCopy.stage.error
+          : toolCopy.stage.idle;
 
   return (
     <div
       data-testid="favicon-shell"
       data-kind={tool.kind}
       data-state={state}
-      className="relative -mx-4 grid gap-4 overflow-clip border-y border-border bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-4 overflow-clip border-y border-line bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
-      <SamuraiStage state={stageState} height={126} heightSm={200} />
+      <SamuraiStage state={stageState} text={stageText} />
 
       <FilePicker
         inputId={inputId}
@@ -298,7 +307,9 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
         onWarmUp={() => void loadEngine().catch(() => {})}
         accept="image/png,.png"
         label={t.icoPick}
-        desktopHint={t.icoHintDesktop}
+        title={t.icoHintDesktop}
+        mobileTitle={t.icoPick}
+        mobileHint={t.icoHint(siteConfig.maxFiles)}
       />
 
       {notice === 'too-many' && <ErrorBanner tone="warning" message={toolCopy.tooMany(maxFiles)} />}
@@ -323,7 +334,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
                     meta={it.result ? metaFor(it.result) : undefined}
                     errorText={it.error?.code === 'UNSUPPORTED_FORMAT' ? t.icoNeedPng : undefined}
                     onDownload={() => onDownloaded('single')}
-                    reserve={{ note: false, share: false }}
+                    reserve={{ note: false }}
                   />
                 </li>
               ))}

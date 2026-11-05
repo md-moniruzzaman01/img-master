@@ -57,8 +57,9 @@ function beginIcon(ctx: Ctx2D, spec: FaviconSpec, size: number): void {
   }
 }
 
-const stackFor = (spec: FaviconSpec) => (spec.mode === 'emoji' ? EMOJI_STACK : FONT_STACK);
-const fontFor = (spec: FaviconSpec, px: number) =>
+const stackFor = (spec: FaviconSpec) =>
+  spec.fontStack || (spec.mode === 'emoji' ? EMOJI_STACK : FONT_STACK);
+export const fontFor = (spec: FaviconSpec, px: number): string =>
   `${spec.mode === 'emoji' ? 400 : spec.fontWeight} ${px}px ${stackFor(spec)}`;
 
 /** Measures the ink bounds of the text at a reference size. */

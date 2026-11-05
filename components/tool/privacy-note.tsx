@@ -1,10 +1,13 @@
 import { cx } from '@/components/ui/cx';
 import { copy } from './copy';
 
-/** "🔒 Your images never leave your device", one small gray line under the picker. */
+/**
+ * "🔒 Processed on this device…", one small line under the picker. Matcha text
+ * (spec §3: matcha = success text, privacy line).
+ */
 export function PrivacyNote({ className }: { className?: string }) {
   return (
-    <p data-testid="privacy-note" className={cx('type-small text-muted', className)}>
+    <p data-testid="privacy-note" className={cx('type-small text-matcha', className)}>
       <span aria-hidden="true">🔒 </span>
       {copy.privacy}
     </p>

@@ -11,13 +11,15 @@ export const content: ToolContent = {
     'png to ico 32x32',
   ],
   shortName: 'PNG to ICO',
-  cardDescription: 'Convert a PNG into a multi-size .ico file.',
+  cardDescription: 'Multi-size .ico files for Windows and old browsers.',
   title: 'PNG to ICO Converter – Free, No Upload | Img Master',
   description:
     'Convert a PNG to ICO with 16, 32 and 48 px icons (plus 256 px for large PNGs). Use it as favicon.ico. Free, runs in your browser, no upload.',
-  h1: 'PNG to ICO Converter',
+  h1: 'PNG to ICO converter',
+  h1Accent: 'ICO',
   subtitle:
     'Convert a PNG to ICO with several icon sizes inside one file, ready to use as favicon.ico.',
+  sideTip: 'Use a square PNG at least 256 pixels wide, so the ICO also gets a 256 px icon.',
   howTo: [
     'Choose a square PNG from your phone or computer.',
     'The tool builds the ICO file right away.',
@@ -82,5 +84,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'png-to-webp',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

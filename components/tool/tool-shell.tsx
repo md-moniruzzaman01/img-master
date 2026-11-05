@@ -22,19 +22,22 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
-import { SamuraiStage } from '@/components/samurai/samurai-stage';
+import { SamuraiStage, type SamuraiState, type StageText } from '@/components/samurai/samurai';
 import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { ChipGroup } from '@/components/ui/chip-group';
-import { AlertIcon, CheckIcon } from '@/components/ui/icons';
+import { cx } from '@/components/ui/cx';
+import { AlertIcon, ArrowRightIcon, CheckIcon } from '@/components/ui/icons';
 import { Switch } from '@/components/ui/switch';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { AdvancedOptions } from './advanced-options';
 import { copy, errorMessage } from './copy';
 import { ErrorBanner } from './error-banner';
 import { FilePicker } from './file-picker';
-import { uniqueNames } from './format';
+import { targetText, uniqueNames } from './format';
 import { FormatSelect } from './format-select';
+import { HERO_FILES_EVENT, HERO_PICK_EVENT, HERO_TOOL_ID } from './hero-bus';
+import { PrivacyNote } from './privacy-note';
 import { ProgressBar } from './progress-bar';
 import { QualitySlider } from './quality-slider';
 import { ResultCard, type CardAction, type ResultItem } from './result-card';
@@ -60,20 +63,34 @@ const IMAGE_KINDS: readonly ToolDefinition['kind'][] = ['compress-to-size', 'com
 /**
  * The interactive island on every tool page (DESIGN.md §4.3). Picks its
  * behavior from `tool.kind` and `tool.preset`.
+ *
+ * `sideTip` — one-line tip shown below the SamuraiStage in the right column (desktop).
+ * `variant` — `'hero'` is the compact, single-column card embedded in the home
+ * hero (spec §5.1 item 1, §6): no samurai panel, no advanced options. It also
+ * answers the home page's hero-bus events (hero-bus.ts) so a CTA or a
+ * page-wide drop target can open its picker / feed it files from outside.
  */
-export function ToolShell({ tool }: { tool: ToolDefinition }) {
+export function ToolShell({
+  tool,
+  sideTip,
+  variant = 'page',
+}: {
+  tool: ToolDefinition;
+  sideTip?: string;
+  variant?: 'page' | 'hero';
+}) {
   if (!IMAGE_KINDS.includes(tool.kind)) {
     return (
       <div
         data-testid="tool-shell"
         data-kind={tool.kind}
-        className="rounded-card border border-border bg-bg p-4 text-muted"
+        className="rounded-card border border-line bg-paper p-4 text-muted"
       >
         {copy.comingSoon}
       </div>
     );
   }
-  return <ImageTool tool={tool} />;
+  return <ImageTool tool={tool} sideTip={sideTip} variant={variant} />;
 }
 
 type ShellState = 'idle' | 'processing' | 'done' | 'partial' | 'error';
@@ -113,9 +130,18 @@ function isIOS(): boolean {
   return /iP(hone|ad|od)/.test(n.userAgent) || (n.platform === 'MacIntel' && n.maxTouchPoints > 1);
 }
 
-function ImageTool({ tool }: { tool: ToolDefinition }) {
+function ImageTool({
+  tool,
+  sideTip,
+  variant = 'page',
+}: {
+  tool: ToolDefinition;
+  sideTip?: string;
+  variant?: 'page' | 'hero';
+}) {
   const slug = tool.slug;
   const kind = tool.kind;
+  const hero = variant === 'hero';
   const verb: Verb = kind === 'convert' ? 'convert' : 'compress';
   const maxFiles = siteConfig.maxFiles;
   const inputId = useId();
@@ -143,6 +169,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   const [announce, setAnnounce] = useState('');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [zipping, setZipping] = useState(false);
+  const [sampleLoading, setSampleLoading] = useState(false);
   const shareSupported = useSyncExternalStore(noopSubscribe, canShareFiles, () => false);
 
   const sourceRef = useRef<File[]>([]);
@@ -340,6 +367,53 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     void run(files, options, 'new');
   }
 
+  /** "No image? Try a sample": draws a sample photo on-device, then runs it like a real pick. */
+  async function trySample() {
+    if (running || sampleLoading) return;
+    setSampleLoading(true);
+    try {
+      const { makeSampleImage } = await import('@/lib/image-engine/sample');
+      const file = await makeSampleImage();
+      handleFiles([file]);
+    } catch {
+      setToast({ id: nextToastId(), text: copy.sampleFailed, tone: 'info' });
+    } finally {
+      setSampleLoading(false);
+    }
+  }
+
+  // Always-fresh ref so the hero-bus listeners below call the latest handleFiles
+  // (closing over the current `running`/`options`) without re-subscribing.
+  const handleFilesRef = useRef(handleFiles);
+  useEffect(() => {
+    handleFilesRef.current = handleFiles;
+  });
+
+  // Hero card only: let the home page's CTA band and page-wide drop target feed
+  // this tool from outside React (hero-bus.ts).
+  useEffect(() => {
+    if (!hero) return;
+    function onPick() {
+      // Scroll the card into view first (the CTA band and page-wide drop target
+      // can both be scrolled away from it), then open the picker.
+      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      document
+        .getElementById(HERO_TOOL_ID)
+        ?.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+      document.getElementById(inputId)?.click();
+    }
+    function onFiles(e: Event) {
+      const files = (e as CustomEvent<File[]>).detail;
+      if (files && files.length > 0) handleFilesRef.current(files);
+    }
+    window.addEventListener(HERO_PICK_EVENT, onPick);
+    window.addEventListener(HERO_FILES_EVENT, onFiles);
+    return () => {
+      window.removeEventListener(HERO_PICK_EVENT, onPick);
+      window.removeEventListener(HERO_FILES_EVENT, onFiles);
+    };
+  }, [hero, inputId]);
+
   /** Change options; re-run now for 1–5 files, or offer "Apply" for bigger batches. */
   function updateOptions(patch: Partial<ToolOptions>, immediate = false) {
     const next = { ...options, ...patch };
@@ -431,6 +505,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   const failedCount = items.filter((it) => it.status === 'failed').length;
   const multi = success.length > 1;
   const totalOut = success.reduce((s, it) => s + it.result.outputBytes, 0);
+  const totalIn = success.reduce((s, it) => s + it.result.inputBytes, 0);
   const state: ShellState = running
     ? 'processing'
     : items.length === 0
@@ -458,7 +533,6 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   const reserveFor = (it: ResultItem) => ({
     // Size targets usually add a note ("Resized to…", "Already under…").
     note: usesTarget(runOpts) || (outputsJpeg && mayHaveAlpha(it.file)),
-    share: shareSupported,
   });
 
   async function downloadAll() {
@@ -495,6 +569,7 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       targetKB={options.targetKB}
       custom={options.custom}
       onChange={(kb, custom) => updateOptions({ targetKB: kb, custom })}
+      hideLabel={hero}
     />
   );
 
@@ -600,12 +675,12 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
       value={m ? (progress.index + progress.ratio) / m : 0}
     />
   ) : state === 'error' ? (
-    <p className="flex items-center gap-2 font-semibold text-danger">
+    <p className="flex items-center gap-2 font-semibold text-accent-strong">
       <AlertIcon size={20} />
       {m === 1 ? copy.failedOne : copy.noneWorked}
     </p>
   ) : m > 0 ? (
-    <p className="flex items-center gap-2 font-semibold text-text">
+    <p className="flex items-center gap-2 font-semibold text-ink">
       <CheckIcon size={20} />
       {state === 'done' ? copy.doneBang(m) : copy.doneMany(success.length, m)}
     </p>
@@ -638,35 +713,95 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
     track('share', { tool: slug });
   };
 
-  const stageState =
+  const smallerKB = sizeMode
+    ? [...SIZE_PRESETS].reverse().find((p) => p < options.targetKB)
+    : undefined;
+
+  const stageState: SamuraiState =
     state === 'processing'
-      ? 'working'
+      ? 'cutting'
       : state === 'done' || state === 'partial'
-        ? 'success'
+        ? 'done'
         : state === 'error'
           ? 'error'
           : 'idle';
-  const hasOptions = primary !== null || advanced.length > 0;
+
+  const stageText: StageText = (() => {
+    switch (stageState) {
+      case 'cutting':
+        return {
+          ...copy.stage.cutting,
+          line: copy.stage.cuttingLine(usesTarget(runOpts) ? targetText(runOpts.targetKB) : undefined),
+        };
+      case 'done':
+        return { ...copy.stage.done, line: copy.stage.doneLine(success.length, totalIn, totalOut) };
+      case 'error':
+        return copy.stage.error;
+      default:
+        return kind === 'convert' ? copy.stage.idleConvert : copy.stage.idle;
+    }
+  })();
+
+  // "1 Target size" above the chips, step 2 is the drop zone's own `step` prop.
+  const stepLabel = hero && usesTarget(options) ? (
+    <p className="flex items-center gap-2 type-small font-bold text-ink">
+      <span aria-hidden="true" className="text-muted">
+        1
+      </span>
+      {copy.stepTarget}
+    </p>
+  ) : null;
 
   return (
     <div
+      id={hero ? HERO_TOOL_ID : undefined}
       data-testid="tool-shell"
       data-kind={kind}
       data-state={state}
-      className="relative -mx-4 grid gap-3 overflow-clip border-y border-border bg-card px-4 py-3 sm:mx-0 sm:grid-cols-[1fr_auto] sm:gap-5 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
+      className={
+        hero
+          ? 'relative grid gap-3 overflow-clip rounded-card border border-line bg-card p-4 sm:p-5 [&>*]:min-w-0'
+          : // Two columns only from lg (spec §5.2: "Two columns ≥ lg"); below that,
+            // everything stacks in document order (samurai row, chips, drop zone),
+            // matching the mobile anatomy, which has no separate tablet treatment.
+            'relative -mx-4 grid gap-3 overflow-clip border-y border-line bg-card px-4 py-3 lg:mx-0 lg:grid-cols-[1fr_auto] lg:gap-5 lg:rounded-card lg:border lg:p-5 [&>*]:min-w-0'
+      }
     >
-      <SamuraiStage
-        state={stageState}
-        height={126}
-        heightSm={200}
-        className="sm:sticky sm:top-4 sm:col-start-2 sm:row-start-1 sm:self-start"
-      />
+      {!hero && (
+        // lg:max-w caps this column's own intrinsic (max-content) width: without
+        // it, the Tip card's unwrapped sentence forces the "auto" grid track to
+        // blow up and take width the chips/drop-zone column needs.
+        <div className="lg:sticky lg:top-4 lg:col-start-2 lg:row-start-1 lg:max-w-[320px] lg:self-start grid gap-3">
+          <SamuraiStage
+            state={stageState}
+            text={stageText}
+          />
+          {/* Spec §5.2's mobile anatomy has no Tip card — only the compact status row. */}
+          {sideTip && (
+            <div className="hidden rounded-card border border-line bg-card p-4 lg:block">
+              <p className="type-eyebrow text-kin-text font-bold mb-1">TIP</p>
+              <p className="type-body text-muted">{sideTip}</p>
+            </div>
+          )}
+        </div>
+      )}
 
-      <div className="grid gap-3 sm:gap-4 sm:col-start-1 sm:row-start-1 [&>*]:min-w-0">
-        {hasOptions && (
-          <div className={running ? 'grid gap-4 opacity-25 transition-opacity' : 'grid gap-4'}>
-            {primary}
-            {advanced.length > 0 && <AdvancedOptions>{advanced}</AdvancedOptions>}
+      <div
+        className={cx(
+          'grid gap-3 lg:gap-4 [&>*]:min-w-0',
+          !hero && 'lg:col-start-1 lg:row-start-1',
+        )}
+      >
+        {primary !== null && (
+          <div className={running ? 'opacity-25 transition-opacity' : undefined}>
+            {hero ? (
+              <div className="grid gap-2">
+                {stepLabel}
+                {primary}
+              </div>
+            ) : (
+              primary
+            )}
           </div>
         )}
 
@@ -675,9 +810,9 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
         {needsApply && (
           <div
             role="status"
-            className="flex flex-col gap-3 rounded-card border border-primary bg-bg p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-card border border-shu bg-paper p-4 sm:flex-row sm:items-center sm:justify-between"
           >
-            <p className="text-text">{copy.optionsChanged}</p>
+            <p className="text-ink">{copy.optionsChanged}</p>
             <Button onClick={() => void run(sourceRef.current, options, 'rerun')}>
               {copy.applyTo(items.length)}
             </Button>
@@ -691,14 +826,39 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
             disabled={running}
             onFiles={handleFiles}
             onWarmUp={() => void loadEngine().catch(() => {})}
+            label={kind === 'convert' ? copy.pickerButtonFormat('images') : copy.pickerButton}
+            title={kind === 'convert' ? copy.dropHereFormat('images') : copy.dropHere}
+            mobileTitle={copy.tapToChoose}
+            hint={copy.pickerHintDesktop(siteConfig.maxFiles)}
+            mobileHint={copy.pickerHintMobile(siteConfig.maxFiles)}
+            step={hero ? '2' : undefined}
+            variant={hero ? 'hero' : 'page'}
           />
+        </div>
+
+        {/* Spec order (§5.2, both mobile and desktop): drop zone, then "More
+            options", then the privacy line. Stays visible after a run (not
+            inside the picker's hidden wrapper) so options stay editable. */}
+        {!hero && advanced.length > 0 && (
+          <div className={running ? 'opacity-25 transition-opacity' : undefined}>
+            <AdvancedOptions>{advanced}</AdvancedOptions>
+          </div>
+        )}
+
+        <div className={m > 0 ? 'hidden' : 'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'}>
+          <PrivacyNote />
+          <SampleLink loading={sampleLoading} onClick={() => void trySample()} />
         </div>
 
         <div className="grid gap-4 [&>*]:min-w-0">
           {m > 0 ? (
             <>
               <div className="im-anim animate-[im-fade-in_150ms_ease-out]">
-                <ResultList headingRef={headingRef} status={statusSlot}>
+                <ResultList
+                  headingRef={headingRef}
+                  status={statusSlot}
+                  tone={state === 'processing' ? 'processing' : state === 'error' ? 'error' : state === 'partial' ? 'partial' : 'done'}
+                >
                   {items.map((it) => (
                     <li key={`${it.id}-${it.file.name}`}>
                       <ResultCard
@@ -724,15 +884,33 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
                 />
               )}
               {/* Present (but hidden) while processing, so it doesn't push content down when done. */}
-              <div className={running ? 'invisible' : undefined} aria-hidden={running || undefined}>
+              <div
+                className={cx(
+                  'flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-4',
+                  running && 'invisible',
+                )}
+                aria-hidden={running || undefined}
+              >
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   disabled={running}
                   onClick={() => document.getElementById(inputId)?.click()}
-                  className="-ml-4"
                 >
                   {copy.again(verb)}
                 </Button>
+                {smallerKB !== undefined && (
+                  <p className="type-small text-muted">
+                    Need it even smaller?{' '}
+                    <button
+                      type="button"
+                      disabled={running}
+                      onClick={() => updateOptions({ targetKB: smallerKB, custom: false })}
+                      className="min-h-12 font-bold text-accent underline-offset-4 hover:underline"
+                    >
+                      Try {targetText(smallerKB)} →
+                    </button>
+                  </p>
+                )}
               </div>
             </>
           ) : (
@@ -751,12 +929,29 @@ function ImageTool({ tool }: { tool: ToolDefinition }) {
   );
 }
 
+/** "No image? Try a sample →" (copy.sample / copy.sampleMobile). Disables itself while loading. */
+function SampleLink({ loading, onClick }: { loading: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      data-testid="try-sample"
+      disabled={loading}
+      onClick={onClick}
+      className="inline-flex min-h-12 items-center gap-1.5 self-start font-bold text-accent underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span className="md:hidden">{copy.sampleMobile}</span>
+      <span className="hidden md:inline">{copy.sample}</span>
+      <ArrowRightIcon size={16} aria-hidden="true" />
+    </button>
+  );
+}
+
 /** Fill color for transparent areas when saving as JPG (shown only when needed). */
 function BackgroundField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const id = useId();
   return (
-    <div className="flex items-center justify-between gap-4 rounded-card border border-border bg-bg p-4">
-      <label htmlFor={id} className="text-text">
+    <div className="flex items-center justify-between gap-4 rounded-card border border-line bg-paper p-4">
+      <label htmlFor={id} className="text-ink">
         <span className="block font-semibold">{copy.backgroundLabel}</span>
         <span className="block type-small text-muted">{copy.backgroundHint}</span>
       </label>
@@ -765,7 +960,7 @@ function BackgroundField({ value, onChange }: { value: string; onChange: (v: str
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-16 shrink-0 cursor-pointer rounded-control border border-border-strong bg-bg p-1"
+        className="h-12 w-16 shrink-0 cursor-pointer rounded-control border border-line-strong bg-paper p-1"
       />
     </div>
   );

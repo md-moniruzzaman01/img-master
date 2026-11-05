@@ -1,5 +1,5 @@
 // Pure layout math for favicons (ENGINE.md §9). No canvas here, so it is unit-tested in Node.
-import type { FaviconShape } from '../../types';
+import type { FaviconShape, FaviconTypeface } from '../../types';
 
 export const BASE_SIZE = 512;
 /** Sizes that are encoded once and reused for the ICO, the files and the previews. */
@@ -10,6 +10,36 @@ export const FONT_STACK =
   'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Bengali", Arial, sans-serif';
 export const EMOJI_STACK =
   '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif';
+
+/** Generic fallbacks after a custom font, per typeface style. */
+export const SERIF_FALLBACK = '"Noto Serif", Georgia, "Times New Roman", serif';
+export const SANS_FALLBACK = 'ui-sans-serif, system-ui, Arial, sans-serif';
+
+const FAMILY_ITEM = /^(?:"[^"\\\n]{1,100}"|'[^'\\\n]{1,100}'|[A-Za-z0-9_-][A-Za-z0-9_ -]{0,99})$/;
+
+/**
+ * Accepts a CSS font-family list such as `'__Yuji_Syuku_abc', '__Yuji_Fallback_abc'`.
+ * Returns it trimmed, or null when it is empty or not a plain family list
+ * (no ;, {}, url(), etc.). A string the canvas can't parse would silently
+ * leave the default 10px font, so anything odd is rejected here.
+ */
+export function cleanFontFamily(family: unknown): string | null {
+  if (typeof family !== 'string') return null;
+  const s = family.trim();
+  if (!s || s.length > 400) return null;
+  const items = s.split(',').map((x) => x.trim());
+  if (items.length > 8 || !items.every((x) => FAMILY_ITEM.test(x))) return null;
+  return items.join(', ');
+}
+
+/** Font stack for text favicons. No custom family → today's system stack. */
+export function textFontStack(
+  typeface: FaviconTypeface | undefined,
+  family: string | null,
+): string {
+  if (!family) return FONT_STACK;
+  return `${family}, ${typeface === 'gothic' ? SANS_FALLBACK : SERIF_FALLBACK}`;
+}
 
 /** Same stack with single quotes so it is safe inside a double-quoted SVG attribute. */
 export const svgFontFamily = (stack: string): string => stack.replace(/"/g, "'");

@@ -11,11 +11,13 @@ export const content: ToolContent = {
     'png to webp for website',
   ],
   shortName: 'PNG to WebP',
-  cardDescription: 'Shrink PNG files by saving them as WebP, transparency kept.',
+  cardDescription: 'Usually smaller, still transparent.',
   title: 'Convert PNG to WebP Online – Free, No Upload | Img Master',
   description: `Convert PNG images to lighter WebP files for faster websites, with transparent backgrounds kept. Batch up to ${siteConfig.maxFiles}, save as ZIP. Free, no upload.`,
   h1: 'Convert PNG to WebP',
+  h1Accent: 'WebP',
   subtitle: 'Make PNG images lighter for your website as WebP, keeping transparent backgrounds.',
+  sideTip: 'For logos with sharp text, keep the quality at 90 or higher and check the edges.',
   howTo: [
     'Choose the PNG files you want to make lighter.',
     'They are converted to WebP at once, at quality 90 unless you change it.',
@@ -55,7 +57,7 @@ export const content: ToolContent = {
     },
     {
       q: 'How much smaller will my files be?',
-      a: 'It depends on the image. Photos and screenshots usually shrink a lot, while tiny icons may change very little. The result card shows the exact before and after sizes for each file.',
+      a: 'It depends on the image. Photos and screenshots usually shrink a lot, while tiny icons may change very little. The result shows the exact before and after sizes for each file.',
     },
     {
       q: "Why does it say my browser can't save WebP?",
@@ -78,5 +80,5 @@ export const content: ToolContent = {
     'compress-image',
     'favicon-generator',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

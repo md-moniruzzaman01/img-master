@@ -14,7 +14,10 @@ function makeFavicons(src: FaviconSource): JobHandle<FaviconPackage> {
     src.mode === 'image'
       ? { file: src.file, options: { ...src, file: undefined } }
       : { file: null, options: { ...src } };
-  const handle = submit<FaviconWire>('favicons', file, options);
+  // Page-loaded fonts are not visible in a Web Worker, so text in a custom
+  // font is drawn on the main thread (6 small canvases; fast). See favicon/job.ts.
+  const main = src.mode === 'text' && !!src.fontFamily && typeof document !== 'undefined';
+  const handle = submit<FaviconWire>('favicons', file, options, undefined, { main });
   const promise = handle.promise.then((w): FaviconPackage => {
     const u = (b: Blob) => URL.createObjectURL(b);
     return {
@@ -39,6 +42,7 @@ export const imageEngine: ImageEngine = {
     submit<EngineResult>('convert', file, { ...opts }, onProgress),
   compress: (file, opts, onProgress) =>
     submit<EngineResult>('compress', file, { ...opts }, onProgress),
+  resize: (file, opts, onProgress) => submit<EngineResult>('resize', file, { ...opts }, onProgress),
   pngToIco: (file) => submit<EngineResult>('pngToIco', file, {}),
   makeFavicons,
   zip: async (files) => (await import('./zip')).zipFiles(files),

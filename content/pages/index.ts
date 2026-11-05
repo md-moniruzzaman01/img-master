@@ -19,6 +19,7 @@ import { content as faviconGenerator } from './favicon-generator';
 import { content as faviconFromText } from './favicon-from-text';
 import { content as faviconFromEmoji } from './favicon-from-emoji';
 import { content as pngToIco } from './png-to-ico';
+import { content as resizeImage } from './resize-image';
 
 export const toolContent: Readonly<Partial<Record<string, ToolContent>>> = {
   'compress-image': compressImage,
@@ -39,4 +40,5 @@ export const toolContent: Readonly<Partial<Record<string, ToolContent>>> = {
   'favicon-from-text': faviconFromText,
   'favicon-from-emoji': faviconFromEmoji,
   'png-to-ico': pngToIco,
+  'resize-image': resizeImage,
 };

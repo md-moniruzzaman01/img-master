@@ -52,7 +52,7 @@ function ColorField({
   const id = useId();
   return (
     <div className="min-w-0">
-      <label htmlFor={id} className="mb-1 block type-small font-semibold text-text">
+      <label htmlFor={id} className="mb-1 block type-small font-semibold text-ink">
         {label}
       </label>
       <input
@@ -62,7 +62,7 @@ function ColorField({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         data-testid="color-input"
-        className="block h-12 w-full cursor-pointer rounded-control border border-border-strong bg-bg p-1 disabled:cursor-not-allowed disabled:opacity-50"
+        className="block h-12 w-full cursor-pointer rounded-control border border-line-strong bg-paper p-1 disabled:cursor-not-allowed disabled:opacity-50"
       />
     </div>
   );
@@ -244,7 +244,7 @@ function EmojiStyle({ o, set }: { o: EmojiOpts; set: (p: Partial<EmojiOpts>) => 
 }
 
 const FIELD =
-  'block h-14 w-full rounded-control border border-border-strong bg-bg px-4 text-center text-[1.5rem] font-semibold text-text';
+  'block h-14 w-full rounded-control border border-line-strong bg-paper px-4 text-center text-[1.5rem] font-semibold text-ink';
 
 function TextField({
   value,
@@ -260,7 +260,7 @@ function TextField({
   const invalid = value.trim() === '';
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block type-small font-semibold text-text">
+      <label htmlFor={id} className="mb-1 block type-small font-semibold text-ink">
         {t.textLabel}
       </label>
       <input
@@ -275,13 +275,13 @@ function TextField({
         aria-describedby={invalid ? hintId : undefined}
         data-testid="text-input"
         onChange={(e) => onChange(limitGraphemes(e.target.value, MAX_TEXT, 'first'))}
-        className={cx(FIELD, invalid && 'border-danger')}
+        className={cx(FIELD, invalid && 'border-shu')}
       />
       {afterInput}
       {/* Always present, so showing it never moves the content below. */}
       <p
         id={hintId}
-        className={cx('mt-1 min-h-5 type-small', invalid ? 'text-danger' : 'invisible')}
+        className={cx('mt-1 min-h-5 type-small', invalid ? 'text-accent-strong' : 'invisible')}
       >
         {t.textInvalid}
       </p>
@@ -304,7 +304,7 @@ function EmojiField({
   return (
     <div className="grid gap-2">
       <div>
-        <label htmlFor={id} className="mb-1 block type-small font-semibold text-text">
+        <label htmlFor={id} className="mb-1 block type-small font-semibold text-ink">
           {t.emojiLabel}
         </label>
         <input
@@ -320,12 +320,12 @@ function EmojiField({
           data-testid="emoji-input"
           onChange={(e) => onChange(limitGraphemes(e.target.value, 1, 'last'))}
           onFocus={(e) => e.currentTarget.select()}
-          className={cx(FIELD, invalid && 'border-danger')}
+          className={cx(FIELD, invalid && 'border-shu')}
         />
         {afterInput}
         <p
           id={hintId}
-          className={cx('mt-1 min-h-5 type-small', invalid ? 'text-danger' : 'text-muted')}
+          className={cx('mt-1 min-h-5 type-small', invalid ? 'text-accent-strong' : 'text-muted')}
         >
           {invalid ? t.emojiInvalid : t.emojiHint}
         </p>

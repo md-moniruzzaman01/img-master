@@ -12,31 +12,59 @@ export const content: ToolContent = {
     'compress jpg to 20kb',
     'resize signature to 20kb',
   ],
-  shortName: 'To 20KB',
-  cardDescription: 'Shrink a photo or signature to under 20KB.',
+  shortName: 'To 20 KB',
+  cardDescription: 'Signatures, tiny ID photos and strict portals.',
   title: 'Compress Image to 20KB Online – Free, No Upload | Img Master',
   description:
-    'Shrink a photo or a signature to under 20KB in seconds. Edges and faces stay as clear as the size allows, and nothing leaves your phone. Free, no signup.',
-  h1: 'Compress Image to 20KB',
-  subtitle: 'Make a photo or signature under 20KB for online forms, right on your phone.',
+    'Shrink a photo or a signature to under 20 KB in seconds. Edges and faces stay as clear as the size allows, and nothing leaves your phone. Free, no signup.',
+  h1: 'Compress image to 20 KB',
+  h1Accent: '20 KB',
+  subtitle: 'Make a photo or signature under 20 KB for online forms, right on your phone.',
+  sideTip: 'Crop close around a signature before you start. Empty paper still uses bytes.',
+  useCases: {
+    heading: 'Where a 20 KB limit shows up',
+    intro: 'Check the exact rule on your form. A photo and a signature may have different limits.',
+    items: [
+      {
+        icon: 'document',
+        title: 'Signature uploads',
+        text: 'A photographed or scanned signature for a form',
+      },
+      {
+        icon: 'cap',
+        title: 'Exam & admission forms',
+        text: 'Small applicant photos with a tight size cap',
+      },
+      {
+        icon: 'globe',
+        title: 'Government portals',
+        text: 'Online services that accept only tiny files',
+      },
+      {
+        icon: 'phone',
+        title: 'Weak mobile data',
+        text: 'Files small enough to send on a poor signal',
+      },
+    ],
+  },
   howTo: [
     'Tap Choose images and pick a photo or a picture of your signature.',
-    'The 20KB size is already selected, so it starts shrinking at once.',
+    'The 20 KB size is already selected, so it starts shrinking at once.',
     'Tap Download to save the JPG, or Share to send it to another app.',
   ],
-  howToHeading: 'How to compress an image to 20KB',
+  howToHeading: 'How to compress an image to 20 KB',
   sections: [
     {
-      heading: 'What fits in 20KB',
+      heading: 'What fits in 20 KB',
       paragraphs: [
-        'To compress an image to 20KB, the tool lowers the JPG quality step by step. If that is not enough, it also makes the picture smaller in pixels. 20KB is a very small file, and a photo from a phone camera is many times bigger, so expect a small width and height in the result.',
-        'That is fine for the places where a 20KB limit is used. Forms often ask for a signature or a small photo at this size, and they show it small on screen or on a printed card. The result card tells you the final dimensions before you download.',
+        'To compress an image to 20 KB, the tool lowers the JPG quality step by step. If that is not enough, it also makes the picture smaller in pixels. 20 KB is a very small file, and a photo from a phone camera is many times bigger, so expect a small width and height in the result.',
+        'That is fine for the places where a 20 KB limit is used. Forms often ask for a signature or a small photo at this size, and they show it small on screen or on a printed card. The result tells you the final dimensions before you download.',
       ],
     },
     {
-      heading: 'Compress a signature to 20KB and keep it readable',
+      heading: 'Compress a signature to 20 KB and keep it readable',
       paragraphs: [
-        'A signature is thin dark lines on plain paper. That kind of picture compresses well, so it can stay sharp at 20KB if the photo itself is clean. Most of the work happens before you open this page:',
+        'A signature is thin dark lines on plain paper. That kind of picture compresses well, so it can stay sharp at 20 KB if the photo itself is clean. Most of the work happens before you open this page:',
       ],
       list: [
         'Sign with a black or dark blue pen on plain white paper.',
@@ -46,33 +74,33 @@ export const content: ToolContent = {
       ],
     },
     {
-      heading: 'When 20KB is not reachable',
+      heading: 'When 20 KB is not reachable',
       paragraphs: [
-        'A busy picture, such as a group photo or a street scene, may not fit in 20KB and still look like anything. In that case the tool tells you, instead of handing you a file full of blocks. You can then allow smaller dimensions, or check whether the form accepts a larger file, such as [50KB](/compress-image-to-50kb).',
-        'Leave **Keep original dimensions** switched off at this size. Keeping a large width and height inside 20KB almost always looks worse than a smaller, cleaner picture.',
+        'A busy picture, such as a group photo or a street scene, may not fit in 20 KB and still look like anything. In that case the tool tells you, instead of handing you a file full of blocks. You can then allow smaller dimensions, or check whether the form accepts a larger file, such as [50 KB](/compress-image-to-50kb).',
+        'Leave **Pixel size** on its default at this size, not on Keep exact. Keeping a large width and height inside 20 KB almost always looks worse than a smaller, cleaner picture.',
       ],
     },
   ],
   tips: [
-    'Crop first. Less area means more detail in the same 20KB.',
+    'Crop first. Less area means more detail in the same 20 KB.',
     'Keep JPG as the output unless the form clearly says it accepts WebP.',
     'The downloaded file is named like your-photo-20kb.jpg, so it is easy to find in your Downloads folder.',
   ],
   faqs: [
     {
-      q: 'Will my photo still look clear at 20KB?',
+      q: 'Will my photo still look clear at 20 KB?',
       a: 'It depends on the photo. Signatures and simple head-and-shoulders photos usually look fine, because they are plain. Busy photos lose more detail. Cropping before you compress helps a lot.',
     },
     {
-      q: 'Why is my 20KB image so small in pixels?',
-      a: 'To fit in 20KB, the tool often has to reduce the width and height as well as the quality. A smaller picture with clean edges looks better than a large one covered in blocky marks. The result shows the exact dimensions.',
+      q: 'Why is my 20 KB image so small in pixels?',
+      a: 'To fit in 20 KB, the tool often has to reduce the width and height as well as the quality. A smaller picture with clean edges looks better than a large one covered in blocky marks. The result shows the exact dimensions.',
     },
     {
-      q: 'The form says my file is bigger than 20KB. Why?',
-      a: 'Some websites count 1KB as 1,000 bytes and others as 1,024 bytes. Img Master keeps the file under 20KB both ways, so this should not happen. If it does, make sure you chose the downloaded file and not the original photo.',
+      q: 'The form says my file is bigger than 20 KB. Why?',
+      a: 'Some websites count 1 KB as 1,000 bytes and others as 1,024 bytes. Img Master keeps the file under 20 KB both ways, so this should not happen. If it does, make sure you chose the downloaded file and not the original photo.',
     },
     {
-      q: 'Can I compress a PNG signature to 20KB?',
+      q: 'Can I compress a PNG signature to 20 KB?',
       a: 'Yes. You can pick a PNG, WebP or other common image. The result is saved as a JPG, and a transparent background becomes white.',
     },
     {
@@ -84,8 +112,8 @@ export const content: ToolContent = {
     'compress-image-to-50kb',
     'compress-image-to-100kb',
     'compress-image',
+    'resize-image',
     'png-to-jpg',
-    'webp-to-jpg',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

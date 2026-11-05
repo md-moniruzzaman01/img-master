@@ -26,11 +26,11 @@ export function ErrorBanner({
       data-testid="error-banner"
       className={cx(
         'flex flex-col gap-3 rounded-card border bg-card p-4 sm:flex-row sm:items-center sm:justify-between',
-        danger ? 'border-danger' : 'border-border-strong',
+        danger ? 'border-shu' : 'border-line-strong',
         className,
       )}
     >
-      <p className={cx('flex items-start gap-2', danger ? 'text-danger' : 'text-text')}>
+      <p className={cx('flex items-start gap-2', danger ? 'text-accent-strong' : 'text-ink')}>
         <AlertIcon size={20} className="mt-0.5 shrink-0" />
         <span className="min-w-0 font-display text-lg [overflow-wrap:anywhere]">{message}</span>
       </p>

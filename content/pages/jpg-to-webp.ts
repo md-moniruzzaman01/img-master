@@ -11,12 +11,14 @@ export const content: ToolContent = {
     'jpg to webp batch',
   ],
   shortName: 'JPG to WebP',
-  cardDescription: 'Turn JPG photos into lighter WebP files for the web.',
+  cardDescription: 'Lighter web images.',
   title: 'Convert JPG to WebP Online – Free, No Upload | Img Master',
   description:
     'Turn JPG photos into smaller WebP images for a faster website. Convert a batch at once and save as ZIP. Works in your browser, free, nothing uploaded.',
   h1: 'Convert JPG to WebP',
+  h1Accent: 'WebP',
   subtitle: 'Turn JPG photos into lighter WebP files for your website, a whole batch at a time.',
+  sideTip: 'Check one photo at full size before you convert the whole batch.',
   howTo: [
     'Pick your JPG photos. You can select many at once.',
     'Each photo is saved as WebP right after you pick it.',
@@ -68,7 +70,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Can I set a file size instead of a quality?',
-      a: 'Not on this page. If you need each photo under a size such as 200KB, use [Compress to 200KB](/compress-image-to-200kb) and choose WebP as the output format.',
+      a: 'Not on this page. If you need each photo under a size such as 200 KB, use [Compress to 200 KB](/compress-image-to-200kb) and choose WebP as the output format.',
     },
   ],
   related: [
@@ -78,5 +80,5 @@ export const content: ToolContent = {
     'image-converter',
     'compress-image',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

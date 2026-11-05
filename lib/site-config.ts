@@ -32,6 +32,12 @@ export const siteConfig = {
   /** Sword sounds for new visitors. Off by default; visitors can turn them on in the header. */
   soundEnabled: false,
 
+  /**
+   * Light ("Washi") and dark ("Sumi") themes. With no saved choice the site follows
+   * prefers-color-scheme. The inline script in app/layout.tsx reads the same key.
+   */
+  theme: { storageKey: 'im-theme', attribute: 'data-theme' },
+
   ads: {
     enabled: false,
     /** Allowed positions only (GROWTH.md §5). */

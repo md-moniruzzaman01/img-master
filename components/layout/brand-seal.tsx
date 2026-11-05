@@ -1,26 +1,16 @@
-/** Small crimson hanko seal with 画 ("picture"). Decorative: the logo text is the name. */
-export function BrandSeal({ size = 18 }: { size?: number }) {
+import { cx } from '@/components/ui/cx';
+
+/** Crimson hanko seal with 刃 ("blade"). Decorative: the logo text is the name. */
+export function BrandSeal({ className }: { className?: string }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 18 18"
+    <span
       aria-hidden="true"
-      focusable="false"
-      className="shrink-0"
+      className={cx(
+        'kanji inline-flex size-8 shrink-0 items-center justify-center rounded-[3px] bg-shu text-[1.1875rem] leading-none text-white lg:size-[34px] lg:text-xl',
+        className,
+      )}
     >
-      <rect width="18" height="18" rx="3" className="fill-primary" />
-      <text
-        x="9"
-        y="14"
-        textAnchor="middle"
-        fontSize="13"
-        fontWeight="700"
-        className="fill-on-primary"
-        fontFamily="var(--font-noto-serif), Georgia, serif"
-      >
-        画
-      </text>
-    </svg>
+      刃
+    </span>
   );
 }

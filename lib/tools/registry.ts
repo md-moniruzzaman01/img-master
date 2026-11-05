@@ -109,7 +109,7 @@ export const tools: readonly ToolDefinition[] = [
     slug: 'resize-image',
     kind: 'resize',
     category: 'resize',
-    status: 'draft',
+    status: 'live',
     phase: 2,
     hub: true,
     preset: {},

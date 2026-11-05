@@ -29,7 +29,7 @@ export function targetText(kb: number): string {
 
 /** Target for chips: 50 → "50KB", 1000 → "1MB". */
 export function targetChip(kb: number): string {
-  return kb >= 1000 && kb % 100 === 0 ? `${kb / 1000}MB` : `${kb}KB`;
+  return kb >= 1000 && kb % 100 === 0 ? `${kb / 1000} MB` : `${kb} KB`;
 }
 
 /** Percent change from input to output; positive means smaller. */

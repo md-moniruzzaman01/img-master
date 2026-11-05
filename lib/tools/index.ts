@@ -2,15 +2,18 @@
 import { toolContent } from '@/content/pages';
 import type {
   Crumb,
+  SearchItem,
   ToolCardData,
   ToolCategory,
   ToolContent,
   ToolDefinition,
   ToolNavGroup,
 } from '../types';
+import { getToolGlyph } from './glyphs';
 import { categoryLabels, categoryOrder, tools } from './registry';
 
 export { categoryLabels, categoryOrder, tools } from './registry';
+export { categoryGlyphs, getToolGlyph, pageGlyphs } from './glyphs';
 
 export function getTool(slug: string): ToolDefinition | undefined {
   return tools.find((t) => t.slug === slug);
@@ -51,7 +54,39 @@ export function getToolCard(slug: string): ToolCardData | undefined {
     category: tool.category,
     shortName: content.shortName,
     description: content.cardDescription,
+    glyph: getToolGlyph(tool),
   };
+}
+
+/** Number of live tools, for copy like "17 tools". Favicon text/emoji are tabs of the generator, so they don't count. */
+export function getLiveToolCount(): number {
+  return getLiveTools().filter((t) => t.kind !== 'favicon-text' && t.kind !== 'favicon-emoji').length;
+}
+
+/** Everything the Ctrl+K search and the "Every tool" filter can find. */
+export function getSearchIndex(): SearchItem[] {
+  return getLiveTools().flatMap((tool) => {
+    const content = getToolContent(tool.slug);
+    if (!content) return [];
+    const words = [
+      content.h1,
+      content.shortName,
+      content.primaryKeyword,
+      ...content.secondaryKeywords,
+      tool.slug.replace(/-/g, ' '),
+    ];
+    return [
+      {
+        slug: tool.slug,
+        href: `/${tool.slug}`,
+        title: content.shortName,
+        description: content.cardDescription,
+        glyph: getToolGlyph(tool),
+        category: tool.category,
+        keywords: Array.from(new Set(words.map((w) => w.toLowerCase()))),
+      },
+    ];
+  });
 }
 
 /** Card data for a list of slugs, skipping any that aren't live. */

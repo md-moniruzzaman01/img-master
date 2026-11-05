@@ -12,7 +12,9 @@ lib/image-engine/
 ├─ run-job.ts        # job runner shared by the worker and the main-thread fallback
 ├─ capabilities.ts   # feature detection (cached)
 ├─ decode.ts         # File/Blob → ImageBitmap (orientation, memory guard)
-├─ resize.ts         # high-quality downscale
+├─ resize.ts         # high-quality scaling (renderScaled never upscales; renderAnySize may)
+├─ resize-job.ts     # resize tool: size math (resizeTarget) and the job
+├─ sample.ts         # makeSampleImage(): on-device sample photo for "Try a sample"
 ├─ encode.ts         # canvas → Blob for jpeg/png/webp, WebP support check
 ├─ compress-to-size.ts  # target-size search (pure logic + encoder injection)
 ├─ convert.ts
@@ -59,13 +61,25 @@ export type EngineErrorCode =
   | 'TARGET_UNREACHABLE'
   | 'ENCODE_UNSUPPORTED'  // e.g. browser can't encode WebP
   | 'OUT_OF_MEMORY'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'INVALID_OPTIONS';     // bad user input (resize to 0 px, percent 1000, target 0 KB); show error.message
 
 export interface CompressToSizeOptions {
   targetKB: number;            // decimal KB as shown to users (1MB page uses 1000)
   format?: 'jpeg' | 'webp';    // default 'jpeg'
   keepDimensions?: boolean;    // default false
+  maxWidth?: number;           // scale down first so width ≤ maxWidth (ratio kept); undefined = keep
   background?: string;         // for alpha → JPG, default '#ffffff'
+}
+
+export interface ResizeOptions {
+  width?: number;              // px
+  height?: number;             // px
+  percent?: number;            // 1–400; wins over width/height when set
+  keepRatio?: boolean;         // default true
+  format?: ImageFormat | 'same'; // default 'same'
+  quality?: number;            // 0–1 for lossy, default 0.9
+  background?: string;         // alpha → JPG, default '#ffffff'
 }
 
 export interface ConvertOptions {
@@ -82,7 +96,7 @@ export interface CompressOptions {
 
 export type FaviconSource =
   | { mode: 'image'; file: File; zoom: number; padding: number; background: string | 'transparent'; shape: 'square' | 'rounded' | 'circle' }
-  | { mode: 'text'; text: string; fontWeight: 400 | 600 | 800; color: string; background: string; shape: 'square' | 'rounded' | 'circle'; padding: number }
+  | { mode: 'text'; text: string; typeface?: 'brush' | 'mincho' | 'gothic'; fontFamily?: string; fontWeight: 400 | 600 | 800; color: string; background: string; shape: 'square' | 'rounded' | 'circle'; padding: number }
   | { mode: 'emoji'; emoji: string; background: string | 'transparent'; shape: 'square' | 'rounded' | 'circle'; padding: number };
 
 export interface FaviconPackage {
@@ -102,6 +116,7 @@ export interface ImageEngine {
   compressToSize(file: File, opts: CompressToSizeOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
   convert(file: File, opts: ConvertOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
   compress(file: File, opts: CompressOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
+  resize(file: File, opts: ResizeOptions, onProgress?: ProgressFn): JobHandle<EngineResult>;
   pngToIco(file: File): JobHandle<EngineResult>;
   makeFavicons(src: FaviconSource): JobHandle<FaviconPackage>;
   zip(files: { name: string; blob: Blob }[]): Promise<Blob>;
@@ -116,6 +131,8 @@ export interface Capabilities {
   maxPixels: number;
 }
 ```
+
+`lib/types.ts` is the source of truth; the block above is kept in step with it.
 
 Also export a **mock engine** (`lib/image-engine/mock.ts`, written by the lead in Phase 0) with the same interface, fake delays and fake sizes, so the UI can be built before the real engine exists.
 
@@ -140,11 +157,22 @@ If `encodeWebp` is false, WebP outputs fail with `ENCODE_UNSUPPORTED` and the UI
 5. Detect alpha cheaply: for PNG/WebP/GIF inputs, draw a 64×64 sample and check for any alpha < 255.
 6. Always `close()` bitmaps when done.
 
-## 5. Resize (`resize.ts`)
+## 5. Resize (`resize.ts`, `resize-job.ts`)
 
-- Keep aspect ratio. Never upscale.
+Scaling helpers:
+
+- `renderScaled` (compress, compress to size, convert, favicons): keeps aspect ratio and **never upscales**.
+- `renderAnySize` (resize tool only): each axis may shrink or grow. Upscaling is allowed up to the pixel cap.
 - For reductions bigger than 2×, step down by halves, then do the final step; set `imageSmoothingQuality = 'high'`. This avoids the jagged look of a single big downscale.
 - When flattening alpha for JPG, fill the background color before drawing (note `transparency-flattened`).
+
+Resize tool (`resizeTarget`, pure and unit-tested):
+
+- `percent` (1–400) wins when set, relative to the image's real size (before any memory downscale, `Decoded.fullWidth/fullHeight`).
+- Otherwise width and/or height in px (rounded). One side → the other follows the ratio. Both + `keepRatio` (default true) → fit inside the box. Both + `keepRatio: false` → exactly that size.
+- Bad input (no size, ≤ 0, NaN, percent out of range) → `INVALID_OPTIONS`. Over the pixel cap or over 16,384 px on a side → `INVALID_OPTIONS` with `detail: { width, height }` = the largest allowed size with the same shape.
+- `format: 'same'`: JPG/PNG/WebP keep their format; GIF, BMP, HEIC and others become PNG; WebP on a browser that can't write WebP becomes PNG. An explicit WebP output still fails with `ENCODE_UNSUPPORTED`.
+- Quality default 0.9 for lossy output. No `resized` note (resizing is the point of the tool).
 
 ## 6. Compress to size (`compress-to-size.ts`)
 
@@ -188,6 +216,8 @@ Approved changes (owner, 2026-10-23):
 - **Probe before step 1:** for inputs over 2 MP, first encode a ~1 MP copy at Q_MAX. If a conservative estimate from it (× pixel ratio × 0.3) is still over the target, skip the full-size check. The probe counts toward MAX_ENCODES and is never returned as a result.
 - **Faster shrinking in step 5:** scale by `min(SCALE_STEP, √(target / bytes))` instead of always SCALE_STEP, clamped so the short side stays ≥ MIN_SIDE.
 
+`maxWidth` (optional): before step 1, scale the source down so width ≤ maxWidth (ratio kept, never upscaled); the search then runs from that size (W, H above are the scaled size). With `keepDimensions` the output stays at the maxWidth size. A non-positive or missing value keeps the original size. A target that is not a positive finite number fails with `INVALID_OPTIONS` before decoding.
+
 Notes:
 - Report progress after each encode (`stage: 'search'`, ratio = encodes / MAX_ENCODES as an upper bound).
 - Check the cancel flag between encodes.
@@ -208,11 +238,12 @@ Decode → optional `maxWidth` resize → encode at the chosen quality in the ch
 ## 9. Favicons (`favicon/`)
 
 - `render.ts`: draw the source into a square canvas at 512px with shape mask (square, rounded with 20% radius, circle), padding and background; text uses the system font stack centered with font size fitted to the box; emoji uses the platform emoji font. Then downscale to 192, 180, 48, 32 and 16 with the stepped resize. For text and emoji at 16 and 32, render directly at that size instead of downscaling, which gives crisper icons.
+- **Text in a page-loaded font** (`fontFamily`, from next/font, already loaded by the UI): fonts in `document.fonts` are not visible inside a Web Worker, so these jobs run on the **main thread** (see §10). The engine awaits `document.fonts.load()` (capped at 3 s; a no-op when already loaded) before measuring. The font stack is `fontFamily` + a serif fallback (`mincho`, `brush`, unset) or a sans fallback (`gothic`). `fontFamily` must be a plain CSS family list (quoted names, identifiers, commas); anything else is ignored and the icon renders with the default system stack. Without `fontFamily`, rendering is unchanged regardless of `typeface`.
 - `ico.ts`: write the ICO container with embedded PNGs.
   - Header (6 bytes): reserved `0`, type `1`, image count.
   - Directory entry per image (16 bytes): width (0 means 256), height, color count `0`, reserved `0`, planes `1`, bit count `32`, byte size of PNG data, byte offset.
   - Then the PNG data blocks in order. `favicon.ico` holds 16, 32 and 48.
-- `svg.ts`: text and emoji modes also produce `favicon.svg` (vector, crisp at any size).
+- `svg.ts`: text and emoji modes also produce `favicon.svg` (vector, crisp at any size). **Exception:** text in a page-loaded font gets no `favicon.svg` (and no SVG line in the snippet and README): the visitor's site won't have our font, and browsers prefer the SVG, so the tab would show a different font than the ICO and PNGs.
 - `package.ts`: build `site.webmanifest` (name, short_name, icons 192/512, theme and background color), the HTML snippet and `README.txt`.
 
 Snippet:
@@ -231,9 +262,10 @@ Snippet:
 - **Pool size:** 1 worker if `navigator.hardwareConcurrency <= 4` or `deviceMemory <= 2`, otherwise 2.
 - **Queue:** jobs run in order; one image at a time per worker to limit memory.
 - **Messages:**
-  - main → worker: `{ id, type: 'compressToSize' | 'convert' | 'compress' | 'pngToIco' | 'favicons', file, options }` (Blobs and Files are structured-cloneable)
+  - main → worker: `{ id, type: 'compressToSize' | 'convert' | 'compress' | 'resize' | 'pngToIco' | 'favicons', file, options, maxPixels }` (Blobs and Files are structured-cloneable)
   - worker → main: `{ id, type: 'progress', stage, ratio }`, `{ id, type: 'done', result }`, `{ id, type: 'error', code, message, detail? }`
   - main → worker: `{ id, type: 'cancel' }`
+- **Main-thread jobs:** `submit(..., { main: true })` puts a job on a separate main-thread queue even when workers are available. Used for text favicons with `fontFamily` (§9); about 100 ms on desktop.
 - **Fallback:** if `workerCanvas` is false, run the same `run-job.ts` on the main thread with `HTMLCanvasElement`, yielding with `await new Promise(r => setTimeout(r))` between encodes so the UI stays responsive.
 - **Create the worker** with `new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })`. Confirm it is emitted correctly in the static export build.
 - **Out of memory:** catch allocation failures (`RangeError`, failed `convertToBlob`) and retry once at half the pixel cap; then `OUT_OF_MEMORY`.
@@ -243,6 +275,7 @@ Snippet:
 - Compress to size: `{base}-{target}kb.jpg` (or `-1mb`)
 - Convert: `{base}.{ext}`
 - Compress: `{base}-compressed.{ext}`
+- Resize: `{base}-{w}x{h}.{ext}` (e.g. `photo-800x600.jpg`)
 - Sanitize: keep letters, numbers, dashes and underscores; max 60 characters; fallback `image`.
 - Duplicates in one batch get `-2`, `-3`.
 
@@ -253,6 +286,10 @@ Snippet:
 - `compress-to-size`: with a fake encoder modeling `bytes ≈ pixels × f(quality)`, check that results are always ≤ target, that the highest passing quality is chosen, that scaling happens only when needed, that `keepDimensions` never scales, that `MAX_ENCODES` is respected, and that impossible targets throw `TARGET_UNREACHABLE`.
 - `ico`: header bytes, directory offsets and sizes are correct for 1, 3 and 4 images; 256px stored as `0`.
 - `names`: sanitizing, extensions, duplicates.
+- `resize`: ratio math, percent, exact size, rounding, validation (`INVALID_OPTIONS`), alpha flatten note, "same" format rules; the job runs against a fake canvas (`__tests__/fake-canvas.ts`).
+- `compress-to-size-job`: `maxWidth` (never encodes wider; with `keepDimensions`; no-op values), invalid targets.
+- `favicon-font`: font-family cleaning, font stacks, no SVG for custom fonts.
+- `sample`: drawing plan (size, sky, sun above hills, three layers) and `makeSampleImage` with a stubbed canvas.
 - Target math: 50KB → ≤ 49,500 bytes; 1MB page → ≤ 990,000 bytes.
 
 ### Browser (owned by qa-reviewer, see its agent file)
@@ -268,4 +305,5 @@ Playwright runs the real tool pages with fixtures and checks real outputs, timin
 | 12 MP photo → 20 KB | < 5 s throttled |
 | WebP → JPG, 2 MP | < 0.5 s desktop |
 | Favicon package | < 1 s desktop |
+| `makeSampleImage()` (1600×1067 JPG, ~355 KB, drawn on the device, no network; separate ~1.7 KB gzipped chunk loaded with `import()`) | measured 150–230 ms desktop, ~0.8 s at 4× throttle |
 | Engine code loaded on the main thread before first use | ≤ 15 KB gzipped (load the rest in the worker) |
