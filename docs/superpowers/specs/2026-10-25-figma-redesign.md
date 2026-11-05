@@ -103,7 +103,7 @@ Mobile (`mobile-compress-50kb-ready-*`): breadcrumbs, H1 (no big glyph), one-lin
 
 Mobile results (`mobile-compress-50kb-result-*`): banner, one card per file (thumb, name, before → after, quality line, Compare + Save buttons side by side), "Need it smaller? Try 20 KB →", then a full-width crimson "Download all (ZIP) · 143 KB" and "Compress more photos" link. After processing, scroll the banner into view (no sticky bar).
 
-All copy keeps `siteConfig.maxFiles` (10). Never "up to 20".
+All copy keeps `siteConfig.maxFiles` (20).
 
 ### 5.4 Favicon generator (`desktop-favicon-generator-*`)
 

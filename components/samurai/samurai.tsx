@@ -4,7 +4,7 @@
 // Under prefers-reduced-motion every state is a still pose.
 import { cx } from '@/components/ui/cx';
 
-export type SamuraiState = 'idle' | 'ready' | 'cutting' | 'done' | 'error';
+export type SamuraiState = 'idle' | 'ready' | 'cutting' | 'done' | 'error' | 'confused';
 
 /** Samurai body, in kamae.svg coordinates (520 × 480). Class = token fill. */
 const BODY: [string, string][] = [
@@ -63,7 +63,8 @@ export const SAMURAI_VIEWBOX = '0 0 340 320';
 /**
  * The samurai on the sun with the overlay for `state`:
  * idle (breathing), ready (dotted ring), cutting (two slash lines sweep),
- * done (済 seal stamps on), error (grey sun, red X).
+ * done (済 seal stamps on), error (grey sun, red X),
+ * confused (grey sun, red ?, used on the 404 page).
  */
 export function SamuraiArt({
   state,
@@ -88,7 +89,7 @@ export function SamuraiArt({
         r="110"
         className={cx(
           'transition-[fill] duration-300',
-          state === 'error' ? 'fill-art-grey-sun' : 'fill-art-sun',
+          state === 'error' || state === 'confused' ? 'fill-art-grey-sun' : 'fill-art-sun',
         )}
       />
       {state === 'ready' && (
@@ -147,6 +148,18 @@ export function SamuraiArt({
           className="stroke-shu"
         />
       )}
+      {state === 'confused' && (
+        <text
+          x="262"
+          y="232"
+          textAnchor="middle"
+          fontSize="64"
+          fontWeight="800"
+          className="font-display fill-shu"
+        >
+          ?
+        </text>
+      )}
     </svg>
   );
 }
@@ -157,6 +170,7 @@ const DOT: Record<SamuraiState, string> = {
   cutting: 'bg-shu',
   done: 'bg-matcha',
   error: 'bg-shu',
+  confused: 'bg-shu',
 };
 
 export interface StageText {

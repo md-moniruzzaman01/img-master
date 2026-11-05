@@ -38,9 +38,9 @@ const SITE_PATHS = ['/', '/about', '/privacy', '/terms', '/contact', '/how-it-wo
  */
 const LAUNCHING = new Set(['resize-image']);
 
-/** Batch copy must use siteConfig.maxFiles; old designs said "up to 20". */
+/** Batch copy must use siteConfig.maxFiles; never hard-code a number. */
 const WRONG_BATCH = new RegExp(
-  `\\b(up to|max(imum)?( of)?)\\s+(?!${siteConfig.maxFiles}\\b)\\d+\\s+(files|images|photos)\\b|\\b20 (files|images|photos)\\b`,
+  `\\b(up to|max(imum)?( of)?)\\s+(?!${siteConfig.maxFiles}\\b)\\d+\\s+(files|images|photos)\\b`,
   'i',
 );
 

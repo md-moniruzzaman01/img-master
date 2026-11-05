@@ -34,6 +34,7 @@ export const navCopy = {
   allTools: 'All tools',
   allToolsLine: 'Every tool on one page', // invented
   anyFormat: 'Any format',
+  anySize: 'Any size',
   footerBlurb: 'Image tools that cut clean. Everything runs on your device — nothing is uploaded.',
   footerMoreTools: 'More tools',
   builtIn: 'Built by Softwara in Dhaka',

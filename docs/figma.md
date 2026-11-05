@@ -215,7 +215,7 @@ Breakpoints in code: base 360, `sm` 640, `md` 768, `lg` 1024. Use Figma auto lay
 │ └──────────────────────────────┘ │
 │ 🔒 Your images never leave your  │  Privacy line
 │    device                        │
-│ JPG, PNG, WebP · up to 10 at once│  Hint
+│ JPG, PNG, WebP · up to 20 at once│  Hint
 ╞══════════════ fold (640px) ══════╡
 │ Results (after processing)       │  Replaces the picker block in place
 │ Breadcrumbs                      │
@@ -237,7 +237,7 @@ Breakpoints in code: base 360, `sm` 640, `md` 768, `lg` 1024. Use Figma auto lay
 | Feature | Behavior the design must show |
 |---|---|
 | Auto-start | Picking files starts processing at once. There is **no separate "Compress" button**. |
-| Batch | Up to 10 images. Results listed in order. "Download all (ZIP)" when more than one. |
+| Batch | Up to 20 images. Results listed in order. "Download all (ZIP)" when more than one. |
 | Desktop extras | Dashed drop zone, drag and drop, paste with Ctrl+V. Show the drag-over state. |
 | Mobile extra | **Share** button (send straight to WhatsApp/Messenger). Only shown where the phone supports it. |
 | File names | `photo-50kb.jpg`, `photo.webp` — show these on result cards. |
@@ -327,7 +327,7 @@ Skeleton (processing) · Success · Success with note (resized / already small /
 | Case | Text |
 |---|---|
 | Not an image | We can't open this file. Try a JPG, PNG or WebP image. |
-| Too many files | You can add up to 10 images at once. We took the first 10. |
+| Too many files | You can add up to 20 images at once. We took the first 20. |
 | Target unreachable | We couldn't get this image under {target} and keep it readable. Try {nextTarget}, or allow smaller dimensions. |
 | Big image | This photo is very large, so we reduced its dimensions first to keep your phone fast. |
 | WebP unsupported | Your browser can't save WebP files yet. Try Chrome or Firefox, or choose JPG. |

@@ -14,6 +14,7 @@ import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy } from '@/components/tool/copy';
 import { ErrorBanner } from '@/components/tool/error-banner';
+import { PrivacyNote } from '@/components/tool/privacy-note';
 import { FilePicker } from '@/components/tool/file-picker';
 import { formatBytes, uniqueNames } from '@/components/tool/format';
 import { ProgressBar } from '@/components/tool/progress-bar';
@@ -311,6 +312,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
         mobileTitle={t.icoPick}
         mobileHint={t.icoHint(siteConfig.maxFiles)}
       />
+      <PrivacyNote />
 
       {notice === 'too-many' && <ErrorBanner tone="warning" message={toolCopy.tooMany(maxFiles)} />}
       {notice === 'engine' && (

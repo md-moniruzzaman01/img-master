@@ -38,6 +38,8 @@ export function SearchLauncher({ items }: { items: SearchItem[] }) {
       .then((m) => setPalette(() => m.SearchPalette))
       .catch(() => {
         loading.current = false;
+        // Chunk failed to load: a full page load is the intended fallback, not client routing.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign('/tools');
       });
   }, []);

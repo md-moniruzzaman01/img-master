@@ -55,7 +55,11 @@ function Column({ label, links }: { label: string; links: { label: string; href:
  */
 export function SiteFooter({ groups }: { groups: ToolNavGroup[] }) {
   const year = new Date().getFullYear();
-  const compress = sizeTools(groups).map((s) => ({ label: `To ${sizeLabel(s.kb)}`, href: s.href }));
+  const compressGroup = groupOf(groups, 'compress');
+  const compress = [
+    ...(compressGroup?.hubHref ? [{ label: t.anySize, href: compressGroup.hubHref }] : []),
+    ...sizeTools(groups).map((s) => ({ label: `To ${sizeLabel(s.kb)}`, href: s.href })),
+  ];
   const convertGroup = groupOf(groups, 'convert');
   const convert = (convertGroup?.tools ?? []).map((x) => ({
     label: x.href === convertGroup?.hubHref ? t.anyFormat : x.shortName,

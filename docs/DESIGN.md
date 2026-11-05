@@ -86,7 +86,7 @@ Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `cu
 │ └────────────────────────────────┘ │
 │ 🔒 Your images never leave your    │  privacy line right under the button
 │    device                          │
-│ JPG, PNG, WebP · up to 10 at once  │  mobile hint (desktop: dashed drop zone)
+│ JPG, PNG, WebP · up to 20 at once  │  mobile hint (desktop: dashed drop zone)
 ├────────────────────────────────────┤
 │ Breadcrumbs, related tools, how-to,│  SEO sections, unchanged text
 │ page sections, FAQ, footer         │
@@ -150,7 +150,7 @@ Same tool card and samurai stage. When the user picks a new image (image mode) o
 | Component | Props / responsibility | States |
 |---|---|---|
 | `ToolShell` (client) | Takes a `ToolDefinition` (structure only). Owns the state machine: `idle → processing → done`, plus `error`. Calls the engine via `lib/image-engine` (the mock until integration). Renders the pieces below. | idle, processing (n of m), done, partial (some failed), error |
-| `FilePicker` (client) | Hidden `<input type="file" accept="image/*" multiple>`, big crimson button, up to `siteConfig.maxFiles` (10) images. Desktop (≥ sm): dashed drop zone, drag/drop and paste; mobile: "up to 10 at once" hint under the privacy line. Validates count and type before passing files on. **Do not set `capture`** (users pick from the gallery). | default, drag-over, disabled while processing |
+| `FilePicker` (client) | Hidden `<input type="file" accept="image/*" multiple>`, big crimson button, up to `siteConfig.maxFiles` (20) images. Desktop (≥ sm): dashed drop zone, drag/drop and paste; mobile: "up to 20 at once" hint under the privacy line. Validates count and type before passing files on. **Do not set `capture`** (users pick from the gallery). | default, drag-over, disabled while processing |
 | `TargetSizeChips` (client) | Preset chips + Custom. | — |
 | `FormatSelect` (client) | Segmented control JPG / PNG / WebP (only valid options per tool). | — |
 | `QualitySlider` (client) | 10–100. | — |
@@ -214,7 +214,7 @@ Optional sword sounds, **off by default** (`siteConfig.soundEnabled: false`). `S
 | Key | Text |
 |---|---|
 | Picker button | Choose images |
-| Picker hint (mobile) | JPG, PNG, WebP · up to {maxFiles} at once (10) |
+| Picker hint (mobile) | JPG, PNG, WebP · up to {maxFiles} at once (20) |
 | Picker hint (desktop) | or drop images here, or paste with Ctrl+V |
 | Privacy note | 🔒 Your images never leave your device |
 | Processing | Compressing photo {n} of {m}… / Converting {n} of {m}… |

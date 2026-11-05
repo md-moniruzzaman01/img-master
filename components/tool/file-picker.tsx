@@ -47,7 +47,7 @@ export function FilePicker({
   mobileTitle: string;
   /** Desktop hint under the heading; null hides it. */
   hint?: string | null;
-  /** Phone hint ("JPG, PNG, WebP · up to 10 photos"). */
+  /** Phone hint ("JPG, PNG, WebP · up to 20 photos"). */
   mobileHint?: string | null;
   /** Hero only: step number before the heading ("2"). */
   step?: string;

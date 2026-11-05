@@ -24,11 +24,11 @@ export default function NotFound() {
       <div className="grid items-center gap-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-16 lg:px-[72px]">
         <SamuraiStage
           layout="panel"
-          state="error"
+          state="confused"
           text={{
-            label: 'Error',
-            title: 'That one resisted',
-            line: "This file isn't an image we can read. Try JPG, PNG or WebP.",
+            label: 'Lost',
+            title: 'Where did that go?',
+            line: "This page doesn't exist. Try one of the tools.",
           }}
         />
         <div>

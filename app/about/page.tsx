@@ -1,5 +1,6 @@
 // About page (spec §5.7, Figma desktop-about-*). Owned by the lead.
 import type { Metadata } from 'next';
+import { LastUpdated } from '@/components/content/last-updated';
 import { RichText } from '@/components/content/rich-text';
 import { HeroScene } from '@/components/home/hero-scene';
 import { BrandSeal } from '@/components/layout/brand-seal';
@@ -76,6 +77,7 @@ export default function AboutPage() {
           </div>
         </div>
         <RichText sections={aboutContent.sections} />
+        <LastUpdated date={aboutContent.updatedAt} />
       </Container>
     </>
   );

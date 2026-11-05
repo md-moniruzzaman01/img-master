@@ -309,19 +309,19 @@ test('compress-image hub: quality mode and size mode both work', async ({ page }
 
 // ── Batch and ZIP ────────────────────────────────────────────────────────
 
-test('batch of 10 files: 10 cards, ZIP has 10 right-named files', async ({ page }) => {
+test('batch of 20 files: 20 cards, ZIP has 20 right-named files', async ({ page }) => {
   test.setTimeout(240_000);
   const src = fixtureBytes('photo-2mp.jpg');
-  const files = Array.from({ length: 10 }, (_, i) => ({
+  const files = Array.from({ length: 20 }, (_, i) => ({
     name: i < 8 ? `holiday ${i + 1}.jpg` : 'dup.jpg',
     mimeType: 'image/jpeg',
     buffer: src,
   }));
   await gotoTool(page, 'compress-image-to-100kb');
   await pickAndWait(page, files);
-  await expect(cards(page)).toHaveCount(10);
-  for (let i = 0; i < 10; i++) expect((await cardData(cards(page).nth(i))).status).toBe('success');
-  await expect(page.getByTestId('download')).toHaveCount(10);
+  await expect(cards(page)).toHaveCount(20);
+  for (let i = 0; i < 20; i++) expect((await cardData(cards(page).nth(i))).status).toBe('success');
+  await expect(page.getByTestId('download')).toHaveCount(20);
   await expect(page.getByTestId('download-all')).toBeVisible();
   const { bytes, name } = await downloadVia(page, page.getByTestId('download-all'));
   expect(name).toBe('img-master-compress-image-to-100kb.zip');
@@ -330,7 +330,7 @@ test('batch of 10 files: 10 cards, ZIP has 10 right-named files', async ({ page 
   const expected = [
     ...Array.from({ length: 8 }, (_, i) => `holiday-${i + 1}-100kb.jpg`),
     'dup-100kb.jpg',
-    'dup-100kb-2.jpg',
+    ...Array.from({ length: 11 }, (_, i) => `dup-100kb-${i + 2}.jpg`),
   ].sort();
   expect(Object.keys(zip).sort()).toEqual(expected);
   for (const [n, data] of Object.entries(zip)) {
@@ -425,19 +425,19 @@ test('edge: animated GIF -> first frame with the animation note', async ({ page 
   expect([d.width, d.height]).toEqual([96, 64]);
 });
 
-test('edge: 11 files -> first 10 are taken, with the "too many" message', async ({ page }) => {
+test('edge: 21 files -> first 20 are taken, with the "too many" message', async ({ page }) => {
   test.setTimeout(240_000);
   const src = fixtureBytes('photo-small.jpg');
-  const files = Array.from({ length: 11 }, (_, i) => ({
+  const files = Array.from({ length: 21 }, (_, i) => ({
     name: `p${i}.jpg`,
     mimeType: 'image/jpeg',
     buffer: src,
   }));
   await gotoTool(page, 'compress-image-to-50kb');
   await pickAndWait(page, files);
-  await expect(cards(page)).toHaveCount(10);
+  await expect(cards(page)).toHaveCount(20);
   await expect(page.getByTestId('error-banner')).toContainText(
-    'You can add up to 10 images at once. We took the first 10.',
+    'You can add up to 20 images at once. We took the first 20.',
   );
 });
 
