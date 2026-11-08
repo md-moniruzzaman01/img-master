@@ -452,6 +452,69 @@
   animation: im-card-slash 1.4s var(--ease-out) infinite;
 }
 
+/* Favicon cut moment (components/favicon/cut-moment-overlay.tsx), ~800 ms total. */
+@keyframes cut-line {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  30% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  55% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes cut-drift-a {
+  0%,
+  30% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-14px, -14px) rotate(-4deg);
+    opacity: 0;
+  }
+}
+@keyframes cut-drift-b {
+  0%,
+  30% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(14px, 14px) rotate(4deg);
+    opacity: 0;
+  }
+}
+.cut-line line {
+  stroke-dasharray: 1;
+}
+.cut-line {
+  animation: cut-line 800ms var(--ease-out) both;
+}
+.cut-line line {
+  stroke-dashoffset: inherit;
+}
+.cut-shard {
+  position: absolute;
+  inset: 0;
+}
+.cut-shard-a {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  animation: cut-drift-a 800ms var(--ease-out) both;
+}
+.cut-shard-b {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  animation: cut-drift-b 800ms var(--ease-out) both;
+}
+
 /* Transparent images sit on a checkerboard. */
 @utility checkerboard {
   background-color: var(--card);
