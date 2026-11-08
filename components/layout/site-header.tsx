@@ -360,6 +360,7 @@ function MobileMenu({ groups }: { groups: ToolNavGroup[] }) {
             { label: t.howItWorks, href: '/how-it-works' },
             { label: 'About', href: '/about' },
             { label: 'Privacy', href: '/privacy' },
+            { label: 'Contact', href: '/contact' },
           ].map((l) => (
             <li key={l.href}>
               <Link

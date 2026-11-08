@@ -6,7 +6,7 @@ import { navCopy as t } from './copy';
 import { groupOf, isTabTool, sizeLabel, sizeTools } from './nav-data';
 
 const link =
-  'inline-flex min-h-10 items-center text-[0.9375rem] text-on-band-muted no-underline hover:text-on-band hover:underline underline-offset-4';
+  'inline-flex min-h-12 items-center text-[0.9375rem] text-on-band-muted no-underline hover:text-on-band hover:underline underline-offset-4';
 
 /** Ink mountain edge from docs/figma-export/svg/footer.svg (its first two paths). */
 function MountainEdge() {
@@ -131,7 +131,7 @@ export function SiteFooter({ groups }: { groups: ToolNavGroup[] }) {
           <div className="mt-6 flex flex-col gap-2 border-t border-on-band-muted/40 pt-5 type-small text-on-band-muted sm:flex-row sm:items-center sm:justify-between lg:mt-10">
             <p>
               © {year} {siteConfig.name} ·{' '}
-              <a href={siteConfig.credit.url} rel="noopener" className="underline-offset-4 hover:underline">
+              <a href={siteConfig.credit.url} rel="noopener" className="inline-flex min-h-12 items-center underline-offset-4 hover:underline">
                 {t.builtIn}
               </a>
             </p>

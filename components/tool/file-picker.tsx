@@ -122,7 +122,7 @@ export function FilePicker({
       className={cx(
         'group/zone relative flex cursor-pointer flex-col items-center rounded-card text-center transition-colors duration-150 ease-out',
         // Phones: dashed crimson on shu-soft.
-        'border-2 border-dashed border-shu bg-shu-soft px-5 py-5',
+        'border-2 border-dashed border-shu bg-shu-soft px-5 py-4 md:py-5',
         // Desktop: ink-dark zone.
         'md:border-solid md:bg-zone',
         dragOver ? 'md:border-shu' : 'md:border-zone',
@@ -136,13 +136,13 @@ export function FilePicker({
         aria-hidden="true"
         className={cx(
           'flex shrink-0 items-center justify-center rounded-full bg-shu text-white transition-transform duration-150',
-          hero ? 'size-14' : 'size-14 md:size-[72px]',
+          hero ? 'size-14' : 'size-12 md:size-[72px]',
           dragOver && 'scale-110',
         )}
       >
         <UploadIcon size={26} strokeWidth={2.25} />
       </span>
-      <span className={cx('min-w-0', hero ? 'mt-3 md:mt-0 md:flex-1' : 'mt-3 md:mt-6')}>
+      <span className={cx('min-w-0', hero ? 'mt-3 md:mt-0 md:flex-1' : 'mt-2 md:mt-6')}>
         <span className="block font-display text-[1.375rem] leading-7 font-extrabold text-ink md:hidden">
           {mobileTitle}
         </span>

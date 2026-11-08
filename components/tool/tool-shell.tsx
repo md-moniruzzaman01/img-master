@@ -886,6 +886,10 @@ function ImageTool({
           />
         </div>
 
+        <div className={m > 0 ? 'hidden' : undefined}>
+          <PrivacyNote />
+        </div>
+
         {/* Spec order (§5.2, both mobile and desktop): drop zone, then "More
             options", then the privacy line. Stays visible after a run (not
             inside the picker's hidden wrapper) so options stay editable. */}
@@ -895,8 +899,7 @@ function ImageTool({
           </div>
         )}
 
-        <div className={m > 0 ? 'hidden' : 'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'}>
-          <PrivacyNote />
+        <div className={m > 0 ? 'hidden' : undefined}>
           <SampleLink loading={sampleLoading} onClick={() => void trySample()} />
         </div>
 
