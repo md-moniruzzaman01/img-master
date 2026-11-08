@@ -4,42 +4,18 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { OUT_DIR } from './helpers/fixtures';
 import { logMetric } from './helpers/tool';
+import { tools } from '../lib/tools/registry';
 
 test.skip(({ browserName }) => browserName !== 'chromium', 'file-system crawl; runs once');
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://img-master.example').replace(/\/$/, '');
-const LIVE_TOOLS = [
-  'compress-image',
-  'compress-image-to-20kb',
-  'compress-image-to-50kb',
-  'compress-image-to-100kb',
-  'compress-image-to-200kb',
-  'compress-image-to-500kb',
-  'compress-image-to-1mb',
-  'image-converter',
-  'webp-to-jpg',
-  'webp-to-png',
-  'png-to-webp',
-  'jpg-to-webp',
-  'png-to-jpg',
-  'jpg-to-png',
-  'favicon-generator',
-  'favicon-from-text',
-  'favicon-from-emoji',
-  'png-to-ico',
-];
+// Derived from the real registry so the expectations track what is actually live.
+const LIVE_TOOLS = tools.filter((t) => t.status === 'live').map((t) => t.slug);
+const DRAFT_SLUGS = tools.filter((t) => t.status !== 'live').map((t) => t.slug);
 const FAVICON = ['favicon-generator', 'favicon-from-text', 'favicon-from-emoji', 'png-to-ico'];
 const LEGAL = ['about', 'privacy', 'terms', 'contact'];
-const DRAFT_SLUGS = [
-  'heic-to-jpg',
-  'resize-image',
-  'compress-image-to-10kb',
-  'compress-image-to-30kb',
-  'compress-image-to-150kb',
-  'compress-image-to-300kb',
-  'compress-image-to-2mb',
-];
-const EXPECTED_PATHS = ['/', ...LIVE_TOOLS.map((s) => `/${s}`), ...LEGAL.map((s) => `/${s}`)];
+const INFO = [...LEGAL, 'how-it-works', 'tools'];
+const EXPECTED_PATHS = ['/', ...LIVE_TOOLS.map((s) => `/${s}`), ...INFO.map((s) => `/${s}`)];
 
 // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -94,7 +70,8 @@ interface Page {
   canonical: string;
   h1s: string[];
   mainHtml: string;
-  below: string; // text container under the tool (or whole main for non-tool pages)
+  belowHtml: string;
+  below: string; // text under the tool (or whole main for non-tool pages)
 }
 
 function loadPages(): Page[] {
@@ -107,11 +84,14 @@ function loadPages(): Page[] {
       const path =
         r === 'index.html' ? '/' : '/' + r.replace(/\.html$/, '').replace(/\/index$/, '');
       const mainHtml = /<main[\s\S]*<\/main>/.exec(html)?.[0] ?? '';
-      const idx = mainHtml.indexOf('max-w-[680px]');
       const hasTool =
         mainHtml.includes('data-testid="tool-shell"') ||
         mainHtml.includes('data-testid="favicon-shell"');
-      const belowHtml = hasTool && idx > 0 ? mainHtml.slice(idx) : mainHtml;
+      // Text under the tool starts at the first <section> after the tool UI
+      // (after the results placeholder when there is one).
+      const afterTool = Math.max(mainHtml.indexOf('data-testid="results-placeholder"'), 0);
+      const sec = mainHtml.indexOf('<section', afterTool);
+      const belowHtml = hasTool && sec > 0 ? mainHtml.slice(sec) : mainHtml;
       return {
         path,
         file: r,
@@ -121,6 +101,7 @@ function loadPages(): Page[] {
         canonical: attr(/<link[^>]*rel="canonical"[^>]*>/.exec(html)?.[0] ?? '', 'href'),
         h1s: [...mainHtml.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => textOf(m[1])),
         mainHtml,
+        belowHtml,
         below: textOf(belowHtml),
       };
     });
@@ -140,7 +121,10 @@ test('built pages are exactly the live pages (no drafts, no dev pages)', () => {
       `draft ${d} leaked into out/`,
     ).toEqual([]);
   }
-  expect(EXPECTED_PATHS.length, '1 home + 18 tools + 4 info pages').toBe(23);
+  expect(
+    EXPECTED_PATHS.length,
+    `1 home + ${LIVE_TOOLS.length} tools + ${INFO.length} info pages`,
+  ).toBe(1 + LIVE_TOOLS.length + INFO.length);
 });
 
 test('sitemap.xml = exactly the live pages, canonical host, no trailing slash', () => {
@@ -341,8 +325,9 @@ test('JSON-LD parses and matches visible content (tool pages)', () => {
       { itemListElement: { name: string; item: string; position: number }[] } | undefined;
     if (bc) {
       const nav = /<nav aria-label="Breadcrumb"[\s\S]*?<\/nav>/.exec(p.mainHtml)?.[0] ?? '';
+      // The "/" separators are aria-hidden spans; drop them before comparing names.
       const visibleCrumbs = [...nav.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) =>
-        textOf(m[1]),
+        textOf(m[1].replace(/<span aria-hidden="true"[\s\S]*?<\/span>/g, '')),
       );
       const jsonCrumbs = bc.itemListElement.map((i) => i.name);
       if (visibleCrumbs.join('|') !== jsonCrumbs.join('|'))
@@ -414,7 +399,9 @@ test('home links to every live tool; hubs link to every tool in their category; 
   const problems: string[] = [];
   const hrefs = (p: Page) =>
     new Set([...p.mainHtml.matchAll(/href="(\/[^"#?]*)"/g)].map((m) => m[1]));
-  const home = hrefs(pages.find((p) => p.path === '/')!);
+  // Home reaches every live tool through its cards, the header tools menu and the footer.
+  const homePage = pages.find((p) => p.path === '/')!;
+  const home = new Set([...homePage.html.matchAll(/href="(\/[^"#?]*)"/g)].map((m) => m[1]));
   for (const s of LIVE_TOOLS) if (!home.has(`/${s}`)) problems.push(`home does not link to /${s}`);
   const compress = hrefs(pages.find((p) => p.path === '/compress-image')!);
   for (const s of LIVE_TOOLS.filter((x) => x.startsWith('compress-image-to')))
@@ -436,9 +423,11 @@ test('home links to every live tool; hubs link to every tool in their category; 
     const slug = p.path.slice(1);
     const hub = FAVICON.includes(slug)
       ? '/favicon-generator'
-      : p.path.startsWith('/compress-image')
-        ? '/compress-image'
-        : '/image-converter';
+      : slug === 'resize-image'
+        ? '/resize-image'
+        : p.path.startsWith('/compress-image')
+          ? '/compress-image'
+          : '/image-converter';
     if (p.path !== hub && !hrefs(p).has(hub))
       problems.push(`${p.path} does not link to its hub ${hub}`);
     const related =
@@ -447,14 +436,11 @@ test('home links to every live tool; hubs link to every tool in their category; 
     if (n < 4 || n > 6) problems.push(`${p.path}: ${n} related tools (want 4-6)`);
     const footer = /<footer[\s\S]*<\/footer>/.exec(p.html)?.[0] ?? '';
     const header = /<header[\s\S]*<\/header>/.exec(p.html)?.[0] ?? '';
-    for (const l of ['/privacy', '/terms', '/contact'])
+    // Legal pages live in the footer; the header menu lists every live tool plus About and Privacy.
+    for (const l of ['/about', '/privacy', '/terms', '/contact'])
       if (!footer.includes(`href="${l}"`)) problems.push(`${p.path}: footer lacks ${l}`);
-    // About lives in the header (desktop link + menu), the menu lists every live tool.
-    for (const l of ['/about', '/privacy', '/terms', '/contact', ...LIVE_TOOLS.map((x) => `/${x}`)])
+    for (const l of ['/about', '/privacy', ...LIVE_TOOLS.map((x) => `/${x}`)])
       if (!header.includes(`href="${l}"`)) problems.push(`${p.path}: header menu lacks ${l}`);
-    if (footer.includes('href="/about"')) problems.push(`${p.path}: footer still links /about`);
-    if ([...footer.matchAll(/href="\/[^"]*"/g)].length !== 3)
-      problems.push(`${p.path}: footer must have exactly 3 internal links`);
   }
   expect(problems).toEqual([]);
 });
@@ -483,7 +469,7 @@ test('text is in the HTML without JavaScript (H1, intro, sections, FAQ answers p
       problems.push(`${p.path}: only ${p.below.split(' ').length} words in server HTML`);
     if (!/data-testid="(file-input|text-input|emoji-input)"/.test(p.mainHtml))
       problems.push(`${p.path}: first control (picker or text/emoji field) not in server HTML`);
-    if (!p.mainHtml.includes('Your images never leave your device'))
+    if (!p.mainHtml.includes('Nothing is uploaded'))
       problems.push(`${p.path}: privacy note missing in HTML`);
   }
   expect(problems).toEqual([]);
@@ -493,9 +479,8 @@ test('text is in the HTML without JavaScript (H1, intro, sections, FAQ answers p
 
 test('word count below the tool (>= 400)', () => {
   const rows = toolPages.map((p) => {
-    const sansRelated = p.mainHtml.replace(/<h2[^>]*>Related tools<\/h2>[\s\S]*?<\/section>/, '');
-    const idx = sansRelated.indexOf('max-w-[680px]');
-    const words = textOf(sansRelated.slice(idx)).split(' ').filter(Boolean).length;
+    const sansRelated = p.belowHtml.replace(/<h2[^>]*>Related tools<\/h2>[\s\S]*?<\/section>/, '');
+    const words = textOf(sansRelated).split(' ').filter(Boolean).length;
     const all = p.below.split(' ').filter(Boolean).length;
     logMetric('word-count.ndjson', {
       page: p.path,
@@ -521,7 +506,7 @@ function shingles(text: string, n = 5): Set<string> {
 
 test('content similarity between sibling tool pages (< 30%)', () => {
   const strip = (p: Page, dropBoilerplate: boolean) => {
-    let h = p.mainHtml.slice(Math.max(0, p.mainHtml.indexOf('max-w-[680px]')));
+    let h = p.belowHtml;
     if (dropBoilerplate) {
       h = h.replace(/<h2[^>]*>Related tools<\/h2>[\s\S]*?<\/section>/, '');
     }

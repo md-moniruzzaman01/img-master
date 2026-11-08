@@ -64,7 +64,7 @@ export function NumberInput({
       <div className="flex items-center gap-3">
         <div
           className={cx(
-            'flex h-12 items-center gap-1 rounded-control border-[1.5px] bg-card pr-1.5 pl-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
+            'flex h-[3.25rem] items-stretch gap-1 rounded-control border-[1.5px] bg-card pr-0 pl-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
             error ? 'border-shu' : 'border-ink',
           )}
         >
@@ -86,7 +86,7 @@ export function NumberInput({
                 commit(text, unit);
               }
             }}
-            className="w-14 bg-transparent text-base font-bold tabular-nums text-ink outline-none"
+            className="h-full w-14 bg-transparent text-base font-bold tabular-nums text-ink outline-none"
           />
           <select
             aria-label={`${label}: unit`}
@@ -97,7 +97,7 @@ export function NumberInput({
               setUnit(u);
               commit(text, u);
             }}
-            className="im-select h-9 rounded-control bg-paper-2 pl-2 text-[1rem] font-bold text-ink"
+            className="im-select h-full min-w-12 rounded-control bg-paper-2 pl-2 text-[1rem] font-bold text-ink"
           >
             <option value="KB">KB</option>
             <option value="MB">MB</option>

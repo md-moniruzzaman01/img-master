@@ -13,7 +13,7 @@ const BUDGET_BYTES = 30 * 1024;
 // (react-dom, Next router/runtime, turbopack runtime, polyfills) is framework.
 const OURS = [
   /Choose images/,
-  /never leave your device/,
+  /never leave your device|Processed on this device/,
   /aria-label[^;]{0,40}Menu/,
   /compressToSize/,
   /transparency-flattened|Transparent areas/,

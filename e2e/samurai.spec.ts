@@ -33,7 +33,7 @@ test.describe('fold at 360x640', () => {
       await page.goto(`/${slug}`);
       const textMode = slug === 'favicon-from-text' || slug === 'favicon-from-emoji';
       const parts = [stage(page), page.getByTestId('privacy-note').first()];
-      if (!textMode) parts.push(page.getByTestId('file-picker').locator('label').first());
+      if (!textMode) parts.push(page.getByTestId('file-picker'));
       for (const l of parts) {
         await expect(l).toBeVisible();
         const b = (await l.boundingBox())!;
@@ -43,25 +43,28 @@ test.describe('fold at 360x640', () => {
       expect(sb.height).toBeLessThanOrEqual(130);
     });
   }
-  test('stage is 200px tall from sm (640) up', async ({ page }) => {
+  // Current design: a compact status row (art in a 56px disc) up to lg, a tall panel from lg (1024).
+  test('stage is a compact row below lg and a tall panel from lg up', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 800 });
     await page.goto(`/${SLUG}`);
-    expect((await stage(page).boundingBox())!.height).toBeCloseTo(200, 0);
+    expect((await stage(page).boundingBox())!.height).toBeLessThanOrEqual(130);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    expect((await stage(page).boundingBox())!.height).toBeGreaterThanOrEqual(200);
   });
 });
 
 // ── States ──────────────────────────────────────────────────────────────
 
-test('stage goes idle, working, success for a photo', async ({ page }) => {
+test('stage goes idle, cutting, done for a photo', async ({ page }) => {
   await gotoTool(page, SLUG);
   await expect(stage(page)).toHaveAttribute('data-state', 'idle');
   await watchStates(page);
   await page.getByTestId('file-input').setInputFiles(fixture('photo-2mp.jpg'));
-  await expect(stage(page)).toHaveAttribute('data-state', 'success', { timeout: 60_000 });
+  await expect(stage(page)).toHaveAttribute('data-state', 'done', { timeout: 60_000 });
   const seen = await states(page);
   expect(seen[0]).toBe('idle');
-  expect(seen).toContain('working');
-  expect(seen.indexOf('working')).toBeLessThan(seen.lastIndexOf('success'));
+  expect(seen).toContain('cutting');
+  expect(seen.indexOf('cutting')).toBeLessThan(seen.lastIndexOf('done'));
   expect(seen.filter((s) => s === 'error')).toEqual([]);
 });
 
@@ -73,30 +76,22 @@ test('stage shows error for a file that is not an image', async ({ page }) => {
 
 // ── Slash ───────────────────────────────────────────────────────────────
 
-test('slash plays at least once per run, even for a tiny image', async ({ page }) => {
+test('the cutting animation shows at least once per run, even for a tiny image', async ({
+  page,
+}) => {
   await gotoTool(page, SLUG);
   await page.evaluate(() => {
     const w = window as unknown as { __cuts: number };
     w.__cuts = 0;
-    const seen = new WeakSet<Element>();
-    const scan = () =>
-      document.querySelectorAll('[data-testid=slash]').forEach((e) => {
-        if (e.classList.contains('is-cutting') && !seen.has(e)) {
-          seen.add(e);
-          w.__cuts++;
-        }
-      });
-    new MutationObserver(scan).observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['class'],
-    });
+    const el = document.querySelector('[data-testid=samurai-stage]')!;
+    new MutationObserver(() => {
+      if (el.querySelector('.sam-sweep')) w.__cuts = Math.max(w.__cuts, 1);
+    }).observe(el, { subtree: true, childList: true, attributes: true });
   });
   await page.getByTestId('file-input').setInputFiles(fixture('tiny-40.jpg'));
-  await expect(stage(page)).toHaveAttribute('data-state', 'success', { timeout: 30_000 });
+  await expect(stage(page)).toHaveAttribute('data-state', 'done', { timeout: 30_000 });
   const cuts = await page.evaluate(() => (window as unknown as { __cuts: number }).__cuts);
-  expect(cuts).toBeGreaterThanOrEqual(1);
+  expect(cuts, 'sword sweep drawn while cutting').toBeGreaterThanOrEqual(1);
 });
 
 // ── Reduced motion ──────────────────────────────────────────────────────
@@ -106,21 +101,19 @@ test('reduced motion: no frame changes while idle, no slash animation after a ru
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await gotoTool(page, SLUG);
-  const href = () =>
+  const anim = () =>
     stage(page)
-      .locator('use')
-      .first()
-      .evaluate((u) => u.getAttribute('href') ?? u.getAttribute('xlink:href'));
-  const first = await href();
-  expect(first).toBeTruthy();
-  const seen = new Set<string | null>([first]);
-  for (let i = 0; i < 10; i++) {
-    await page.waitForTimeout(100);
-    seen.add(await href());
-  }
-  expect([...seen]).toEqual([first]);
+      .locator('.sam-body')
+      .evaluate((e) => getComputedStyle(e).animationName);
+  expect(await anim()).toBe('none');
+  const snap = () => stage(page).evaluate((e) => e.innerHTML);
+  const first = await snap();
+  await page.waitForTimeout(1000);
+  expect(await snap(), 'stage markup is still while idle').toBe(first);
   await pickAndWait(page, fixture('photo-2mp.jpg'));
-  expect(await page.locator('[data-testid=slash].is-cutting').count()).toBe(0);
+  const sweep = page.locator('[data-testid=samurai-stage] .sam-sweep');
+  for (const e of await sweep.all())
+    expect(await e.evaluate((n) => getComputedStyle(n).animationName)).toBe('none');
 });
 
 // ── Sprite 404 ──────────────────────────────────────────────────────────
@@ -133,7 +126,7 @@ test('sprite 404 keeps the layout and the tool still works', async ({ page }) =>
   const after = (await stage(page).boundingBox())!;
   expect(after.height).toBe(before.height);
   expect(after.width).toBe(before.width);
-  const label = (await page.getByTestId('file-picker').locator('label').first().boundingBox())!;
+  const label = (await page.getByTestId('file-picker').boundingBox())!;
   expect(label.height).toBeGreaterThan(0);
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   await expect(page.getByTestId('result-card').first()).toHaveAttribute('data-status', 'success');
@@ -177,16 +170,22 @@ test('no sound requests while sound is off; start.mp3 is fetched after turning i
     if (r.url().includes('/sounds/')) reqs.push(r.url());
   });
   await gotoTool(page, SLUG);
-  const toggle = page.getByTestId('sound-toggle');
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-  await expect(toggle).toHaveAttribute('aria-label', 'Sound off');
+  // On phones the header icon is hidden; the same toggle lives in the menu as a pill button.
+  const hidden = page.getByTestId('sound-toggle');
+  await expect(hidden).toHaveAttribute('aria-pressed', 'false');
+  await expect(hidden).toHaveAttribute('aria-label', 'Sound on'); // constant label; aria-pressed carries the state
+  const menu = page.locator('header details[data-menu="mobile"]');
+  const pill = menu.getByRole('button', { name: 'Sound on' });
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   await page.waitForTimeout(1200);
   expect(reqs, 'sound requests while off').toEqual([]);
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-  await expect(toggle).toHaveAttribute('aria-label', 'Sound on');
-  await page.getByRole('button', { name: /compress another/i }).click();
+  await menu.locator('summary[aria-label="Menu"]').click();
+  await expect(pill).toHaveAttribute('aria-pressed', 'false');
+  await pill.click();
+  await expect(pill).toHaveAttribute('aria-pressed', 'true');
+  await expect(hidden).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /compress (more|another)/i }).click();
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   const hasAudio = await page.evaluate(
     () => typeof AudioContext !== 'undefined' || 'webkitAudioContext' in window,

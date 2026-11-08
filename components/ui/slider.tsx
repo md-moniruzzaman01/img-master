@@ -50,7 +50,7 @@ export function Slider({
         aria-valuetext={format(value)}
         onChange={(e) => onChange(Number(e.target.value))}
         style={{ '--pct': `${pct}%` } as CSSProperties}
-        className="im-range block h-10 w-full cursor-pointer appearance-none bg-transparent disabled:opacity-60"
+        className="im-range block h-12 w-full cursor-pointer appearance-none bg-transparent disabled:opacity-60"
       />
       {hint && <p className="type-small text-muted">{hint}</p>}
     </div>

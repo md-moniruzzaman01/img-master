@@ -37,14 +37,14 @@ export interface CardAction {
 }
 
 /** Pulsing bar that stands in for one line of text (same line box as the real text). */
-function SkeletonLine({ width, small }: { width: string; small?: boolean }) {
+function SkeletonLine({ width, small, tall }: { width: string; small?: boolean; tall?: boolean }) {
   return (
-    <p aria-hidden="true" className={cx('relative', small ? 'type-small' : 'leading-6')}>
+    <p aria-hidden="true" className={cx('relative', small ? 'type-small' : tall ? 'leading-[30px]' : 'leading-6')}>
       &nbsp;
       <span
         className={cx(
           'absolute left-0 animate-pulse rounded bg-paper-2',
-          small ? 'top-1 h-3' : 'top-1 h-4',
+          small ? 'top-1 h-3' : tall ? 'top-2 h-4' : 'top-1 h-4',
           width,
         )}
       />
@@ -72,10 +72,13 @@ export function ResultCard({
   reserve,
   summary,
   meta,
+  resize,
 }: {
   item: ResultItem;
   /** Replaces the "before → after" lines (for outputs where savings make no sense). */
   summary?: string;
+  /** Resize tool: lead with the new pixel size, keep the byte change on the second line. */
+  resize?: boolean;
   /** Replaces the "W × H px · FORMAT" line. */
   meta?: string;
   /** Output name, unique within the batch (defaults to the engine's name). */
@@ -180,7 +183,7 @@ export function ResultCard({
           {busy && (
             // Same line boxes as the result below, so the card doesn't grow when it lands.
             <>
-              <SkeletonLine width="w-3/4" />
+              <SkeletonLine width="w-3/4" tall />
               <SkeletonLine width="w-1/3" />
               <SkeletonLine width="w-1/2" small />
               <span className="sr-only">{status === 'queued' ? copy.waiting : copy.working}</span>
@@ -189,7 +192,21 @@ export function ResultCard({
 
           {status === 'success' && r && (
             <>
-              {summary ? (
+              {resize ? (
+                <>
+                  <p className="leading-7 tabular-nums text-ink">
+                    <span className="font-display text-xl font-extrabold">
+                      {r.width} × {r.height} px
+                    </span>
+                  </p>
+                  <p className="leading-6 tabular-nums text-muted">
+                    {formatBytes(r.inputBytes)}
+                    <span aria-hidden="true"> → </span>
+                    <span className="sr-only"> to </span>
+                    {formatBytes(r.outputBytes)}
+                  </p>
+                </>
+              ) : summary ? (
                 <p className="min-h-12 leading-6 tabular-nums text-ink">{summary}</p>
               ) : (
                 <>
@@ -208,7 +225,8 @@ export function ResultCard({
                 </>
               )}
               <p className="type-small tabular-nums text-muted">
-                {meta ?? `${r.width} × ${r.height} px · ${FORMAT_LABEL[r.format]}`}
+                {meta ??
+                  (resize ? FORMAT_LABEL[r.format] : `${r.width} × ${r.height} px · ${FORMAT_LABEL[r.format]}`)}
               </p>
             </>
           )}

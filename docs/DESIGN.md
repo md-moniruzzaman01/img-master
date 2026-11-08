@@ -133,7 +133,6 @@ Same tool card and samurai stage. When the user picks a new image (image mode) o
 | `NumberInput` (client) | With unit toggle (KB/MB) for custom size. |
 | `Sheet` (client) | Bottom sheet on mobile, side panel on desktop; focus trap, Esc closes, returns focus. |
 | `Toast` (client) | `aria-live="polite"`, auto-hides after 3 s. |
-| `VisuallyHidden` | For screen-reader-only text. |
 
 ### 4.2 Layout (`components/layout/`)
 
@@ -199,7 +198,7 @@ Sprites (`public/samurai/kendo.svg`, `ronin.svg`) are traced from free Pixabay c
 
 ### 4.7 Sound (`components/sound/`)
 
-Optional sword sounds, **off by default** (`siteConfig.soundEnabled: false`). `SoundToggle` is a 48×48 icon button in the header (`aria-pressed`, label "Sound on" / "Sound off"), with the preference in `localStorage` (try/catch). The AudioContext is created only inside the toggle's click. Sounds (`/sounds/{start,success,error}.mp3?v=N`, 5–8 KB each) are fetched only after the user turns sound on.
+Optional sword sounds, **off by default** (`siteConfig.soundEnabled: false`). `SoundToggle` is a 48×48 icon button in the header (constant `aria-label="Sound on"` plus `aria-pressed`: the pressed state carries on/off, so screen readers do not hear the state twice), with the preference in `localStorage` (try/catch). The AudioContext is created only inside the toggle's click. Sounds (`/sounds/{start,success,error}.mp3?v=N`, 5–8 KB each) are fetched only after the user turns sound on.
 
 ## 5. Interaction details
 

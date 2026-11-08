@@ -45,6 +45,23 @@ export const FILL_SWATCHES = [
 
 export const RESIZE_LIMITS = { min: 1, max: 20_000, pctMin: 1, pctMax: 400 } as const;
 
+export type ResizeProblem = 'empty' | 'range' | 'percent';
+
+/** Why the current resize inputs can't run yet (null = fine). Never starts a run when set. */
+export function resizeProblem(o: ToolOptions): ResizeProblem | null {
+  const { min, max, pctMin, pctMax } = RESIZE_LIMITS;
+  const ok = (n: number) => Number.isInteger(n) && n >= min && n <= max;
+  if (o.resizeBy === 'percent') {
+    const p = o.percent;
+    return Number.isFinite(p) && p >= pctMin && p <= pctMax ? null : 'percent';
+  }
+  const w = Number.isFinite(o.width) ? o.width : 0;
+  const h = Number.isFinite(o.height) ? o.height : 0;
+  if (!(w > 0) && !(h > 0)) return 'empty';
+  if ((w !== 0 && !ok(w)) || (h !== 0 && !ok(h))) return 'range';
+  return null;
+}
+
 export function defaultOptions(tool: ToolDefinition): ToolOptions {
   const p = tool.preset;
   const pct = (q: number | undefined, fallback: number) =>

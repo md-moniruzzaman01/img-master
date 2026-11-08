@@ -40,6 +40,7 @@ import { HERO_FILES_EVENT, HERO_PICK_EVENT, HERO_TOOL_ID } from './hero-bus';
 import { PrivacyNote } from './privacy-note';
 import { ProgressBar } from './progress-bar';
 import { QualitySlider } from './quality-slider';
+import { ResizeFormat, ResizePrimary } from './resize-controls';
 import { ResultCard, type CardAction, type ResultItem } from './result-card';
 import { ResultList } from './result-list';
 import { ResultsPlaceholder } from './results-placeholder';
@@ -54,11 +55,12 @@ import {
   mergeStored,
   nextTarget,
   readStoredRaw,
+  resizeProblem,
   saveOptions,
   type ToolOptions,
 } from './tool-options';
 
-const IMAGE_KINDS: readonly ToolDefinition['kind'][] = ['compress-to-size', 'compress', 'convert'];
+const IMAGE_KINDS: readonly ToolDefinition['kind'][] = ['compress-to-size', 'compress', 'convert', 'resize'];
 
 /**
  * The interactive island on every tool page (DESIGN.md §4.3). Picks its
@@ -95,7 +97,7 @@ export function ToolShell({
 
 type ShellState = 'idle' | 'processing' | 'done' | 'partial' | 'error';
 type Notice = 'too-many' | 'webp' | 'engine' | null;
-type Verb = 'compress' | 'convert';
+type Verb = 'compress' | 'convert' | 'resize';
 
 const noopSubscribe = () => () => {};
 
@@ -142,7 +144,7 @@ function ImageTool({
   const slug = tool.slug;
   const kind = tool.kind;
   const hero = variant === 'hero';
-  const verb: Verb = kind === 'convert' ? 'convert' : 'compress';
+  const verb: Verb = kind === 'convert' ? 'convert' : kind === 'resize' ? 'resize' : 'compress';
   const maxFiles = siteConfig.maxFiles;
   const inputId = useId();
 
@@ -166,6 +168,8 @@ function ImageTool({
   const [progress, setProgress] = useState({ index: 0, ratio: 0 });
   const [notice, setNotice] = useState<Notice>(null);
   const [needsApply, setNeedsApply] = useState(false);
+  // Resize: a file was picked while the size fields were not valid yet.
+  const [waiting, setWaiting] = useState(false);
   const [announce, setAnnounce] = useState('');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [zipping, setZipping] = useState(false);
@@ -219,6 +223,21 @@ function ImageTool({
         onProgress,
       );
     }
+    if (kind === 'resize') {
+      const common = { format: o.resizeFormat, quality: 0.9, background: o.background };
+      return engine.resize(
+        file,
+        o.resizeBy === 'percent'
+          ? { ...common, percent: o.percent }
+          : {
+              ...common,
+              width: o.width > 0 ? o.width : undefined,
+              height: o.height > 0 ? o.height : undefined,
+              keepRatio: o.keepRatio,
+            },
+        onProgress,
+      );
+    }
     if (kind === 'compress') {
       return engine.compress(
         file,
@@ -245,6 +264,7 @@ function ImageTool({
     revokeAll();
     savedRef.current = false;
     setNeedsApply(false);
+    setWaiting(false);
     setRunOpts(o);
 
     const initial: ResultItem[] = files.map((file, i) =>
@@ -335,7 +355,9 @@ function ImageTool({
     if (files.length === 1) {
       setAnnounce(
         ok[0]
-          ? copy.doneSingle(ok[0].outputBytes, ok[0].inputBytes)
+          ? kind === 'resize'
+            ? copy.resizeDoneLive(ok[0].width, ok[0].height, ok[0].outputBytes)
+            : copy.doneSingle(ok[0].outputBytes, ok[0].inputBytes)
           : lastError
             ? errorText(lastError, o)
             : copy.noneWorked,
@@ -363,6 +385,11 @@ function ImageTool({
       setNotice(null);
     }
     sourceRef.current = files;
+    if (kind === 'resize' && resizeProblem(options)) {
+      // Keep the files; the hint under the size fields says what to fix.
+      setWaiting(true);
+      return;
+    }
     track('tool_start', { tool: slug, files: files.length });
     void run(files, options, 'new');
   }
@@ -422,11 +449,16 @@ function ImageTool({
     const files = sourceRef.current;
     if (files.length === 0) return;
     window.clearTimeout(timerRef.current);
+    if (kind === 'resize' && resizeProblem(next)) {
+      setNeedsApply(false);
+      return;
+    }
     if (!immediate && files.length > 5) {
       setNeedsApply(true);
       return;
     }
-    timerRef.current = window.setTimeout(() => void run(files, next, 'rerun'), immediate ? 0 : 250);
+    const again = items.length === 0 ? 'new' : 'rerun';
+    timerRef.current = window.setTimeout(() => void run(files, next, again), immediate ? 0 : 250);
   }
 
   function switchToJpg() {
@@ -441,6 +473,9 @@ function ImageTool({
       return error.detail?.smallestBytes
         ? `${base} ${copy.smallestReached(error.detail.smallestBytes)}`
         : base;
+    }
+    if (error.code === 'INVALID_OPTIONS' && error.detail?.width && error.detail.height) {
+      return copy.resizeTooBig(error.detail.width, error.detail.height);
     }
     return errorMessage(error.code);
   }
@@ -460,6 +495,7 @@ function ImageTool({
   const noteText = (n: EngineNote, r: EngineResult): string | null => {
     switch (n) {
       case 'resized':
+        if (kind === 'resize') return null;
         return usesTarget(runOpts)
           ? copy.resizedToTarget(r.width, r.height, runOpts.targetKB)
           : copy.resized(r.width, r.height);
@@ -527,7 +563,11 @@ function ImageTool({
   // Space held from the moment processing starts, so nothing below the tool
   // moves when results land (DESIGN.md §8, CLS < 0.05).
   const outputsJpegFor = (o: ToolOptions) =>
-    usesTarget(o) ? o.sizeFormat === 'jpeg' : kind === 'convert' && o.convertTo === 'jpeg';
+    usesTarget(o)
+      ? o.sizeFormat === 'jpeg'
+      : kind === 'resize'
+        ? o.resizeFormat === 'jpeg'
+        : kind === 'convert' && o.convertTo === 'jpeg';
   const outputsJpeg = outputsJpegFor(runOpts);
   const mayFlatten = outputsJpeg && items.some((it) => mayHaveAlpha(it.file));
   const reserveFor = (it: ResultItem) => ({
@@ -574,7 +614,9 @@ function ImageTool({
   );
 
   let primary: React.ReactNode = null;
-  if (kind === 'compress-to-size') {
+  if (kind === 'resize') {
+    primary = <ResizePrimary options={options} onChange={updateOptions} waiting={waiting} />;
+  } else if (kind === 'compress-to-size') {
     primary = targetChips;
   } else if (kind === 'compress') {
     primary = (
@@ -613,7 +655,15 @@ function ImageTool({
   }
 
   const advanced: React.ReactNode[] = [];
-  if (sizeMode) {
+  if (kind === 'resize') {
+    advanced.push(
+      <ResizeFormat
+        key="rformat"
+        value={options.resizeFormat}
+        onChange={(resizeFormat) => updateOptions({ resizeFormat })}
+      />,
+    );
+  } else if (sizeMode) {
     advanced.push(
       <FormatSelect
         key="format"
@@ -872,6 +922,7 @@ function ImageTool({
                         shareSupported={shareSupported}
                         onShared={onShared}
                         reserve={reserveFor(it)}
+                        resize={kind === 'resize'}
                       />
                     </li>
                   ))}

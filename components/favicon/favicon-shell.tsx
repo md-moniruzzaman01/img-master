@@ -331,16 +331,19 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
       <div className={group}>
         <div className="order-1 grid gap-4 lg:order-2">
           {mode === 'image' ? (
-            <FilePicker
-              inputId={inputId}
-              multiple={false}
-              onFiles={pickFile}
-              onWarmUp={() => void loadEngine().catch(() => {})}
-              label={file ? t.pickAnother : t.pickImage}
-              title={t.imageHintDesktop}
-              mobileTitle={file ? t.pickAnother : t.pickImage}
-              hint={t.imageHint}
-            />
+            <div>
+              <FilePicker
+                inputId={inputId}
+                multiple={false}
+                onFiles={pickFile}
+                onWarmUp={() => void loadEngine().catch(() => {})}
+                label={file ? t.pickAnother : t.pickImage}
+                title={t.imageHintDesktop}
+                mobileTitle={file ? t.pickAnother : t.pickImage}
+                hint={t.imageHint}
+              />
+              <PrivacyNote className="mt-2" />
+            </div>
           ) : (
             <FaviconControls
               mode={mode}

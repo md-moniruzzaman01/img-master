@@ -217,7 +217,7 @@ export function SamuraiStage({
         'rounded-card border border-line bg-card',
         panel
           ? 'flex flex-col p-6'
-          : 'flex items-center gap-4 p-3 lg:flex-col lg:items-stretch lg:gap-0 lg:p-6',
+          : 'flex items-center gap-4 p-2 lg:flex-col lg:items-stretch lg:gap-0 lg:p-6',
         className,
       )}
     >

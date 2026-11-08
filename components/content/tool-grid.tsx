@@ -116,7 +116,7 @@ function HomeSection({
           <p className="mt-4 text-right">
             <Link
               href={group.hubHref}
-              className="type-small font-semibold text-accent hover:underline underline-offset-4"
+              className="inline-flex min-h-12 items-center type-small font-semibold text-accent-strong hover:underline underline-offset-4"
             >
               Any format to JPG, PNG or WebP →
             </Link>

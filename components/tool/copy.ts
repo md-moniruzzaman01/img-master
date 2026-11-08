@@ -59,11 +59,23 @@ export const copy = {
   height: 'Height',
   auto: 'Auto', // invented
   percent: 'Scale', // invented
-  keepRatio: 'Keep the shape (lock ratio)', // invented
+  keepRatio: 'Keep ratio', // invented
   keepRatioOn: 'Ratio locked', // invented
   keepRatioOff: 'Ratio unlocked', // invented
   sameFormat: 'Same as original', // invented
+  sameShort: 'Same', // invented
+  formatLabel: 'Format', // invented
   resizeHint: 'Leave one side on Auto to keep the shape.', // invented
+  resizeFitHint: 'The image fits inside this box and keeps its shape.', // invented
+  resizePercentHint: 'Width and height scale together.', // invented
+  percentKeeps: '100% keeps the size.', // invented
+  resizeNeedSize: 'Enter a width or a height.', // invented
+  resizeBadPixels: 'Use a size from 1 to 20,000 px.', // invented
+  resizeBadPercent: 'Use a percent from 1 to 400.', // invented
+  resizeWaiting: 'Your image will start when this is fixed.', // invented
+  resizeTooBig: (w: number, h: number) => `Largest size for this image is ${w} × ${h} px.`, // invented
+  resizeDoneLive: (w: number, h: number, bytes: number) =>
+    `Done. ${w} by ${h} pixels, ${formatBytes(bytes)}`, // invented
 
   // States (samurai panel)
   stage: {

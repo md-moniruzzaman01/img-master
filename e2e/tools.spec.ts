@@ -129,7 +129,7 @@ test('compress-to-size: changing the target chip re-runs and respects the new si
   await pickAndWait(page, fixture('photo-2mp.jpg'));
   const a = await cardData(cards(page).first());
   expect(a.outputBytes).toBeLessThanOrEqual(50_000);
-  await page.getByRole('radio', { name: '200KB' }).click();
+  await page.getByRole('radio', { name: '200 KB', exact: true }).click();
   await expect
     .poll(async () => (await cardData(cards(page).first())).outputBytes, { timeout: 30_000 })
     .toBeGreaterThan(a.outputBytes);
@@ -218,7 +218,7 @@ test('converter png-to-jpg: transparent PNG gets a solid (white) background', as
   expect(R).toBeGreaterThan(245);
   expect(G).toBeGreaterThan(245);
   expect(B).toBeGreaterThan(245);
-  await expect(page.getByText('Background color').first()).toBeVisible();
+  await expect(page.getByText('Background colour').first()).toBeVisible();
   // Changing the background re-runs with the new color.
   await page.locator('input[type=color]').fill('#ff0000');
   await page.waitForTimeout(1200);
@@ -299,7 +299,7 @@ test('compress-image hub: quality mode and size mode both work', async ({ page }
   expect(d.outputBytes).toBeLessThan(d.inputBytes);
   expect(d.fileName).toBe('photo-2mp-compressed.jpg');
   await page.getByRole('radio', { name: 'Pick a size' }).click();
-  await page.getByRole('radio', { name: '100KB' }).click();
+  await page.getByRole('radio', { name: '100 KB', exact: true }).click();
   await expect
     .poll(async () => (await cardData(cards(page).first())).outputBytes, { timeout: 30_000 })
     .toBeLessThanOrEqual(100_000);
@@ -456,7 +456,7 @@ test('edge: unreachable target -> honest message, next-size button, works after 
   await expect(card).toContainText(UNREACHABLE_MSG);
   await expect(card).toContainText('allow smaller dimensions');
   await expect(card.getByRole('button', { name: /^Try / })).toBeVisible();
-  await card.getByRole('button', { name: 'Allow smaller dimensions' }).click();
+  await card.getByRole('button', { name: /^Allow smaller/ }).click();
   await expect
     .poll(async () => (await cardData(cards(page).first())).status, { timeout: 60_000 })
     .toMatch(/success|failed/);

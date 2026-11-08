@@ -122,7 +122,7 @@ export function FilePicker({
       className={cx(
         'group/zone relative flex cursor-pointer flex-col items-center rounded-card text-center transition-colors duration-150 ease-out',
         // Phones: dashed crimson on shu-soft.
-        'border-2 border-dashed border-shu bg-shu-soft px-5 py-6',
+        'border-2 border-dashed border-shu bg-shu-soft px-5 py-5',
         // Desktop: ink-dark zone.
         'md:border-solid md:bg-zone',
         dragOver ? 'md:border-shu' : 'md:border-zone',
@@ -168,7 +168,7 @@ export function FilePicker({
         aria-hidden="true"
         className={cx(
           buttonClasses('primary', 'md'),
-          'hidden md:inline-flex',
+          'max-md:hidden',
           hero ? 'shrink-0' : 'mt-5 min-w-36',
         )}
       >

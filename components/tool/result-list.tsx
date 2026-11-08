@@ -30,22 +30,25 @@ export function ResultList({
       </h2>
       <div
         className={cx(
-          'flex min-h-11 items-center gap-4 rounded-card p-4',
+          'flex min-h-[5.5rem] items-center gap-4 rounded-card p-4',
           tone === 'done' && 'bg-matcha-soft',
           (tone === 'partial' || tone === 'error') && 'bg-shu-soft',
         )}
       >
-        {stamped && (
+        {stamped ? (
           <span
             aria-hidden="true"
             className="kanji grid size-14 shrink-0 -rotate-6 place-items-center rounded-[6px] border-[3px] border-shu text-2xl leading-none font-extrabold text-shu"
           >
             {tone === 'done' ? '済' : '断'}
           </span>
+        ) : (
+          // Holds the stamp's room, so the text beside it doesn't slide when the stamp lands.
+          <span aria-hidden="true" className="size-14 shrink-0" />
         )}
         <div
           className={cx(
-            'min-w-0 flex-1',
+            'flex min-h-14 min-w-0 flex-1 flex-col justify-center',
             stamped &&
               '[&_p]:font-display [&_p]:text-xl [&_p]:leading-7 [&_p]:font-extrabold sm:[&>div]:flex sm:[&>div]:flex-wrap sm:[&>div]:items-center sm:[&>div]:justify-between sm:[&>div]:gap-3',
           )}
