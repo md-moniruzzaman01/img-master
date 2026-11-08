@@ -1,5 +1,5 @@
 import type { Viewport } from 'next';
-import { Shippori_Mincho_B1, Yuji_Syuku, Zen_Kaku_Gothic_New } from 'next/font/google';
+import localFont from 'next/font/local';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { buildRootMetadata } from '@/lib/seo/metadata';
@@ -9,41 +9,32 @@ import './globals.css';
 
 export const metadata = buildRootMetadata();
 
-// Fonts from the Figma file (spec 2026-10-25 §4). Self-hosted at build: no runtime request to Google.
+// Fonts from the Figma file (spec 2026-10-25 §4), self-hosted as latin-only woff2 (Shippori Mincho B1
+// and Zen Kaku Gothic New, both OFL). The full Google builds ship ~120 unicode-range slices per
+// weight: ~560 KB of render-blocking @font-face CSS. Japanese glyphs fall back to system fonts.
 
 /** Headings, logo, result numbers. */
-const mincho = Shippori_Mincho_B1({
-  subsets: ['latin'],
-  weight: ['500', '700', '800'],
+const mincho = localFont({
+  src: [
+    { path: './fonts/mincho-500.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/mincho-700.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/mincho-800.woff2', weight: '800', style: 'normal' },
+  ],
   display: 'swap',
+  preload: false,
   variable: '--font-mincho',
 });
 
 /** Body, buttons, labels, inputs. */
-const gothic = Zen_Kaku_Gothic_New({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
+const gothic = localFont({
+  src: [
+    { path: './fonts/gothic-400.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/gothic-500.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/gothic-700.woff2', weight: '700', style: 'normal' },
+  ],
   display: 'swap',
+  preload: false,
   variable: '--font-gothic',
-});
-
-/**
- * Decorative kanji (圧縮, 五十 …). Not preloaded and not limited to latin, so the
- * browser fetches only the unicode-range slices for glyphs a page actually shows.
- */
-const kanji = Shippori_Mincho_B1({
-  weight: '800',
-  display: 'swap',
-  preload: false,
-  variable: '--font-kanji',
-});
-
-/** Favicon "Brush" typeface. Downloaded only when text uses it (favicon Letters tab). */
-const brush = Yuji_Syuku({
-  weight: '400',
-  display: 'swap',
-  preload: false,
-  variable: '--font-brush',
 });
 
 export const viewport: Viewport = {
@@ -67,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${mincho.variable} ${gothic.variable} ${kanji.variable} ${brush.variable}`}
+      className={`${mincho.variable} ${gothic.variable}`}
       suppressHydrationWarning
     >
       <head>
