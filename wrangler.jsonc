@@ -1,0 +1,12 @@
+{
+  // Static export: Cloudflare serves the files in out/ (built by `npm run build`).
+  // No Worker code and no OpenNext. public/_headers is copied into out/ by Next and applied.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "img-master",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}
