@@ -1,40 +1,32 @@
 import type { ReactNode } from 'react';
 import { cx } from '@/components/ui/cx';
 
-// Tool and text columns share one width, so on tool pages the tool, its
-// results and the content below all start at the same left edge (QA-16).
+// One page grid: 16px gutters on phones, 24px from 640px, 48px from 1024px
+// (1184px content at 1280, as in the Figma frames).
 const widths = {
-  tool: 'max-w-[680px]',
-  text: 'max-w-[680px]',
-  wide: 'max-w-[1024px]',
+  page: 'max-w-[1184px]',
+  /** Reading width for legal and info text. */
+  text: 'max-w-[760px]',
+  /** Old names, same as `page`. */
+  tool: 'max-w-[1184px]',
+  wide: 'max-w-[1184px]',
 } as const;
 
-/**
- * The tool column fills the first screen (viewport minus the 52px header),
- * capped at 56rem for very tall screens. Content after it starts at the fold,
- * so results can land without moving anything the visitor can see (CLS),
- * and without holding a whole invisible result card of blank space (QA-18).
- */
-const minHeights = {
-  tool: 'min-h-[min(calc(100svh-52px),56rem)]',
-  text: undefined,
-  wide: undefined,
-} as const;
-
-/** Centered column with page gutters: 16px on mobile, 24px from 640px. */
+/** Centered column with page gutters. */
 export function Container({
-  size,
+  size = 'page',
   className,
   children,
+  as: Tag = 'div',
 }: {
-  size: 'tool' | 'text' | 'wide';
+  size?: keyof typeof widths;
   className?: string;
   children: ReactNode;
+  as?: 'div' | 'section' | 'header' | 'footer';
 }) {
-  // Max widths include the gutters' content box, so add the padding on top.
   return (
-    <div className={cx('mx-auto w-full px-4 sm:px-6', minHeights[size], className)}>
+    <Tag className={cx('mx-auto w-full px-4 sm:px-6 lg:px-12', className)}>
       <div className={cx('mx-auto w-full', widths[size])}>{children}</div>
-    </div>
+    </Tag>
   );
 }

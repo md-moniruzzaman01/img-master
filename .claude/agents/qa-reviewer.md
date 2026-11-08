@@ -38,7 +38,7 @@ On every tool page, record all network requests while processing files. Fail if 
 - Every compress-to-size page with every fixture: result `data-output-bytes` ≤ `targetKB × 1000`, or a clear unreachable message; the downloaded file decodes as an image of the right type.
 - Converters: output MIME and extension match; transparent PNG → JPG has a solid background.
 - WebKit: WebP output either works or shows the "can't save WebP" message (never a broken file).
-- Batch of 10 files and "Download all (ZIP)" contains 10 files with the right names.
+- Batch of 20 files and "Download all (ZIP)" contains 20 files with the right names.
 - Edge-case fixtures produce the right messages from `DESIGN.md` §6.
 - Favicon (Phase 4): ZIP contains every file in `PRODUCT.md` §4.4; `favicon.ico` header lists 16/32/48.
 

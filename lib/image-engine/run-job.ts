@@ -5,6 +5,7 @@ import type {
   ConvertOptions,
   EngineNote,
   EngineResult,
+  ResizeOptions,
 } from '../types';
 import { compressJob } from './compress';
 import { MAX_ENCODES, searchToSize, targetBytesFor, type Encoder } from './compress-to-size';
@@ -16,9 +17,11 @@ import { decodeImage } from './decode';
 import { EngineError, cancelled, isOutOfMemory } from './errors';
 import { assertFormatSupported, encodeCanvas, releaseCanvas, type AnyCanvas } from './encode';
 import { compressToSizeName } from './names';
-import { Pyramid } from './resize';
+import { Pyramid, fitWidth } from './resize';
+import { resizeJob } from './resize-job';
 
-export type JobType = 'compressToSize' | 'convert' | 'compress' | 'pngToIco' | 'favicons';
+export type JobType =
+  'compressToSize' | 'convert' | 'compress' | 'resize' | 'pngToIco' | 'favicons';
 export type Stage = 'decode' | 'search' | 'encode';
 
 export interface RunOptions {
@@ -52,7 +55,7 @@ export async function compressToSizeJob(
     throw new EngineError('ENCODE_UNSUPPORTED', 'Compress to size supports JPG and WebP only');
   }
   if (!(opts.targetKB > 0) || !Number.isFinite(opts.targetKB)) {
-    throw new EngineError('TARGET_UNREACHABLE', 'Invalid target size');
+    throw new EngineError('INVALID_OPTIONS', 'Enter a target size above 0 KB.');
   }
   await assertFormatSupported(format);
   const targetBytes = targetBytesFor(opts.targetKB);
@@ -64,6 +67,9 @@ export async function compressToSizeJob(
   const notes: EngineNote[] = [...decoded.notes];
   const flatten = format === 'jpeg';
   const background = flatten ? (opts.background ?? '#ffffff') : undefined;
+
+  // maxWidth: scale down first (ratio kept), then search at that size or smaller.
+  const start = fitWidth(decoded.width, decoded.height, opts.maxWidth ?? 0);
 
   const pyramid = new Pyramid(decoded.source);
   let cached: { w: number; h: number; canvas: AnyCanvas } | null = null;
@@ -79,8 +85,8 @@ export async function compressToSizeJob(
 
   try {
     const r = await searchToSize({
-      width: decoded.width,
-      height: decoded.height,
+      width: start.width,
+      height: start.height,
       targetBytes,
       keepDimensions: opts.keepDimensions ?? false,
       encode: encoder,
@@ -135,6 +141,8 @@ async function runOnce(
       return convertJob(file, options as ConvertOptions, ctx);
     case 'compress':
       return compressJob(file, options as CompressOptions, ctx);
+    case 'resize':
+      return resizeJob(file, options as ResizeOptions, ctx);
     case 'pngToIco':
       return pngToIcoJob(file, ctx);
   }

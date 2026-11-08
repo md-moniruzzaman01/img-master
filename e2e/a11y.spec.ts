@@ -67,8 +67,8 @@ for (const scheme of ['light'] as const) {
     ]);
     await expect(cards(page)).toHaveCount(3);
     await axe(page, `${scheme} partial results with error + notes + per-card downloads`);
-    await page.locator('header summary[aria-label="Menu"]').click();
-    await expect(page.locator('header details')).toHaveAttribute('open', '');
+    await page.locator('header details[data-menu="mobile"] summary[aria-label="Menu"]').click();
+    await expect(page.locator('header details[data-menu="mobile"]')).toHaveAttribute('open', '');
     await axe(page, `${scheme} menu open over results`);
     await page.keyboard.press('Escape');
 
@@ -102,20 +102,23 @@ test('keyboard only: skip link, menu (open, reach every link, Esc closes, focus 
   await page.keyboard.press('Enter');
   expect(page.url()).toContain('#main');
 
-  const summary = page.locator('header summary[aria-label="Menu"]');
-  const details = page.locator('header details');
+  const summary = page.locator('header details[data-menu="mobile"] summary[aria-label="Menu"]');
+  // The phone menu (native <details data-menu="mobile">); desktop mega menus are hidden here.
+  const details = page.locator('header details[data-menu="mobile"]');
   await expect(details).not.toHaveAttribute('open', '');
   await summary.focus();
   await page.keyboard.press('Enter');
   await expect(details).toHaveAttribute('open', '');
-  await expect(summary).toHaveAttribute('aria-expanded', 'true');
+  // Native <summary>: the browser exposes expanded/collapsed itself, so no aria-expanded attribute.
 
-  // Links in the open menu are reachable with Tab (22 = 18 tools + 4 info pages).
+  // Links in the open menu are reachable with Tab. The phone menu is a condensed list
+  // (size chips, pairs, "More" links, info pages), so count it instead of hard-coding.
   const links = details.locator('a[href]');
-  expect(await links.count()).toBe(22);
+  const linkCount = await links.count();
+  expect(linkCount).toBeGreaterThanOrEqual(15);
   if (browserName !== 'webkit') {
     const seen = new Set<string>();
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < linkCount + 10; i++) {
       await page.keyboard.press('Tab');
       const href = await page.evaluate(() => {
         const a = document.activeElement as HTMLAnchorElement | null;
@@ -123,13 +126,14 @@ test('keyboard only: skip link, menu (open, reach every link, Esc closes, focus 
       });
       if (href) seen.add(href);
     }
-    expect(seen.size, 'every menu link receives focus by Tab').toBe(22);
+    expect(seen.size, 'every distinct menu link receives focus by Tab').toBe(
+      new Set(await links.evaluateAll((as) => as.map((a) => a.getAttribute('href')))).size,
+    );
   }
   // Esc closes the menu and focus returns to the button.
   await page.keyboard.press('Escape');
   await expect(details).not.toHaveAttribute('open', '');
   await expect(summary).toBeFocused();
-  await expect(summary).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('keyboard only: compress page (picker focus ring, chips with arrow keys, switch, details, results)', async ({
@@ -176,10 +180,10 @@ test('keyboard only: compress page (picker focus ring, chips with arrow keys, sw
   }
 
   // Chips are a radiogroup with roving tabindex and arrow keys.
-  const chip = page.getByRole('radio', { name: '50KB' });
+  const chip = page.getByRole('radio', { name: '50 KB', exact: true });
   await chip.focus();
   await page.keyboard.press('ArrowRight');
-  await expect(page.getByRole('radio', { name: '100KB' })).toBeChecked();
+  await expect(page.getByRole('radio', { name: '100 KB', exact: true })).toBeChecked();
   await page.keyboard.press('ArrowLeft');
   await expect(chip).toBeChecked();
 

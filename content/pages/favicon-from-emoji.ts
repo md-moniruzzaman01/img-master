@@ -10,12 +10,15 @@ export const content: ToolContent = {
     'favicon.ico from emoji',
   ],
   shortName: 'Favicon from emoji',
-  cardDescription: 'Turn one emoji into a website icon.',
+  cardDescription: 'Turn one emoji into a website icon, with an SVG too.',
   title: 'Favicon from Emoji – Free, No Upload | Img Master',
   description:
     'Pick one emoji and turn it into a website favicon with ICO, PNG and SVG files. Choose a background and shape, then download. Free, no upload.',
-  h1: 'Favicon from Emoji',
+  h1: 'Favicon from emoji',
+  h1Accent: 'emoji',
   subtitle: 'Make a favicon from emoji by picking one emoji, a background color and a shape.',
+  sideTip:
+    'Try the light and dark tab previews. A solid background helps an emoji stand out in both.',
   howTo: [
     'Open your emoji keyboard and type or paste one emoji.',
     'Choose a background color or transparent, and a shape.',
@@ -71,5 +74,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['favicon-generator', 'favicon-from-text', 'png-to-ico', 'image-converter'],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

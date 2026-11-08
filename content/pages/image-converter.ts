@@ -16,11 +16,13 @@ export const content: ToolContent = {
   title: 'Image Converter Online – JPG, PNG, WebP | Img Master',
   description:
     'Convert images to JPG, PNG or WebP in seconds. Pick any common format, choose the output and download. Free, works on phones, no upload needed.',
-  h1: 'Image Converter',
+  h1: 'Image converter',
+  h1Accent: 'converter',
   subtitle: 'Convert any common image to JPG, PNG or WebP with one tap, right in your browser.',
+  sideTip: 'Pick the output first: JPG for forms, PNG for exact copies, WebP for websites.',
   howTo: [
     'Choose one or more images in any common format.',
-    'Pick JPG, PNG or WebP under Convert to.',
+    'Pick JPG, PNG or WebP as the output.',
     'Download each converted file, or all of them as a ZIP.',
   ],
   howToHeading: 'How to convert images online',
@@ -35,7 +37,7 @@ export const content: ToolContent = {
     {
       heading: 'Choosing the right format',
       paragraphs: [
-        'When an image with a transparent background is saved as JPG, the clear parts are filled with a color. White is the default, and you can change it on the result. If you need a website icon in the .ico format, use [PNG to ICO](/png-to-ico).',
+        'When an image with a transparent background is saved as JPG, the clear parts are filled with a color. White is the default, and you can pick another color in the tool. If you need a website icon in the .ico format, use [PNG to ICO](/png-to-ico).',
       ],
       table: {
         caption: 'JPG, PNG and WebP compared',
@@ -69,7 +71,7 @@ export const content: ToolContent = {
   faqs: [
     {
       q: 'How do I change a picture to JPG?',
-      a: 'Choose the picture, keep JPG selected under Convert to, and download the new file. It works the same way on a phone or a computer.',
+      a: 'Choose the picture, keep JPG as the output, and download the new file. It works the same way on a phone or a computer.',
     },
     {
       q: 'Which format makes the smallest file?',
@@ -96,5 +98,5 @@ export const content: ToolContent = {
     'webp-to-png',
     'compress-image',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

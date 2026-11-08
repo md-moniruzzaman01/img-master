@@ -57,17 +57,17 @@ export function SnippetBlock({ snippet }: { snippet: string | null }) {
       data-testid="snippet-block"
       className="grid gap-2 [&>*]:min-w-0"
     >
-      <h2 id={headingId} className="type-h3 text-text">
+      <h2 id={headingId} className="type-h3 text-ink">
         {t.snippetHeading}
       </h2>
       <p className="type-small text-muted">{t.snippetHint}</p>
-      <div className="relative rounded-card border border-border bg-surface">
+      <div className="relative rounded-card border border-line bg-paper-2">
         <pre
           ref={preRef}
           tabIndex={0}
           aria-label={t.snippetHeading}
           data-testid="snippet"
-          className="no-scrollbar min-h-[176px] overflow-x-auto p-4 pb-16 font-mono text-[0.8125rem] leading-5 text-text"
+          className="no-scrollbar min-h-[176px] overflow-x-auto p-4 pb-16 font-mono text-[0.8125rem] leading-5 text-ink"
         >
           {snippet ? (
             <code>{snippet}</code>

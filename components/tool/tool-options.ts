@@ -25,6 +25,41 @@ export interface ToolOptions {
   convertQuality: number;
   /** Fill for transparent areas going to JPG. */
   background: string;
+  /** Resize: by pixels or by percent. */
+  resizeBy: 'px' | 'percent';
+  /** Resize target in px; 0 = auto (keep the shape). */
+  width: number;
+  height: number;
+  /** Resize percent, 1–400. */
+  percent: number;
+  keepRatio: boolean;
+  resizeFormat: ImageFormat | 'same';
+}
+
+/** Fill swatches for transparent areas (output data, not styling). */
+export const FILL_SWATCHES = [
+  { value: '#ffffff', name: 'White' },
+  { value: '#f2ece1', name: 'Paper' },
+  { value: '#000000', name: 'Black' },
+] as const;
+
+export const RESIZE_LIMITS = { min: 1, max: 20_000, pctMin: 1, pctMax: 400 } as const;
+
+export type ResizeProblem = 'empty' | 'range' | 'percent';
+
+/** Why the current resize inputs can't run yet (null = fine). Never starts a run when set. */
+export function resizeProblem(o: ToolOptions): ResizeProblem | null {
+  const { min, max, pctMin, pctMax } = RESIZE_LIMITS;
+  const ok = (n: number) => Number.isInteger(n) && n >= min && n <= max;
+  if (o.resizeBy === 'percent') {
+    const p = o.percent;
+    return Number.isFinite(p) && p >= pctMin && p <= pctMax ? null : 'percent';
+  }
+  const w = Number.isFinite(o.width) ? o.width : 0;
+  const h = Number.isFinite(o.height) ? o.height : 0;
+  if (!(w > 0) && !(h > 0)) return 'empty';
+  if ((w !== 0 && !ok(w)) || (h !== 0 && !ok(h))) return 'range';
+  return null;
 }
 
 export function defaultOptions(tool: ToolDefinition): ToolOptions {
@@ -42,6 +77,12 @@ export function defaultOptions(tool: ToolDefinition): ToolOptions {
     convertTo: p.to ?? 'jpeg',
     convertQuality: tool.kind === 'convert' ? pct(p.quality, 90) : 90,
     background: '#ffffff',
+    resizeBy: 'px',
+    width: 1200,
+    height: 0,
+    percent: 50,
+    keepRatio: true,
+    resizeFormat: 'same',
   };
 }
 
@@ -50,13 +91,15 @@ function rememberedKeys(tool: ToolDefinition): (keyof ToolOptions)[] {
   switch (tool.kind) {
     case 'compress-to-size':
       // The page's own size always wins on a size page (PRODUCT.md §5.1).
-      return ['sizeFormat', 'keepDimensions', 'background'];
+      return ['sizeFormat', 'keepDimensions', 'maxWidth', 'background'];
     case 'compress':
       return ['mode', 'targetKB', 'custom', 'sizeFormat', 'keepDimensions', 'quality', 'maxWidth'];
     case 'convert':
       return tool.preset.from === 'any'
         ? ['convertTo', 'convertQuality', 'background']
         : ['convertQuality', 'background'];
+    case 'resize':
+      return ['resizeBy', 'width', 'height', 'percent', 'keepRatio', 'resizeFormat', 'background'];
     default:
       return [];
   }
@@ -122,6 +165,23 @@ export function mergeStored(
         break;
       case 'background':
         if (isColor(v)) out.background = v as string;
+        break;
+      case 'resizeBy':
+        if (v === 'px' || v === 'percent') out.resizeBy = v;
+        break;
+      case 'width':
+      case 'height':
+        if (v === 0 || inRange(v, RESIZE_LIMITS.min, RESIZE_LIMITS.max)) out[key] = v as number;
+        break;
+      case 'percent':
+        if (inRange(v, RESIZE_LIMITS.pctMin, RESIZE_LIMITS.pctMax)) out.percent = v as number;
+        break;
+      case 'keepRatio':
+        if (typeof v === 'boolean') out.keepRatio = v;
+        break;
+      case 'resizeFormat':
+        if (v === 'same' || (typeof v === 'string' && FORMATS.includes(v)))
+          out.resizeFormat = v as ImageFormat | 'same';
         break;
     }
   }

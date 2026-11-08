@@ -60,3 +60,13 @@ export function dedupeNames(names: readonly string[]): string[] {
     return candidate;
   });
 }
+
+/** Resize: `{base}-{w}x{h}.{ext}`, e.g. photo-800x600.jpg. */
+export function resizeName(
+  original: string,
+  width: number,
+  height: number,
+  format: ImageFormat,
+): string {
+  return `${sanitizeBase(original)}-${Math.round(width)}x${Math.round(height)}.${EXTENSIONS[format]}`;
+}

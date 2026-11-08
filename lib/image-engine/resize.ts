@@ -1,4 +1,5 @@
-// High-quality downscale (ENGINE.md §5). Never upscales; keeps aspect ratio.
+// High-quality scaling (ENGINE.md §5). renderScaled never upscales; renderAnySize
+// (resize tool) may.
 import { context2d, createCanvas, releaseCanvas, type AnyCanvas } from './encode';
 
 export type DrawSource = ImageBitmap | AnyCanvas;
@@ -32,8 +33,9 @@ export function fitWidth(
 }
 
 /**
- * Draws `src` into a new w×h canvas. Reductions bigger than 2× step down by
- * halves first. When `background` is set, it is filled first (alpha flattening).
+ * Draws `src` into a new w×h canvas, never upscaling (sizes are clamped to the
+ * source). Reductions bigger than 2× step down by halves first. When
+ * `background` is set, it is filled first (alpha flattening).
  */
 export function renderScaled(
   src: DrawSource,
@@ -43,39 +45,57 @@ export function renderScaled(
 ): AnyCanvas {
   const w = Math.max(1, Math.min(Math.round(width), src.width));
   const h = Math.max(1, Math.min(Math.round(height), src.height));
+  return renderAnySize(src, w, h, background);
+}
+
+/**
+ * Like `renderScaled` but without the clamp: each axis may shrink or grow
+ * (resize tool, exact sizes). Shrinking axes still step down by halves.
+ */
+export function renderAnySize(
+  src: DrawSource,
+  width: number,
+  height: number,
+  background?: string,
+): AnyCanvas {
+  const w = Math.max(1, Math.round(width));
+  const h = Math.max(1, Math.round(height));
 
   let current: DrawSource = src;
   let temp: AnyCanvas | null = null;
   let cw = src.width;
   let ch = src.height;
 
-  while (cw > w * 2 && ch > h * 2) {
-    const nw = Math.ceil(cw / 2);
-    const nh = Math.ceil(ch / 2);
-    const next = createCanvas(nw, nh);
-    const ctx = context2d(next);
+  try {
+    while (cw > w * 2 && ch > h * 2) {
+      const nw = Math.ceil(cw / 2);
+      const nh = Math.ceil(ch / 2);
+      const next = createCanvas(nw, nh);
+      const ctx = context2d(next);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(current, 0, 0, cw, ch, 0, 0, nw, nh);
+      releaseCanvas(temp);
+      temp = next;
+      current = next;
+      cw = nw;
+      ch = nh;
+    }
+
+    const out = createCanvas(w, h);
+    const ctx = context2d(out);
+    if (background !== undefined) {
+      ctx.fillStyle = '#ffffff'; // used if `background` is not a valid color
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, w, h);
+    }
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(current, 0, 0, cw, ch, 0, 0, nw, nh);
+    ctx.drawImage(current, 0, 0, cw, ch, 0, 0, w, h);
+    return out;
+  } finally {
     releaseCanvas(temp);
-    temp = next;
-    current = next;
-    cw = nw;
-    ch = nh;
   }
-
-  const out = createCanvas(w, h);
-  const ctx = context2d(out);
-  if (background !== undefined) {
-    ctx.fillStyle = '#ffffff'; // used if `background` is not a valid color
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, w, h);
-  }
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(current, 0, 0, cw, ch, 0, 0, w, h);
-  releaseCanvas(temp);
-  return out;
 }
 
 /**

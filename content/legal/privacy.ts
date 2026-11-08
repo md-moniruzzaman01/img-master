@@ -59,7 +59,7 @@ const sections: RichSection[] = [
   {
     heading: 'Settings saved on your device',
     paragraphs: [
-      "Each tool remembers your last options, such as the target size or quality, in your browser's local storage. This data stays on your device, contains no images, and is never sent to us. You can remove it at any time by clearing your browser's data for this site.",
+      "Each tool remembers your last options, such as the target size or quality, in your browser's local storage. The site also remembers whether you turned on dark mode or sound. This data stays on your device, contains no images, and is never sent to us. You can remove it at any time by clearing your browser's data for this site.",
     ],
   },
   {
@@ -91,5 +91,5 @@ export const privacyContent: LegalContent = {
   description: `How ${name} handles your data: images are processed in your browser and never uploaded. What we store on your device, analytics, ads and contact.`,
   h1: 'Privacy policy',
   sections,
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-10-25',
 };

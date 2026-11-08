@@ -3,14 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { toolContent } from '@/content/pages';
 import { homeContent } from '@/content/home';
 import { legalContent } from '@/content/legal';
+import { howItWorksContent } from '@/content/pages/how-it-works';
+import { fillCount, toolsIndexContent } from '@/content/pages/tools-index';
+import { siteConfig } from '@/lib/site-config';
 import { getLiveTools, getTool, tools } from '@/lib/tools';
-import type { ToolContent } from '@/lib/types';
+import type { InfoPageContent, ToolContent } from '@/lib/types';
 import {
   allLinks,
   belowToolText,
   containsKeyword,
   inlineLinks,
   isOneSentence,
+  normalizeForKeyword,
   overlap,
   shingles,
   wordCount,
@@ -22,6 +26,23 @@ const liveSlugs = new Set(live.map((t) => t.slug));
 const withContent = tools.filter((t) => toolContent[t.slug]);
 const knownSlugs = new Set(withContent.map((t) => t.slug));
 const pages: [string, ToolContent][] = withContent.map((t) => [t.slug, toolContent[t.slug]!]);
+const infoPages: [string, InfoPageContent][] = [
+  ['/how-it-works', howItWorksContent],
+  ['/tools', toolsIndexContent],
+];
+/** Site pages that are not tools; content may link to them. */
+const SITE_PATHS = ['/', '/about', '/privacy', '/terms', '/contact', '/how-it-works', '/tools'];
+/**
+ * Draft tools that live pages may already link to, because the lead flips them
+ * to live in the same change. Remove a slug once it is live in the registry.
+ */
+const LAUNCHING = new Set(['resize-image']);
+
+/** Batch copy must use siteConfig.maxFiles; never hard-code a number. */
+const WRONG_BATCH = new RegExp(
+  `\\b(up to|max(imum)?( of)?)\\s+(?!${siteConfig.maxFiles}\\b)\\d+\\s+(files|images|photos)\\b`,
+  'i',
+);
 
 const BANNED = [
   /\bbest\b/i,
@@ -67,19 +88,16 @@ describe('tool page content', () => {
 
   it.each(pages)('%s: a live page links only to live pages', (slug, c) => {
     if (!liveSlugs.has(slug)) return;
-    for (const r of c.related) expect(liveSlugs.has(r), `${slug} related ${r} is draft`).toBe(true);
+    const ok = (s: string) => liveSlugs.has(s) || LAUNCHING.has(s);
+    for (const r of c.related) expect(ok(r), `${slug} related ${r} is draft`).toBe(true);
     for (const href of allLinks(c)) {
-      if (
-        href.startsWith('/') &&
-        href !== '/' &&
-        !['/about', '/privacy', '/terms', '/contact'].includes(href)
-      )
-        expect(liveSlugs.has(href.slice(1)), `${slug} links to draft ${href}`).toBe(true);
+      if (href.startsWith('/') && !SITE_PATHS.includes(href))
+        expect(ok(href.slice(1)), `${slug} links to draft ${href}`).toBe(true);
     }
   });
 
   it.each(pages)('%s: every internal link points to a live page', (slug, c) => {
-    const known = new Set(['/', '/about', '/privacy', '/terms', '/contact']);
+    const known = new Set(SITE_PATHS);
     for (const href of allLinks(c)) {
       if (!href.startsWith('/')) continue;
       expect(href.endsWith('/') && href !== '/', `${slug} trailing slash ${href}`).toBe(false);
@@ -102,10 +120,48 @@ describe('tool page content', () => {
     expect(containsKeyword(intro, c.primaryKeyword), `${slug} subtitle/intro`).toBe(true);
     // An H2 carries the keyword's distinctive words ("50kb", "webp … jpg", "converter").
     const key = c.primaryKeyword.split(' ').filter((w) => !['to', 'image', 'online'].includes(w));
-    // The how-to heading counts as an H2 too (it is rendered above the steps).
-    const h2s = [c.howToHeading ?? '', ...c.sections.map((s) => s.heading)];
-    const hit = h2s.some((h) => key.every((w) => h.toLowerCase().includes(w)));
+    // The how-to and use-case headings count as H2s too. "50 KB" matches "50kb".
+    const h2s = [
+      c.howToHeading ?? '',
+      c.useCases?.heading ?? '',
+      ...c.sections.map((s) => s.heading),
+    ];
+    const hit = h2s.some((h) => key.every((w) => normalizeForKeyword(h).includes(w)));
     expect(hit, `${slug} H2 with ${key.join(' + ')}`).toBe(true);
+  });
+
+  it.each(pages)('%s: h1Accent is a non-empty part of the H1', (slug, c) => {
+    expect(c.h1Accent, `${slug} h1Accent`).toBeTruthy();
+    expect(c.h1.includes(c.h1Accent!), `${slug}: "${c.h1Accent}" not in "${c.h1}"`).toBe(true);
+    expect(c.h1Accent!.length).toBeLessThan(c.h1.length);
+  });
+
+  it.each(pages)('%s: side tip is one short line', (slug, c) => {
+    expect(c.sideTip, `${slug} sideTip`).toBeTruthy();
+    expect(c.sideTip!.length, `${slug} sideTip`).toBeLessThanOrEqual(120);
+    expect(c.sideTip).not.toMatch(/\[|\*\*/);
+  });
+
+  it.each(pages)('%s: use cases have 2–4 short cards', (slug, c) => {
+    if (!c.useCases) return;
+    const u = c.useCases;
+    expect(u.heading.length, `${slug} use-case heading`).toBeLessThanOrEqual(60);
+    if (u.intro) expect(u.intro.length, `${slug} use-case intro`).toBeLessThanOrEqual(120);
+    expect(u.items.length).toBeGreaterThanOrEqual(2);
+    expect(u.items.length).toBeLessThanOrEqual(4);
+    for (const it of u.items) {
+      expect(it.title.length, `${slug} "${it.title}"`).toBeLessThanOrEqual(28);
+      expect(it.text.length, `${slug} "${it.text}"`).toBeLessThanOrEqual(70);
+    }
+    expect(new Set(u.items.map((i) => i.title)).size).toBe(u.items.length);
+  });
+
+  it.each(pages)('%s: compress-to-size pages have use cases', (slug, c) => {
+    if (getTool(slug)!.kind === 'compress-to-size') expect(c.useCases, slug).toBeDefined();
+  });
+
+  it.each(pages)('%s: batch size is never hard-coded', (slug, c) => {
+    expect(JSON.stringify(c), slug).not.toMatch(WRONG_BATCH);
   });
 
   it.each(pages)('%s: subtitle is one sentence', (slug, c) => {
@@ -134,7 +190,7 @@ describe('tool page content', () => {
   });
 
   it.each(pages)('%s: no unsupported claims or placeholders', (slug, c) => {
-    const text = `${c.title} ${c.description} ${c.subtitle} ${belowToolText(c)}`;
+    const text = `${c.title} ${c.description} ${c.subtitle} ${c.sideTip ?? ''} ${belowToolText(c)}`;
     for (const re of BANNED) expect(re.test(text), `${slug} matches ${re}`).toBe(false);
     expect(text).not.toMatch(/PLACEHOLDER|TODO|lorem/i);
   });
@@ -145,7 +201,12 @@ describe('tool page content', () => {
   });
 
   it('titles, descriptions and H1s are unique across the site', () => {
-    const all = [...pages.map(([, c]) => c), homeContent, ...Object.values(legalContent)];
+    const all = [
+      ...pages.map(([, c]) => c),
+      ...infoPages.map(([, c]) => c),
+      homeContent,
+      ...Object.values(legalContent),
+    ];
     const titles = all.map((c) => c.title);
     const descriptions = all.map((c) => c.description);
     const h1s = all.map((c) => c.h1);
@@ -155,7 +216,11 @@ describe('tool page content', () => {
   });
 
   it('FAQ questions are not repeated across pages', () => {
-    const qs = pages.flatMap(([, c]) => c.faqs.map((f) => f.q.toLowerCase()));
+    const qs = [
+      ...pages.flatMap(([, c]) => c.faqs),
+      ...infoPages.flatMap(([, c]) => c.faqs ?? []),
+      ...homeContent.faqs,
+    ].map((f) => f.q.toLowerCase());
     expect(new Set(qs).size).toBe(qs.length);
   });
 
@@ -180,24 +245,54 @@ describe('tool page content', () => {
   });
 });
 
+/** Claims the Figma drafts made that we cannot back up (CLAUDE.md rule 8). */
+const UNPROVEN = [
+  /most forms/i,
+  /about a second/i,
+  /\d+\s*% (lighter|smaller)/i,
+  /before you.ve looked away/i,
+  /\bbest\b/i,
+  /#1\b/,
+  /\bmillions?\b/i,
+  /\breviews?\b/i,
+];
+
 describe('home and legal content', () => {
-  it('home fits its limits and has 4 FAQs', () => {
+  it('home fits its limits', () => {
     expect(homeContent.title.length).toBeLessThanOrEqual(60);
     expect(homeContent.description.length).toBeGreaterThanOrEqual(120);
     expect(homeContent.description.length).toBeLessThanOrEqual(155);
-    expect(homeContent.subtitle.length).toBeLessThanOrEqual(90);
-    expect(isOneSentence(homeContent.subtitle)).toBe(true);
+    expect(homeContent.subtitle.length).toBeLessThanOrEqual(140);
+    expect(homeContent.eyebrow.length).toBeLessThanOrEqual(30);
     expect(homeContent.faqs).toHaveLength(4);
+    expect(homeContent.trustItems).toHaveLength(3);
+    for (const t of homeContent.trustItems) expect(t.length).toBeLessThanOrEqual(28);
+    expect(homeContent.values).toHaveLength(3);
+    for (const v of homeContent.values) expect([...v.glyph]).toHaveLength(1);
   });
 
-  it('home H1 is exactly the owner-approved line', () => {
-    expect(homeContent.h1).toBe('Free Image Tools. No Upload. No Signup.');
+  it('home H1 is the owner-approved line with its accent', () => {
+    expect(homeContent.h1).toBe('Cut any image down to size.');
+    expect(homeContent.h1Accent).toBe('size.');
+    expect(homeContent.h1.endsWith(homeContent.h1Accent!)).toBe(true);
   });
 
-  it('home "How it works" mentions privacy once, with the picker wording', () => {
-    const text = homeContent.howItWorks.paragraphs.join(' ');
-    expect(text.match(/never leaves? your device/g) ?? []).toHaveLength(1);
-    expect(text).not.toMatch(/uploaded|private/i);
+  it('home makes no unproven claims and the compare labels have no numbers', () => {
+    const text = JSON.stringify(homeContent);
+    for (const re of UNPROVEN) expect(re.test(text), `home matches ${re}`).toBe(false);
+    expect(homeContent.compare.originalLabel).not.toMatch(/\d/);
+    expect(homeContent.compare.resultLabel).not.toMatch(/\d/);
+    expect(text).not.toMatch(WRONG_BATCH);
+  });
+
+  it('about has its eyebrow, intro and three values', () => {
+    const a = legalContent.about;
+    expect(a.eyebrow).toBe('About');
+    expect(a.h1).toBe('One clean cut.');
+    expect(a.intro?.length).toBeGreaterThan(0);
+    expect(a.values).toHaveLength(3);
+    for (const re of UNPROVEN)
+      expect(re.test(JSON.stringify(a)), `about matches ${re}`).toBe(false);
   });
 
   it.each(Object.values(legalContent).map((c) => [c.slug, c] as const))(
@@ -221,5 +316,56 @@ describe('home and legal content', () => {
     expect(JSON.stringify(legalContent.contact)).toContain(mailto);
     expect(JSON.stringify(legalContent.about)).toContain(mailto);
     expect(JSON.stringify(legalContent.about)).toContain(siteConfig.owner.name);
+  });
+});
+
+describe('info pages (how it works, every tool)', () => {
+  it.each(infoPages)('%s: title, description, subtitle and date', (path, c) => {
+    expect(c.title.length, `${path} title`).toBeLessThanOrEqual(60);
+    expect(c.title.endsWith(' | Img Master'), `${path} title brand`).toBe(true);
+    expect(c.description.length, `${path} description`).toBeGreaterThanOrEqual(120);
+    expect(c.description.length, `${path} description`).toBeLessThanOrEqual(155);
+    expect(c.subtitle.length, `${path} subtitle`).toBeLessThanOrEqual(140);
+    expect(c.sections.length).toBeGreaterThan(0);
+    expect(c.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    if (c.faqs) {
+      expect(c.faqs.length).toBeGreaterThanOrEqual(3);
+      expect(c.faqs.length).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it.each(infoPages)('%s: no unproven claims, placeholders or hard-coded batch size', (path, c) => {
+    const text = JSON.stringify(c);
+    for (const re of UNPROVEN) expect(re.test(text), `${path} matches ${re}`).toBe(false);
+    expect(text).not.toMatch(/PLACEHOLDER|TODO|lorem/i);
+    expect(text).not.toMatch(WRONG_BATCH);
+  });
+
+  it.each(infoPages)('%s: internal links point to live pages', (path, c) => {
+    const texts = [
+      ...c.sections.flatMap((s) => [...s.paragraphs, ...(s.list ?? [])]),
+      ...(c.faqs ?? []).map((f) => f.a),
+    ];
+    const hrefs = texts.flatMap((t) => [...t.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((m) => m[1]));
+    for (const href of hrefs) {
+      if (!href.startsWith('/')) continue;
+      const slug = href.slice(1);
+      const ok = SITE_PATHS.includes(href) || liveSlugs.has(slug) || LAUNCHING.has(slug);
+      expect(ok, `${path} links to ${href}`).toBe(true);
+      expect(href).not.toBe(path);
+    }
+  });
+
+  it('every-tool subtitle uses the {count} placeholder and no typed number', () => {
+    const s = toolsIndexContent.subtitle;
+    expect(s).toContain('{count}');
+    expect(s.replace('{count}', '')).not.toMatch(/\d/);
+    expect(fillCount(s, 17)).toBe(s.replace('{count}', '17'));
+    for (const t of [toolsIndexContent.title, toolsIndexContent.description, toolsIndexContent.h1])
+      expect(t).not.toMatch(/\{count\}|\b\d+ tools\b/);
+  });
+
+  it('every-tool H1 is "Every tool"', () => {
+    expect(toolsIndexContent.h1).toBe('Every tool');
   });
 });

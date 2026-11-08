@@ -1,51 +1,69 @@
 'use client';
 
-import { useEffect, useRef, useState, type DragEvent } from 'react';
+import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
 import { buttonClasses } from '@/components/ui/button-styles';
 import { cx } from '@/components/ui/cx';
-import { copy } from './copy';
-import { PrivacyNote } from './privacy-note';
+import { UploadIcon } from '@/components/ui/icons';
 
 /**
- * Big "Choose images" control (DESIGN.md §4.3), with the privacy line right
- * under the button. Mobile: button + privacy line. Desktop (≥ 768px): a dashed
- * drop zone around both, plus the drop/paste hint.
- *
- * The visible button is a <label> for a real file input, so it opens the
- * gallery even before React hydrates. Files picked before hydration are picked
- * up on mount. No `capture` attribute: users pick from the gallery.
- * Desktop extras: drag and drop onto the zone, paste with Ctrl+V.
+ * The drop zone (spec §5.2): ink-dark with a crimson upload disc on desktop
+ * (≥ 768px), dashed shu-soft "Tap to choose photos" on phones. The whole zone is
+ * a <label> for a real file input, so it opens the gallery even before React
+ * hydrates; files picked before hydration are picked up on mount. Desktop
+ * extras: drag and drop, paste with Ctrl+V. No `capture` attribute.
  */
 export function FilePicker({
   inputId,
   disabled,
   onFiles,
   onWarmUp,
+  onDragState,
   accept = 'image/*',
   multiple = true,
   label,
-  desktopHint,
+  title,
+  mobileTitle,
+  hint,
+  mobileHint,
+  step,
+  variant = 'page',
+  className,
 }: {
   inputId: string;
   disabled?: boolean;
   onFiles: (files: File[]) => void;
-  /** File types for the picker (default: any image). */
+  /** Called on first intent (pointer down, focus) to start loading the engine. */
+  onWarmUp?: () => void;
+  /** Drag enters/leaves the zone (the samurai shows "Blade drawn"). */
+  onDragState?: (over: boolean) => void;
   accept?: string;
   /** False: a single file; extras from drop or paste are ignored. */
   multiple?: boolean;
-  /** Overrides the button text (favicon tools). */
-  label?: string;
-  /** Drop/paste hint shown in the desktop drop zone; `null` hides it. */
-  desktopHint?: string | null;
-  /** Called on first intent (pointer down, focus) to start loading the engine. */
-  onWarmUp?: () => void;
+  /** Button text ("Choose images"). */
+  label: string;
+  /** Desktop heading ("Drop images here"). */
+  title: string;
+  /** Phone heading ("Tap to choose photos"). */
+  mobileTitle: string;
+  /** Desktop hint under the heading; null hides it. */
+  hint?: string | null;
+  /** Phone hint ("JPG, PNG, WebP · up to 20 photos"). */
+  mobileHint?: string | null;
+  /** Hero only: step number before the heading ("2"). */
+  step?: string;
+  /** `hero`: a low, horizontal zone (home). */
+  variant?: 'page' | 'hero';
+  className?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const hintId = useId();
   const [dragOver, setDragOver] = useState(false);
   const onFilesRef = useRef(onFiles);
+  const dragRef = useRef(onDragState);
   useEffect(() => {
     onFilesRef.current = multiple ? onFiles : (files) => onFiles(files.slice(0, 1));
-  }, [onFiles, multiple]);
+    dragRef.current = onDragState;
+  }, [onFiles, multiple, onDragState]);
 
   // A file chosen before hydration is still sitting in the input.
   useEffect(() => {
@@ -72,68 +90,108 @@ export function FilePicker({
     return () => window.removeEventListener('paste', onPaste);
   }, [disabled]);
 
-  function onDrop(e: DragEvent<HTMLDivElement>) {
+  function setOver(v: boolean) {
+    setDragOver(v);
+    dragRef.current?.(v);
+  }
+
+  function onDrop(e: DragEvent<HTMLLabelElement>) {
     e.preventDefault();
-    setDragOver(false);
+    setOver(false);
     if (disabled) return;
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) onFilesRef.current(files);
   }
 
+  const hero = variant === 'hero';
+
   return (
-    <div
+    <label
+      htmlFor={inputId}
       data-testid="file-picker"
       data-state={disabled ? 'disabled' : dragOver ? 'drag-over' : 'default'}
+      onPointerDown={onWarmUp}
       onDragOver={(e) => {
         e.preventDefault();
-        if (!disabled) setDragOver(true);
+        if (!disabled && !dragOver) setOver(true);
       }}
       onDragLeave={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragOver(false);
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false);
       }}
       onDrop={onDrop}
       className={cx(
-        'flex flex-col items-center text-center transition-colors duration-150 ease-out',
-        // Desktop: a dashed drop zone around the button.
-        'md:rounded-card md:border-2 md:border-dashed md:px-6 md:py-10',
-        dragOver ? 'md:border-primary md:bg-surface' : 'md:border-border-strong/50',
+        'group/zone relative flex cursor-pointer flex-col items-center rounded-card text-center transition-colors duration-150 ease-out',
+        // Phones: dashed crimson on shu-soft.
+        'border-2 border-dashed border-shu bg-shu-soft px-5 py-4 md:py-5',
+        // Desktop: ink-dark zone.
+        'md:border-solid md:bg-zone',
+        dragOver ? 'md:border-shu' : 'md:border-zone',
+        hero ? 'md:flex-row md:gap-5 md:px-6 md:py-6 md:text-left' : 'md:px-8 md:py-12',
+        'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
+        disabled && 'pointer-events-none opacity-60',
+        className,
       )}
     >
-      <label
-        htmlFor={inputId}
-        onPointerDown={onWarmUp}
-        aria-disabled={disabled || undefined}
+      <span
+        aria-hidden="true"
         className={cx(
-          buttonClasses('primary', 'lg'),
-          'cursor-pointer text-[1.0625rem] md:w-auto md:min-w-80 md:px-10',
-          'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus',
-          disabled && 'pointer-events-none',
+          'flex shrink-0 items-center justify-center rounded-full bg-shu text-white transition-transform duration-150',
+          hero ? 'size-14' : 'size-12 md:size-[72px]',
+          dragOver && 'scale-110',
         )}
       >
-        {dragOver ? copy.dropHere : (label ?? copy.pickerButton)}
-        <input
-          ref={inputRef}
-          id={inputId}
-          data-testid="file-input"
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          disabled={disabled}
-          onFocus={onWarmUp}
-          onChange={(e) => {
-            const files = Array.from(e.target.files ?? []);
-            e.target.value = '';
-            if (files.length > 0) onFilesRef.current(files);
-          }}
-          className="sr-only"
-        />
-      </label>
-      <PrivacyNote className="mt-2" />
-      {desktopHint !== null && (
-        <p className="mt-1 hidden type-small text-muted md:block">
-          {desktopHint ?? copy.pickerHintDesktop}
-        </p>
-      )}
-    </div>
+        <UploadIcon size={26} strokeWidth={2.25} />
+      </span>
+      <span className={cx('min-w-0', hero ? 'mt-3 md:mt-0 md:flex-1' : 'mt-2 md:mt-6')}>
+        <span className="block font-display text-[1.375rem] leading-7 font-extrabold text-ink md:hidden">
+          {mobileTitle}
+        </span>
+        <span
+          className={cx(
+            'hidden font-display font-extrabold text-on-zone md:block',
+            hero ? 'text-lg leading-6' : 'text-[1.75rem] leading-9',
+          )}
+        >
+          {step && <span className="mr-2 font-sans text-base text-on-zone-muted">{step}</span>}
+          {dragOver ? 'Release to start the cut' : title}
+        </span>
+        {mobileHint && (
+          <span className="mt-1 block type-small text-muted md:hidden">{mobileHint}</span>
+        )}
+        {hint && (
+          <span id={hintId} className="mt-1 hidden type-small text-on-zone-muted md:block">
+            {hint}
+          </span>
+        )}
+      </span>
+      <span
+        aria-hidden="true"
+        className={cx(
+          buttonClasses('primary', 'md'),
+          'max-md:hidden',
+          hero ? 'shrink-0' : 'mt-5 min-w-36',
+        )}
+      >
+        {label}
+      </span>
+      <input
+        ref={inputRef}
+        id={inputId}
+        data-testid="file-input"
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        disabled={disabled}
+        aria-label={label}
+        aria-describedby={hint ? hintId : undefined}
+        onFocus={onWarmUp}
+        onChange={(e) => {
+          const files = Array.from(e.target.files ?? []);
+          e.target.value = '';
+          if (files.length > 0) onFilesRef.current(files);
+        }}
+        className="sr-only"
+      />
+    </label>
   );
 }

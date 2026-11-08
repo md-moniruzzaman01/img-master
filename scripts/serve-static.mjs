@@ -103,9 +103,10 @@ createServer((req, res) => {
     /^(text\/|application\/(json|xml|manifest))|svg/.test(type) &&
     /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''));
   res.writeHead(status, {
+    // Default no-cache; a _headers rule (e.g. immutable sprites) overrides it, as on Cloudflare.
+    'Cache-Control': 'no-cache',
     ...headersFor(pathname),
     'Content-Type': type,
-    'Cache-Control': 'no-cache',
     ...(gzip ? { 'Content-Encoding': 'gzip', Vary: 'Accept-Encoding' } : {}),
   });
   if (req.method === 'HEAD') return res.end();

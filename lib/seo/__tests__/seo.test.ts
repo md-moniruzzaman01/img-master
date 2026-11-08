@@ -4,9 +4,12 @@ import robots from '@/app/robots';
 import sitemap from '@/app/sitemap';
 import { homeContent } from '@/content/home';
 import { legalContent } from '@/content/legal';
-import { homeJsonLd, toolJsonLd } from '@/lib/seo/jsonld';
+import { howItWorksContent } from '@/content/pages/how-it-works';
+import { toolsIndexContent } from '@/content/pages/tools-index';
+import { homeJsonLd, infoPageJsonLd, toolJsonLd, toolsIndexJsonLd } from '@/lib/seo/jsonld';
 import {
   absoluteUrl,
+  buildInfoMetadata,
   buildPageMetadata,
   buildRootMetadata,
   buildToolMetadata,
@@ -135,9 +138,11 @@ describe('sitemap and robots', () => {
   const entries = sitemap();
   const urls = entries.map((e) => e.url);
 
-  it('lists exactly home, every live tool and the legal pages', () => {
+  it('lists exactly home, the info pages, every live tool and the legal pages', () => {
     const expected = [
       origin,
+      `${origin}/tools`,
+      `${origin}/how-it-works`,
       ...getLiveTools().map((t) => `${origin}/${t.slug}`),
       ...Object.keys(legalContent).map((s) => `${origin}/${s}`),
     ];
@@ -185,5 +190,60 @@ describe('sitemap and robots', () => {
     const r = robots();
     expect(r.sitemap).toBe(`${origin}/sitemap.xml`);
     expect(r.rules).toMatchObject({ userAgent: '*', allow: '/' });
+  });
+});
+
+describe('info pages: metadata and JSON-LD', () => {
+  const info = [
+    ['/how-it-works', howItWorksContent],
+    ['/tools', toolsIndexContent],
+  ] as const;
+
+  it.each(info)('%s: canonical, title and shared OG image', (path, c) => {
+    const m = buildInfoMetadata(c, path);
+    expect(m.title).toEqual({ absolute: c.title });
+    expect(m.description).toBe(c.description);
+    expect(m.alternates?.canonical).toBe(`${origin}${path}`);
+    expect(m.robots).toEqual({ index: true, follow: true });
+    const og = (m.openGraph as { images?: { url: string }[]; url?: string }) ?? {};
+    expect(og.url).toBe(`${origin}${path}`);
+    expect(og.images?.[0]?.url).toBe(`${origin}/opengraph-image`);
+  });
+
+  it('how it works: WebPage + FAQPage matching the visible FAQs', () => {
+    const data = infoPageJsonLd(howItWorksContent, '/how-it-works');
+    expect(roundTrip(data)).toEqual(data);
+    const [page, faq] = data as Record<string, unknown>[];
+    expect(page['@type']).toBe('WebPage');
+    expect(page.url).toBe(`${origin}/how-it-works`);
+    expect(page.name).toBe(howItWorksContent.h1);
+    const qs = faq.mainEntity as { name: string; acceptedAnswer: { text: string } }[];
+    expect(qs.map((q) => q.name)).toEqual(
+      (howItWorksContent.faqs ?? []).map((f) => toPlainText(f.q)),
+    );
+    for (const banned of ['AggregateRating', 'Review', 'HowTo'])
+      expect(types(data)).not.toContain(banned);
+  });
+
+  it('every tool: CollectionPage with an ItemList of live tools', () => {
+    const data = toolsIndexJsonLd(toolsIndexContent);
+    expect(roundTrip(data)).toEqual(data);
+    const [page] = data as Record<string, unknown>[];
+    expect(page['@type']).toBe('CollectionPage');
+    expect(page.url).toBe(`${origin}/tools`);
+    const list = page.mainEntity as { itemListElement: { url: string; position: number }[] };
+    const liveUrls = getLiveTools().map((t) => `${origin}/${t.slug}`);
+    expect(list.itemListElement.map((i) => i.url)).toEqual(liveUrls);
+    expect(list.itemListElement.map((i) => i.position)).toEqual(liveUrls.map((_, i) => i + 1));
+    expect(JSON.stringify(data)).not.toContain('{count}');
+  });
+
+  it('every tool: ItemList follows the slugs the page renders', () => {
+    const data = toolsIndexJsonLd(toolsIndexContent, { slugs: ['webp-to-jpg', 'compress-image'] });
+    const list = (data[0] as { mainEntity: { itemListElement: { url: string }[] } }).mainEntity;
+    expect(list.itemListElement.map((i) => i.url)).toEqual([
+      `${origin}/webp-to-jpg`,
+      `${origin}/compress-image`,
+    ]);
   });
 });

@@ -3,8 +3,8 @@
 // visible FAQs, so answers are converted from the inline syntax to plain text.
 import { homeContent } from '@/content/home';
 import { siteConfig } from '@/lib/site-config';
-import { getBreadcrumbs } from '@/lib/tools';
-import type { ToolContent, ToolDefinition } from '@/lib/types';
+import { getBreadcrumbs, getLiveTools, getToolContent } from '@/lib/tools';
+import type { FaqItem, InfoPageContent, ToolContent, ToolDefinition } from '@/lib/types';
 import { absoluteUrl, toPlainText } from './url';
 
 type JsonLd = Record<string, unknown>;
@@ -90,16 +90,81 @@ export function toolJsonLd(tool: ToolDefinition, content: ToolContent): object[]
 
   const out: object[] = [app, breadcrumbs];
 
-  if (content.faqs.length > 0) {
-    out.push({
-      '@context': CONTEXT,
-      '@type': 'FAQPage',
-      mainEntity: content.faqs.map((f) => ({
-        '@type': 'Question',
-        name: toPlainText(f.q),
-        acceptedAnswer: { '@type': 'Answer', text: toPlainText(f.a) },
+  if (content.faqs.length > 0) out.push(faqPage(content.faqs));
+  return out;
+}
+
+/** FAQPage that matches the visible FAQs exactly (as plain text). */
+function faqPage(faqs: readonly FaqItem[]): JsonLd {
+  return {
+    '@context': CONTEXT,
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: toPlainText(f.q),
+      acceptedAnswer: { '@type': 'Answer', text: toPlainText(f.a) },
+    })),
+  };
+}
+
+function webPage(
+  type: 'WebPage' | 'CollectionPage',
+  content: InfoPageContent,
+  url: string,
+): JsonLd {
+  return {
+    '@context': CONTEXT,
+    '@type': type,
+    name: content.h1,
+    url,
+    description: content.description,
+    inLanguage: 'en',
+    dateModified: content.updatedAt,
+    isPartOf: { '@id': websiteId() },
+    publisher: { '@id': organizationId() },
+  };
+}
+
+/**
+ * Info page such as /how-it-works: WebPage (+ FAQPage when the page shows FAQs).
+ * `path` is the canonical path, e.g. "/how-it-works".
+ */
+export function infoPageJsonLd(content: InfoPageContent, path: string): object[] {
+  const out: object[] = [webPage('WebPage', content, absoluteUrl(path))];
+  if (content.faqs && content.faqs.length > 0) out.push(faqPage(content.faqs));
+  return out;
+}
+
+/**
+ * The "Every tool" page (/tools): CollectionPage with an ItemList of every
+ * live tool in registry order, plus FAQPage when the page shows FAQs.
+ * Pass `slugs` when the page renders a different list, so the ItemList
+ * always matches the visible cards.
+ */
+export function toolsIndexJsonLd(
+  content: InfoPageContent,
+  opts: { path?: string; slugs?: readonly string[] } = {},
+): object[] {
+  const path = opts.path ?? '/tools';
+  const slugs = opts.slugs ?? getLiveTools().map((t) => t.slug);
+  const items = slugs.flatMap((slug) => {
+    const c = getToolContent(slug);
+    return c ? [{ name: c.h1, url: absoluteUrl(`/${slug}`) }] : [];
+  });
+  const page: JsonLd = {
+    ...webPage('CollectionPage', content, absoluteUrl(path)),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: items.length,
+      itemListElement: items.map((it, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: it.name,
+        url: it.url,
       })),
-    });
-  }
+    },
+  };
+  const out: object[] = [page];
+  if (content.faqs && content.faqs.length > 0) out.push(faqPage(content.faqs));
   return out;
 }

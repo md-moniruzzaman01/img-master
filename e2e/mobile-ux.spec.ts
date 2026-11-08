@@ -69,7 +69,7 @@ test('no horizontal scroll on the 404 page', async ({ page }) => {
 for (const slug of TOOL_SLUGS) {
   test(`picker button fully visible without scrolling: /${slug}`, async ({ page }) => {
     await page.goto(`/${slug}`);
-    const label = page.getByTestId('file-picker').locator('label').first();
+    const label = page.getByTestId('file-picker');
     await expect(label).toBeVisible();
     const box = await label.boundingBox();
     const vh = page.viewportSize()?.height ?? 640;
@@ -127,6 +127,14 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', '
         .filter((e) => ['fixed', 'sticky'].includes(getComputedStyle(e).position))
         .filter((e) => !(e instanceof HTMLAnchorElement && e.getAttribute('href') === '#main'))
         .filter((e) => getComputedStyle(e).pointerEvents !== 'none') // the toast
+        // the phone menu panel is fixed but lives in a closed <details>: not rendered
+        .filter((e) => !e.closest('details:not([open])'))
+        // closed <dialog>s and the empty toast container are zero-size / invisible: not a pinned bar
+        .filter((e) => {
+          const r = e.getBoundingClientRect();
+          const cs = getComputedStyle(e);
+          return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && cs.opacity !== '0';
+        })
         .map((e) => e.tagName),
     );
     expect(pinned, 'fixed/sticky elements').toEqual([]);
@@ -158,15 +166,20 @@ for (const slug of ['compress-image-to-50kb', 'webp-to-jpg', 'compress-image', '
 
 test('menu: tap targets >= 48px, fits the screen, no horizontal scroll', async ({ page }) => {
   await page.goto('/');
-  await page.locator('header summary[aria-label="Menu"]').click();
-  await expect(page.locator('header details')).toHaveAttribute('open', '');
-  const items = await interactive(page, 'header details');
-  expect(items.length).toBeGreaterThanOrEqual(23); // summary + 18 tools + 4 info pages
-  const small = items.filter((t) => t.h < 47.5);
+  await page.locator('header details[data-menu="mobile"] summary[aria-label="Menu"]').click();
+  await expect(page.locator('header details[data-menu="mobile"]')).toHaveAttribute('open', '');
+  const items = await interactive(page, 'header details[data-menu="mobile"]');
+  expect(items.length).toBeGreaterThanOrEqual(20); // summary, brand, search, 6 sizes, 3 pairs + More, 3 icon tools, toggles, 3 info pages (21 measured)
+  // The search <input> sits inside a 56px label (the whole label is the tap target); measure the label instead.
+  const searchLabel = await page
+    .locator('header details[data-menu="mobile"] form[role=search] label')
+    .boundingBox();
+  expect(searchLabel!.height).toBeGreaterThanOrEqual(47.5);
+  const small = items.filter((t) => t.h < 47.5 && t.tag !== 'input');
   expect(small, JSON.stringify(small)).toEqual([]);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(sw).toBeLessThanOrEqual(360);
-  const panel = await page.locator('header details > div').boundingBox();
+  const panel = await page.locator('header details[data-menu="mobile"] > div[data-menu-panel]').boundingBox();
   expect(panel!.width).toBeLessThanOrEqual(360);
   expect(panel!.y + panel!.height, 'menu panel fits the viewport').toBeLessThanOrEqual(640.5);
 });

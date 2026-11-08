@@ -13,10 +13,12 @@ import {
   buildManifest,
   buildReadme,
   buildSnippet,
+  hasSvg,
   normalizeSpec,
+  type FaviconSpec,
   type WireFaviconSource,
 } from './package';
-import { drawContained, drawGlyphIcon, drawImageIcon, glyphLayout } from './render';
+import { drawContained, drawGlyphIcon, drawImageIcon, fontFor, glyphLayout } from './render';
 import { buildSvg } from './svg';
 
 type Size = (typeof PNG_SIZES)[number];
@@ -25,6 +27,27 @@ const bytesOf = async (b: Blob) => new Uint8Array(await b.arrayBuffer());
 
 /** Sizes drawn straight at their own size for text and emoji (crisper than downscaling). */
 const DIRECT = new Set<number>([16, 32]);
+
+const FONT_WAIT_MS = 3000;
+
+/**
+ * Text in a page-loaded font (FaviconSource.fontFamily). Fonts loaded with
+ * document.fonts are not visible inside a Web Worker, so index.ts sends these
+ * jobs to the main thread, where the canvas can use them. The UI has already
+ * loaded the font; this only makes sure it is ready (no-op when it is). In a
+ * worker (no document) the browser falls back to the generic stack.
+ */
+async function fontReady(spec: FaviconSpec): Promise<void> {
+  if (!spec.customFont || typeof document === 'undefined' || !document.fonts) return;
+  try {
+    await Promise.race([
+      document.fonts.load(fontFor(spec, 64), spec.text),
+      new Promise((r) => setTimeout(r, FONT_WAIT_MS)),
+    ]);
+  } catch {
+    // Draw with whatever is available; the fallback stack still renders.
+  }
+}
 
 export async function faviconsJob(
   file: File | null,
@@ -46,6 +69,8 @@ export async function faviconsJob(
       decoded.release();
       decoded = null;
     } else {
+      await fontReady(spec);
+      ctx.check();
       layout = glyphLayout(spec);
       base = drawGlyphIcon(spec, layout, BASE_SIZE);
     }
@@ -74,7 +99,8 @@ export async function faviconsJob(
         ICO_SIZES.map(async (size) => ({ size, png: await bytesOf(png.get(size) as Blob) })),
       ),
     );
-    const snippet = buildSnippet(spec.mode);
+    const withSvg = hasSvg(spec);
+    const snippet = buildSnippet(spec.mode, withSvg);
     const get = (s: Size) => png.get(s) as Blob;
     const files: { name: string; blob: Blob }[] = [
       { name: 'favicon.ico', blob: new Blob([ico as BlobPart], { type: 'image/x-icon' }) },
@@ -84,7 +110,7 @@ export async function faviconsJob(
       { name: 'android-chrome-192x192.png', blob: get(192) },
       { name: 'android-chrome-512x512.png', blob: get(512) },
     ];
-    if (spec.mode !== 'image' && layout) {
+    if (withSvg && spec.mode !== 'image' && layout) {
       const svg = buildSvg({
         kind: spec.mode,
         text: spec.text,
@@ -103,7 +129,7 @@ export async function faviconsJob(
       },
       {
         name: 'README.txt',
-        blob: new Blob([buildReadme(spec.mode, snippet)], { type: 'text/plain' }),
+        blob: new Blob([buildReadme(spec.mode, snippet, withSvg)], { type: 'text/plain' }),
       },
     );
     return {

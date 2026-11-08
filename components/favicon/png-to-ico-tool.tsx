@@ -7,11 +7,14 @@ import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { siteConfig } from '@/lib/site-config';
 import { AdSlot } from '@/components/content/ad-slot';
+import { SamuraiStage, type SamuraiState } from '@/components/samurai/samurai';
+import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { AlertIcon, CheckIcon } from '@/components/ui/icons';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy } from '@/components/tool/copy';
 import { ErrorBanner } from '@/components/tool/error-banner';
+import { PrivacyNote } from '@/components/tool/privacy-note';
 import { FilePicker } from '@/components/tool/file-picker';
 import { formatBytes, uniqueNames } from '@/components/tool/format';
 import { ProgressBar } from '@/components/tool/progress-bar';
@@ -203,6 +206,13 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
           ? 'error'
           : 'partial';
 
+  // Sword sounds follow the shell's state (no-ops unless the visitor turned sound on).
+  useEffect(() => {
+    if (state === 'processing') playSound('start');
+    else if (state === 'done' || state === 'partial') playSound('success');
+    else if (state === 'error') playSound('error');
+  }, [state]);
+
   async function downloadAll() {
     setZipping(true);
     try {
@@ -231,12 +241,12 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       value={m ? (progress.index + progress.ratio) / m : 0}
     />
   ) : state === 'error' ? (
-    <p className="flex items-center gap-2 font-semibold text-danger">
+    <p className="flex items-center gap-2 font-semibold text-accent-strong">
       <AlertIcon size={20} />
       {m === 1 ? toolCopy.failedOne : toolCopy.noneWorked}
     </p>
   ) : m > 0 ? (
-    <p className="flex items-center gap-2 font-semibold text-text">
+    <p className="flex items-center gap-2 font-semibold text-ink">
       <CheckIcon size={20} />
       {state === 'done' ? t.icoDone(m) : toolCopy.doneMany(success.length, m)}
     </p>
@@ -264,13 +274,33 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       statusLine
     );
 
+  const stageState: SamuraiState =
+    state === 'processing'
+      ? 'cutting'
+      : state === 'done' || state === 'partial'
+        ? 'done'
+        : state === 'error'
+          ? 'error'
+          : 'idle';
+
+  const stageText =
+    stageState === 'cutting'
+      ? toolCopy.stage.cutting
+      : stageState === 'done'
+        ? toolCopy.stage.done
+        : stageState === 'error'
+          ? toolCopy.stage.error
+          : toolCopy.stage.idle;
+
   return (
     <div
       data-testid="favicon-shell"
       data-kind={tool.kind}
       data-state={state}
-      className="grid gap-4 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-4 overflow-clip border-y border-line bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 [&>*]:min-w-0"
     >
+      <SamuraiStage state={stageState} text={stageText} />
+
       <FilePicker
         inputId={inputId}
         disabled={running}
@@ -278,8 +308,11 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
         onWarmUp={() => void loadEngine().catch(() => {})}
         accept="image/png,.png"
         label={t.icoPick}
-        desktopHint={t.icoHintDesktop}
+        title={t.icoHintDesktop}
+        mobileTitle={t.icoPick}
+        mobileHint={t.icoHint(siteConfig.maxFiles)}
       />
+      <PrivacyNote />
 
       {notice === 'too-many' && <ErrorBanner tone="warning" message={toolCopy.tooMany(maxFiles)} />}
       {notice === 'engine' && (
@@ -303,7 +336,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
                     meta={it.result ? metaFor(it.result) : undefined}
                     errorText={it.error?.code === 'UNSUPPORTED_FORMAT' ? t.icoNeedPng : undefined}
                     onDownload={() => onDownloaded('single')}
-                    reserve={{ note: false, share: false }}
+                    reserve={{ note: false }}
                   />
                 </li>
               ))}

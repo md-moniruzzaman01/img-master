@@ -196,6 +196,12 @@ export interface Decoded {
   source: DrawSource;
   width: number;
   height: number;
+  /**
+   * Size of the image before any memory downscale (EXIF orientation applied).
+   * Equals width/height unless 'downscaled-for-memory' is in notes.
+   */
+  fullWidth: number;
+  fullHeight: number;
   kind: SniffedKind;
   hasAlpha: boolean;
   animated: boolean;
@@ -269,6 +275,10 @@ export async function decodeImage(file: Blob, maxPixels: number): Promise<Decode
   }
 
   if (resizeWidth !== undefined) notes.push('downscaled-for-memory');
+  const full =
+    resizeWidth !== undefined && header
+      ? orientedSize(header)
+      : { width: source.width, height: source.height };
 
   // Some browsers ignore resize options: downscale with canvas steps instead.
   if (source.width * source.height > maxPixels) {
@@ -298,6 +308,8 @@ export async function decodeImage(file: Blob, maxPixels: number): Promise<Decode
     source: s,
     width: s.width,
     height: s.height,
+    fullWidth: full.width,
+    fullHeight: full.height,
     kind,
     hasAlpha,
     animated,

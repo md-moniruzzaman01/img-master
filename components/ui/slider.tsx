@@ -31,11 +31,11 @@ export function Slider({
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className={cx('min-w-0', className)}>
-      <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="type-small font-semibold text-text">
+      <div className="flex items-baseline gap-2">
+        <label htmlFor={id} className="type-small text-muted">
           {label}
         </label>
-        <output htmlFor={id} className="font-semibold tabular-nums text-text">
+        <output htmlFor={id} className="type-small font-bold tabular-nums text-ink">
           {format(value)}
         </output>
       </div>

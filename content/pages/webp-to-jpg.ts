@@ -12,12 +12,14 @@ export const content: ToolContent = {
     'webp converter',
   ],
   shortName: 'WebP to JPG',
-  cardDescription: 'Turn WebP images into JPG files that open everywhere.',
+  cardDescription: 'For forms and old apps.',
   title: 'Convert WebP to JPG Online – Free, No Upload | Img Master',
   description:
-    'Change WebP images into JPG files that open in any app and upload to any form. One tap on your phone, nothing uploaded, free with no signup.',
+    'Change WebP images into JPG files that open in older apps and upload to most forms. Works on your phone, many files at once, nothing uploaded. Free.',
   h1: 'Convert WebP to JPG',
-  subtitle: 'Convert WebP to JPG so your image opens in every app and uploads to any form.',
+  h1Accent: 'JPG',
+  subtitle: 'Convert WebP to JPG so your image opens in older apps, email and most upload forms.',
+  sideTip: 'Transparent parts of a WebP become the fill color you pick. White suits most forms.',
   howTo: [
     'Pick the .webp file from your downloads or gallery.',
     'It is changed to JPG the moment you pick it.',
@@ -26,23 +28,32 @@ export const content: ToolContent = {
   howToHeading: 'How to convert WebP to JPG',
   sections: [
     {
-      heading: 'Why you got a WebP file',
+      heading: 'Why convert WebP to JPG?',
       paragraphs: [
-        'Many websites now serve their images as WebP, because the files are smaller and pages load faster. When you save an image from such a site, your phone keeps it as WebP. Some older apps, photo editors and online forms do not accept it.',
-        'Converting WebP to JPG fixes that. JPG is supported almost everywhere, from gallery apps to printing shops to upload forms.',
+        'Many websites now serve their images as WebP, because the files are smaller. When you save an image from such a site, your phone keeps it as WebP. JPG is the safer choice when you need to send or upload that image somewhere else:',
+      ],
+      list: [
+        'Some upload forms accept only JPG or PNG.',
+        'Some older photo apps and image viewers cannot open WebP.',
+        'JPG shows a preview in almost every email and chat app.',
+        'Print shops and photo kiosks accept JPG.',
       ],
     },
     {
-      heading: 'What changes when you go from WebP to JPG',
-      paragraphs: [
-        'The new file looks like the original, with a few differences you should know about:',
-      ],
-      list: [
-        'The JPG is saved at quality 90 by default, which keeps it close to the WebP. You can move the slider if you want a smaller file.',
-        'If the WebP has a transparent background, those areas are filled with white. You can choose another background color on the result.',
-        'An animated WebP becomes a still image of its first frame.',
-        'Hidden data, such as location, is not copied into the new file.',
-      ],
+      heading: 'What changes in the file',
+      paragraphs: ['The JPG looks like the original. These are the differences to know about:'],
+      table: {
+        caption: 'WebP to JPG: what changes',
+        headers: ['Part of the file', 'What happens'],
+        rows: [
+          ['Transparency', 'Filled with the color you pick (white by default)'],
+          ['Animation', 'Only the first frame is kept'],
+          ['Quality', 'Saved at 90 by default; move the slider for a smaller file'],
+          ['Pixel size', 'Kept, unless the image is over 16.7 megapixels'],
+          ['File size', 'Often a little larger than the WebP'],
+          ['Hidden data', 'Location and camera details are not copied'],
+        ],
+      },
     },
     {
       heading: 'Converting many images at once',
@@ -53,7 +64,7 @@ export const content: ToolContent = {
     },
   ],
   tips: [
-    'If the JPG must be under a size limit, such as 50KB, use [Compress to 50KB](/compress-image-to-50kb). It also accepts WebP files and saves a JPG.',
+    'If the JPG must be under a size limit, such as 50 KB, use [Compress to 50 KB](/compress-image-to-50kb). It also accepts WebP files and saves a JPG.',
     'Need to keep a transparent background? Choose [WebP to PNG](/webp-to-png) instead.',
   ],
   faqs: [
@@ -66,7 +77,7 @@ export const content: ToolContent = {
       a: 'Yes. JPG and JPEG are two names for the same format. A form that asks for JPEG accepts a .jpg file.',
     },
     {
-      q: 'Will converting WebP to JPG make the file bigger?',
+      q: 'Will the JPG be bigger than the WebP?',
       a: 'Often, yes, a little. WebP packs images more tightly than JPG. If the new file is too big for a form, lower the quality slider or use a compress-to-size tool.',
     },
     {
@@ -85,5 +96,5 @@ export const content: ToolContent = {
     'compress-image-to-50kb',
     'jpg-to-webp',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

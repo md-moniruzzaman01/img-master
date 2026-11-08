@@ -96,7 +96,7 @@ for (const slug of FAVICON_SLUGS) {
         ? text(page)
         : slug === 'favicon-from-emoji'
           ? emoji(page)
-          : page.getByTestId('file-picker').locator('label').first();
+          : page.getByTestId('file-picker');
     await expect(first).toBeVisible();
     const box = (await first.boundingBox())!;
     const bottom = box.y + box.height;
@@ -211,6 +211,14 @@ for (const slug of FAVICON_SLUGS) {
         .filter((e) => ['fixed', 'sticky'].includes(getComputedStyle(e).position))
         .filter((e) => !(e instanceof HTMLAnchorElement && e.getAttribute('href') === '#main'))
         .filter((e) => getComputedStyle(e).pointerEvents !== 'none') // the toast
+        // the phone menu panel is fixed but lives in a closed <details>: not rendered
+        .filter((e) => !e.closest('details:not([open])'))
+        // closed <dialog>s and the empty toast container are zero-size / invisible: not a pinned bar
+        .filter((e) => {
+          const r = e.getBoundingClientRect();
+          const cs = getComputedStyle(e);
+          return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && cs.opacity !== '0';
+        })
         .map((e) => e.tagName + '.' + e.className.toString().slice(0, 40)),
     );
     expect(pinned, 'fixed/sticky elements').toEqual([]);
@@ -287,26 +295,36 @@ test('Copy button is disabled when there is nothing to copy (image mode before a
 
 // ── Navigation lists the favicon category ────────────────────────────────
 
-test('header menu lists the favicon category and its four pages; footer has no tool list', async ({
+test('header lists the favicon pages (phone menu: Icons & size group; static HTML: all four); footer has no tool list', async ({
+  page,
+  request,
+}) => {
+  // Crawlable without JS: all four favicon pages are links in the server-rendered header.
+  const html = await (await request.get('/')).text();
+  const header = /<header[\s\S]*?<\/header>/.exec(html)![0];
+  for (const s of FAVICON_SLUGS) expect(header, `header html ${s}`).toContain(`href="/${s}"`);
+
+  await page.goto('/');
+  const menu = page.locator('header details[data-menu="mobile"]');
+  await menu.locator('summary[aria-label="Menu"]').click();
+  await expect(menu).toHaveAttribute('open', '');
+  await expect(menu.getByRole('heading', { name: 'Icons & size' })).toBeVisible();
+  for (const s of ['favicon-generator', 'png-to-ico'])
+    expect(await menu.locator(`a[href="/${s}"]`).count(), s).toBeGreaterThan(0);
+  for (const s of FAVICON_SLUGS)
+    // The desktop footer column carries them in the HTML (hidden on phones); none is visible here.
+    expect(await page.locator(`footer a[href="/${s}"]:visible`).count(), `footer ${s}`).toBe(0);
+  await menu.locator('a[href="/favicon-generator"]').click();
+  await expect(page).toHaveURL(/\/favicon-generator$/);
+  await expect(fshell(page)).toHaveAttribute('data-mode', 'image');
+});
+
+test('home links to the favicon hub; /tools lists all four favicon pages (Figma home shows compress + convert grids only)', async ({
   page,
 }) => {
   await page.goto('/');
-  const menu = page.locator('header details');
-  await menu.locator('summary[aria-label="Menu"]').click();
-  await expect(menu).toHaveAttribute('open', '');
-  await expect(menu.getByText('Favicon', { exact: true }).first()).toBeVisible();
-  for (const s of FAVICON_SLUGS)
-    expect(await menu.locator(`a[href="/${s}"]`).count(), s).toBeGreaterThan(0);
-  for (const s of FAVICON_SLUGS)
-    expect(await page.locator(`footer a[href="/${s}"]`).count(), `footer ${s}`).toBe(0);
-  // A favicon link in the menu opens the page
-  await menu.locator('a[href="/favicon-from-emoji"]').click();
-  await expect(page).toHaveURL(/\/favicon-from-emoji$/);
-  await expect(fshell(page)).toHaveAttribute('data-mode', 'emoji');
-});
-
-test('home page links to the four favicon pages', async ({ page }) => {
-  await page.goto('/');
+  expect(await page.locator('main a[href="/favicon-generator"]').count()).toBeGreaterThan(0);
+  await page.goto('/tools');
   for (const s of FAVICON_SLUGS)
     expect(await page.locator(`main a[href="/${s}"]`).count(), s).toBeGreaterThan(0);
 });

@@ -27,6 +27,7 @@ import type {
   ImageFormat,
   JobHandle,
   ProgressFn,
+  ResizeOptions,
 } from '../types';
 
 class MockEngineError extends Error implements EngineErrorShape {
@@ -247,6 +248,53 @@ export const mockEngine: ImageEngine = {
           Math.round(file.size * pixelRatio * opts.quality * rand(0.2, 0.4)),
         ),
         quality: format === 'png' ? undefined : opts.quality,
+        notes,
+        ms: Math.round(performance.now() - started),
+      } satisfies EngineResult;
+    });
+  },
+
+  resize(file: File, opts: ResizeOptions, onProgress?: ProgressFn) {
+    const started = performance.now();
+    return job(rand(300, 700), onProgress, async () => {
+      checkInput(file);
+      const format = !opts.format || opts.format === 'same' ? formatOf(file) : opts.format;
+      checkWebp(file, format);
+      const { width, height } = await dimensions(file);
+      const keepRatio = opts.keepRatio ?? true;
+      let outW: number;
+      let outH: number;
+      if (opts.percent !== undefined) {
+        outW = Math.max(1, Math.round((width * opts.percent) / 100));
+        outH = Math.max(1, Math.round((height * opts.percent) / 100));
+      } else if (opts.width && opts.height && !keepRatio) {
+        outW = opts.width;
+        outH = opts.height;
+      } else if (opts.width && opts.height) {
+        const s = Math.min(opts.width / width, opts.height / height);
+        outW = Math.round(width * s);
+        outH = Math.round(height * s);
+      } else if (opts.width) {
+        outW = opts.width;
+        outH = Math.round((height * opts.width) / width);
+      } else if (opts.height) {
+        outH = opts.height;
+        outW = Math.round((width * opts.height) / height);
+      } else {
+        throw new MockEngineError('INVALID_OPTIONS', 'Enter a width, a height or a percentage.');
+      }
+      const notes: EngineNote[] = [];
+      if (format === 'jpeg' && formatOf(file) === 'png') notes.push('transparency-flattened');
+      const pixelRatio = (outW * outH) / (width * height);
+      return {
+        blob: file,
+        fileName: `${baseName(file.name)}-${outW}x${outH}.${EXT[format]}`,
+        format,
+        width: outW,
+        height: outH,
+        inputBytes: file.size,
+        outputBytes: Math.max(200, Math.round(file.size * pixelRatio * rand(0.6, 0.9))),
+        quality: format === 'png' ? undefined : (opts.quality ?? 0.9),
         notes,
         ms: Math.round(performance.now() - started),
       } satisfies EngineResult;

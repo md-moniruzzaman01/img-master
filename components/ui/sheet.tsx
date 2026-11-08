@@ -75,12 +75,12 @@ export function Sheet({
       }}
       className={
         'fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-hidden ' +
-        'rounded-t-card border border-border bg-bg p-0 text-text backdrop:bg-scrim ' +
+        'rounded-t-card border border-line bg-card p-0 text-ink backdrop:bg-scrim ' +
         'md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[400px] md:rounded-none md:border-y-0 md:border-r-0'
       }
     >
       <div className="flex max-h-[85dvh] flex-col md:h-dvh md:max-h-none">
-        <div className="flex items-center justify-between gap-2 border-b border-border py-1 pr-2 pl-4">
+        <div className="flex items-center justify-between gap-2 border-b border-line py-1 pr-2 pl-4">
           <h2 id={titleId} className="type-h3">
             {title}
           </h2>

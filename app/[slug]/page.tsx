@@ -7,6 +7,7 @@ import { LastUpdated } from '@/components/content/last-updated';
 import { PageIntro } from '@/components/content/page-intro';
 import { RelatedTools } from '@/components/content/related-tools';
 import { RichText } from '@/components/content/rich-text';
+import { UseCases } from '@/components/content/use-cases';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Container } from '@/components/layout/container';
 import { FaviconShell } from '@/components/favicon/favicon-shell';
@@ -19,6 +20,7 @@ import {
   getLiveToolPage,
   getLiveTools,
   getToolCards,
+  getToolGlyph,
 } from '@/lib/tools';
 
 // Every tool page comes from the registry + its content file.
@@ -41,11 +43,21 @@ export default async function ToolPage({ params }: PageProps<'/[slug]'>) {
   return (
     <>
       <Container size="tool">
-        <PageIntro h1={content.h1} subtitle={content.subtitle} />
-        {tool.category === 'favicon' ? <FaviconShell tool={tool} /> : <ToolShell tool={tool} />}
+        <Breadcrumbs items={getBreadcrumbs(slug)} />
+        <PageIntro
+          h1={content.h1}
+          subtitle={content.subtitle}
+          h1Accent={content.h1Accent}
+          glyph={getToolGlyph(tool)}
+        />
+        {tool.category === 'favicon' ? (
+          <FaviconShell tool={tool} />
+        ) : (
+          <ToolShell tool={tool} sideTip={content.sideTip} />
+        )}
       </Container>
       <Container size="text">
-        <Breadcrumbs items={getBreadcrumbs(slug)} />
+        {content.useCases && <UseCases {...content.useCases} />}
         <RelatedTools tools={getToolCards(content.related)} />
         <HowToSteps steps={content.howTo} heading={content.howToHeading} />
         <RichText sections={content.sections} />

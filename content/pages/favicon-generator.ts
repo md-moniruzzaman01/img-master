@@ -12,12 +12,15 @@ export const content: ToolContent = {
     'favicon for website',
   ],
   shortName: 'Favicon generator',
-  cardDescription: 'Turn a logo or photo into a full favicon pack.',
+  cardDescription: 'Full icon set, ICO and HTML in one download.',
   title: 'Favicon Generator – Free, No Upload | Img Master',
   description:
     'Turn a logo or picture into a full favicon pack: ICO, PNG sizes, Apple icon and manifest. Preview it first. Free, runs in your browser, no upload.',
-  h1: 'Favicon Generator',
-  subtitle: 'Use this favicon generator to turn your logo into every icon file a website needs.',
+  h1: 'Favicon generator',
+  h1Accent: 'generator',
+  subtitle:
+    'Turn a logo, letters or an emoji into every icon file your website needs, in one download.',
+  sideTip: 'Look at the 16 px preview. That is the size people really see in a browser tab.',
   howTo: [
     'Choose a square logo or picture. Use the zoom slider and padding to fit it.',
     'Check the preview in the browser tab and on the phone home screen.',
@@ -46,7 +49,7 @@ export const content: ToolContent = {
     {
       heading: 'Choose the right favicon tool',
       paragraphs: [
-        'Start from the kind of source you have. All four tools give you the same kind of download, except that the SVG file comes only from the text and emoji tools.',
+        'Start from the kind of source you have. The text and emoji tools give you the same full set as this page, and only emoji icons add an SVG file. PNG to ICO makes just the one .ico file.',
       ],
       table: {
         caption: 'Favicon tools on Img Master',
@@ -102,5 +105,5 @@ export const content: ToolContent = {
     'image-converter',
     'compress-image',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

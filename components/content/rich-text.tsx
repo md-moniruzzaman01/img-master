@@ -7,14 +7,14 @@ export function RichText({ sections }: { sections: RichSection[] }) {
     <>
       {sections.map((s, si) => (
         <section key={`${s.heading}-${si}`} className="mt-8 lg:mt-12">
-          <h2 className="type-h2 text-balance text-text">{s.heading}</h2>
+          <h2 className="type-h2 text-balance">{s.heading}</h2>
           {s.paragraphs.map((p, pi) => (
-            <p key={pi} className="mt-3 text-text">
+            <p key={pi} className="mt-3 text-ink">
               <InlineText text={p} />
             </p>
           ))}
           {s.list && s.list.length > 0 && (
-            <ul className="mt-3 grid list-disc gap-2 pl-6 text-text marker:text-muted">
+            <ul className="mt-3 grid list-disc gap-2 pl-6 text-ink marker:text-muted">
               {s.list.map((item, li) => (
                 <li key={li}>
                   <InlineText text={item} />
@@ -27,10 +27,10 @@ export function RichText({ sections }: { sections: RichSection[] }) {
               role="region"
               aria-label={s.table.caption}
               tabIndex={0}
-              className="mt-4 overflow-x-auto rounded-card border border-border"
+              className="mt-4 overflow-x-auto rounded-card border border-line"
             >
               <table className="w-full border-collapse text-left type-small tabular-nums">
-                <caption className="border-b border-border bg-surface px-3 py-2 text-left font-semibold text-text">
+                <caption className="border-b border-line bg-paper-2 px-3 py-2 text-left font-semibold text-ink">
                   {s.table.caption}
                 </caption>
                 <thead>
@@ -39,7 +39,7 @@ export function RichText({ sections }: { sections: RichSection[] }) {
                       <th
                         key={hi}
                         scope="col"
-                        className="border-b border-border bg-surface px-3 py-2 font-semibold whitespace-nowrap text-text"
+                        className="border-b border-line bg-paper-2 px-3 py-2 font-semibold whitespace-nowrap text-ink"
                       >
                         {h}
                       </th>
@@ -48,9 +48,9 @@ export function RichText({ sections }: { sections: RichSection[] }) {
                 </thead>
                 <tbody>
                   {s.table.rows.map((row, ri) => (
-                    <tr key={ri} className="border-b border-border last:border-b-0">
+                    <tr key={ri} className="border-b border-line last:border-b-0">
                       {row.map((cell, ci) => (
-                        <td key={ci} className="px-3 py-2 align-top text-text">
+                        <td key={ci} className="px-3 py-2 align-top text-ink">
                           <InlineText text={cell} />
                         </td>
                       ))}

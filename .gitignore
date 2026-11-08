@@ -49,3 +49,12 @@ next-env.d.ts
 
 # raw QA run data
 /reports/data/
+
+# brainstorming mockups
+.superpowers/
+
+# owner's reference art (third-party, never shipped)
+ref/
+
+# owner's Figma screen exports (reference only; regenerate from Figma)
+/docs/figma-export/

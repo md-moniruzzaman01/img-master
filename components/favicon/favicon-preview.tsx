@@ -14,11 +14,14 @@ function Icon({
   size,
   loading,
   className,
+  cutTarget,
 }: {
   src: string | undefined;
   size: number;
   loading: boolean;
   className?: string;
+  /** Marks the icon the cut-to-icon shards fly to. */
+  cutTarget?: boolean;
 }) {
   const box = { width: size, height: size };
   if (!src) {
@@ -26,6 +29,7 @@ function Icon({
       <span
         aria-hidden="true"
         style={box}
+        data-cut-target={cutTarget ? '' : undefined}
         className={cx(
           'block shrink-0 rounded-[3px] bg-border',
           loading && 'animate-pulse',
@@ -43,6 +47,7 @@ function Icon({
       width={size}
       height={size}
       style={box}
+      data-cut-target={cutTarget ? '' : undefined}
       className={cx('block shrink-0', className)}
     />
   );
@@ -53,28 +58,37 @@ function TabMock({
   scheme,
   src,
   loading,
+  popKey,
 }: {
   scheme: 'light' | 'dark';
   src: string | undefined;
   loading: boolean;
+  popKey: number;
 }) {
   return (
     <div className="min-w-0">
       <div
         data-scheme={scheme}
         className={cx(
-          'overflow-hidden rounded-[8px] border border-border bg-surface text-text',
+          'overflow-hidden rounded-[8px] border border-line bg-paper-2 text-ink',
           scheme === 'light' ? 'pin-light' : 'pin-dark',
         )}
       >
         <div className="px-2 pt-2">
-          <div className="flex h-9 items-center gap-2 rounded-t-[8px] bg-bg px-2.5">
-            <Icon src={src} size={16} loading={loading} />
-            <span className="min-w-0 flex-1 truncate type-small text-text">{t.siteTitle}</span>
+          <div className="flex h-9 items-center gap-2 rounded-t-[8px] bg-paper px-2.5">
+            <Icon
+              key={popKey}
+              src={src}
+              size={16}
+              loading={loading}
+              cutTarget={scheme === 'light'}
+              className={popKey > 0 ? 'im-anim animate-[im-pop_300ms_ease-out]' : undefined}
+            />
+            <span className="min-w-0 flex-1 truncate type-small text-ink">{t.siteTitle}</span>
             <XIcon size={20} className="size-3.5 shrink-0 text-muted" />
           </div>
         </div>
-        <div className="h-4 bg-bg" />
+        <div className="h-4 bg-paper" />
       </div>
       <p className="mt-1 type-caption text-muted">{scheme === 'light' ? t.tabLight : t.tabDark}</p>
     </div>
@@ -95,6 +109,7 @@ export function FaviconPreview({
   busy,
   empty,
   emptyText,
+  popKey = 0,
 }: {
   /** Latest package previews; kept on screen while the next one renders. */
   previews: Previews | null;
@@ -103,6 +118,8 @@ export function FaviconPreview({
   empty: boolean;
   /** Overrides the default empty-state sentence (text and emoji modes). */
   emptyText?: string;
+  /** Counts finished cut moments; the tab icons pop when it goes up. 0 = never. */
+  popKey?: number;
 }) {
   const headingId = useId();
   const descId = useId();
@@ -115,10 +132,10 @@ export function FaviconPreview({
       aria-describedby={descId}
       data-testid="favicon-preview"
       data-state={empty ? 'empty' : busy ? 'busy' : p ? 'ready' : 'loading'}
-      className="rounded-card border border-border bg-bg p-3 sm:p-4"
+      className="rounded-card border border-line bg-paper p-3 sm:p-4"
     >
       <div className="flex h-6 items-center justify-between gap-3">
-        <h2 id={headingId} className="type-h3 text-text">
+        <h2 id={headingId} className="type-h3 text-ink">
           {t.previewHeading}
         </h2>
         <span
@@ -136,8 +153,8 @@ export function FaviconPreview({
         <div className="grid gap-3">
           {/* The tabs stay drawn (with an empty icon slot) so the box reads as a preview. */}
           <div className="grid grid-cols-2 gap-2">
-            <TabMock scheme="light" src={p?.[16]} loading={loading} />
-            <TabMock scheme="dark" src={p?.[16]} loading={loading} />
+            <TabMock scheme="light" src={p?.[16]} loading={loading} popKey={popKey} />
+            <TabMock scheme="dark" src={p?.[16]} loading={loading} popKey={popKey} />
           </div>
 
           {/* Until there is an icon, this row is held empty (same height) and the
@@ -145,7 +162,7 @@ export function FaviconPreview({
           <div className="relative">
             <div className={cx('flex items-end gap-3', empty && 'invisible')}>
               <div className="shrink-0">
-                <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-surface">
+                <div className="flex size-[72px] items-center justify-center rounded-[14px] bg-paper-2">
                   <Icon
                     src={p?.[180]}
                     size={52}
@@ -162,7 +179,7 @@ export function FaviconPreview({
                 >
                   {SIZES.map((s) => (
                     <li key={s} className="flex flex-col items-center gap-1">
-                      <span className="checkerboard block rounded-[4px] border border-border">
+                      <span className="checkerboard block rounded-[4px] border border-line">
                         <Icon src={p?.[s]} size={SHOWN[s]} loading={loading} />
                       </span>
                       <span className="type-caption tabular-nums text-muted">{s}</span>
@@ -175,7 +192,7 @@ export function FaviconPreview({
             {empty && (
               <p
                 data-testid="favicon-preview-empty"
-                className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-surface px-4 text-center text-text"
+                className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-paper-2 px-4 text-center text-ink"
               >
                 {emptyText ?? t.previewEmpty}
               </p>

@@ -12,12 +12,14 @@ export const content: ToolContent = {
     'reduce png file size',
   ],
   shortName: 'PNG to JPG',
-  cardDescription: 'Change PNG screenshots and graphics into small JPG files.',
+  cardDescription: 'Smaller JPG files from PNGs and screenshots.',
   title: 'Convert PNG to JPG Online – Free, No Upload | Img Master',
   description:
     'Change PNG screenshots and images into smaller JPG files that every form accepts. Pick a background color for transparent areas. Free, no upload.',
   h1: 'Convert PNG to JPG',
+  h1Accent: 'JPG',
   subtitle: 'Change a large PNG or screenshot into a smaller JPG that forms and apps accept.',
+  sideTip: 'Screenshots with small text stay cleanest at quality 90 or above.',
   howTo: [
     'Choose the PNG image or screenshot from your phone.',
     'It turns into a JPG right away. Transparent parts become white unless you pick a color.',
@@ -36,14 +38,14 @@ export const content: ToolContent = {
       heading: 'What happens to transparent areas',
       paragraphs: [
         'JPG cannot store transparency. When your PNG has a clear background, for example a logo or a cut-out photo, those areas must be filled with a color. White is the default because it suits most forms and documents.',
-        'When the image has transparency, a background color option appears on the result, so you can choose black or another color instead.',
+        'If you want black or another color instead, pick it under Fill transparent areas with.',
       ],
     },
     {
       heading: 'Screenshots and small text',
       paragraphs: [
         'Screenshots often contain small text. At low quality, JPG compression can leave faint marks around sharp letters. The default quality of 90 keeps text clean in most cases. If you see fuzzy edges around letters, move the slider higher.',
-        'If the file is still too large for a form, compress it to a fixed limit instead, for example with [Compress to 100KB](/compress-image-to-100kb).',
+        'If the file is still too large for a form, compress it to a fixed limit instead, for example with [Compress to 100 KB](/compress-image-to-100kb).',
       ],
     },
   ],
@@ -58,7 +60,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Why did my transparent background turn white?',
-      a: 'JPG has no transparency, so the clear parts need a color. White is used by default. You can choose a different background color on the result card.',
+      a: 'JPG has no transparency, so the clear parts need a color. White is used by default. You can pick a different color under Fill transparent areas with.',
     },
     {
       q: 'Will the JPG be smaller than the PNG?',
@@ -81,5 +83,5 @@ export const content: ToolContent = {
     'png-to-webp',
     'png-to-ico',
   ],
-  updatedAt: '2026-10-24',
+  updatedAt: '2026-10-25',
 };

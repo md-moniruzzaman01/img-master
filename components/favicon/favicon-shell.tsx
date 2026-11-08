@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useReducer,
   useRef,
   useState,
   useSyncExternalStore,
@@ -14,6 +15,8 @@ import { isEngineError } from '@/lib/types';
 import { loadEngine } from '@/lib/engine';
 import { track } from '@/lib/analytics';
 import { AdSlot } from '@/components/content/ad-slot';
+import { SamuraiStage, type SamuraiState } from '@/components/samurai/samurai';
+import { playSound } from '@/components/sound/sound';
 import { Button } from '@/components/ui/button';
 import { Toast, type ToastMessage } from '@/components/ui/toast';
 import { copy as toolCopy, errorMessage } from '@/components/tool/copy';
@@ -21,6 +24,8 @@ import { ErrorBanner } from '@/components/tool/error-banner';
 import { FilePicker } from '@/components/tool/file-picker';
 import { PrivacyNote } from '@/components/tool/privacy-note';
 import { faviconCopy as t } from './copy';
+import { cutReducer, initialCut } from './cut-moment';
+import { CutMoment } from './cut-moment-overlay';
 import { FaviconControls } from './favicon-controls';
 import { FaviconModeTabs } from './favicon-mode-tabs';
 import {
@@ -37,6 +42,10 @@ import { FaviconPreview } from './favicon-preview';
 import { PngToIcoTool } from './png-to-ico-tool';
 import { isIOS, revokePackage, saveBlob } from './save-blob';
 import { SnippetBlock } from './snippet-block';
+
+/** Two cards from lg; below that the groups vanish and the order-N classes keep the phone order. */
+const group =
+  'contents lg:grid lg:content-start lg:gap-4 lg:rounded-card lg:border lg:border-line lg:bg-card lg:p-6 [&>*]:min-w-0';
 
 const noopSubscribe = () => () => {};
 const DEBOUNCE_MS = 150;
@@ -86,6 +95,9 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   const [announce, setAnnounce] = useState('');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [zipping, setZipping] = useState(false);
+
+  const [cut, dispatchCut] = useReducer(cutReducer, mode, initialCut);
+  const [donePlays, setDonePlays] = useState(0);
 
   const startedRef = useRef(false);
   const succeededRef = useRef(false);
@@ -180,6 +192,11 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
     };
   }, [source, slug]);
 
+  // A new package may start the cut moment (the reducer decides).
+  useEffect(() => {
+    if (made) dispatchCut({ type: 'built' });
+  }, [made]);
+
   // Start loading the engine early on the pages that preview right away.
   useEffect(() => {
     void loadEngine().catch(() => {});
@@ -194,6 +211,7 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   function change<M extends FaviconMode>(m: M, patch: Partial<FaviconOptions[M]>) {
     const next: FaviconOptions = { ...options, [m]: { ...options[m], ...patch } };
     setUserOptions(next);
+    dispatchCut({ type: 'edit' });
     saveOptions(tool, next);
     markStarted(0);
   }
@@ -202,9 +220,15 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
     const f = files[0];
     if (!f) return;
     setFile(f);
+    dispatchCut({ type: 'file' });
     startedRef.current = false;
     succeededRef.current = false;
     markStarted(1);
+  }
+
+  function switchMode(m: FaviconMode) {
+    setMode(m);
+    dispatchCut({ type: 'mode', mode: m });
   }
 
   const hideToast = useCallback(() => setToast(null), []);
@@ -250,82 +274,156 @@ function FaviconMaker({ tool }: { tool: ToolDefinition }) {
   const state =
     source === null ? 'idle' : failure ? 'error' : busy ? 'processing' : pkg ? 'done' : 'idle';
 
+  const cutPlaying = cut.plays > 0 && donePlays !== cut.plays;
+  const cutDone = cut.plays > 0 && donePlays === cut.plays && pkg !== null;
+  const stageState: SamuraiState = cutPlaying
+    ? 'cutting'
+    : failure
+      ? 'error'
+      : busy
+        ? 'cutting'
+        : cutDone
+          ? 'done'
+          : 'idle';
+
+  const stageText = cutPlaying || busy
+    ? toolCopy.stage.cutting
+    : stageState === 'done'
+      ? toolCopy.stage.done
+      : stageState === 'error'
+        ? toolCopy.stage.error
+        : { ...toolCopy.stage.idle, compact: undefined };
+  const tileSrc = pkg?.previews[512];
+
+  // Sword sounds: the cut starts, the cut lands, a preview fails (no-ops unless sound is on).
+  const failedNow = failure !== null;
+  useEffect(() => {
+    if (cut.plays > 0) playSound('start');
+  }, [cut.plays]);
+  useEffect(() => {
+    if (cutDone) playSound('success');
+  }, [cutDone]);
+  useEffect(() => {
+    if (failedNow) playSound('error');
+  }, [failedNow]);
+
   return (
     <div
       data-testid="favicon-shell"
       data-kind={tool.kind}
       data-mode={mode}
       data-state={state}
-      className="grid gap-4 [&>*]:min-w-0"
+      className="relative -mx-4 grid gap-4 overflow-clip border-y border-line bg-card px-4 py-3 sm:mx-0 sm:rounded-card sm:border sm:p-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-6 lg:overflow-visible lg:border-0 lg:bg-transparent lg:p-0 [&>*]:min-w-0"
     >
-      {mode === 'image' ? (
-        <FilePicker
-          inputId={inputId}
-          multiple={false}
-          onFiles={pickFile}
-          onWarmUp={() => void loadEngine().catch(() => {})}
-          label={file ? t.pickAnother : t.pickImage}
-          desktopHint={t.imageHintDesktop}
-        />
-      ) : (
-        <FaviconControls
-          mode={mode}
-          part="main"
-          options={options}
-          onChange={change}
-          afterInput={<PrivacyNote className="mt-2" />}
-        />
-      )}
-
-      <FaviconModeTabs mode={mode} onChange={setMode} />
-
-      {failure && (
-        <ErrorBanner
-          message={failure.message}
-          action={
-            failure.engine
-              ? { label: toolCopy.reload, onClick: () => window.location.reload() }
-              : undefined
-          }
-        />
-      )}
-
-      <FaviconPreview
-        previews={pkg?.previews ?? null}
-        busy={busy}
-        empty={source === null}
-        emptyText={
-          mode === 'text' ? t.previewEmptyText : mode === 'emoji' ? t.previewEmptyEmoji : undefined
+      <SamuraiStage state={stageState} text={stageText} className="order-first lg:hidden" />
+      <CutMoment
+        playKey={cut.plays}
+        onDone={() => setDonePlays(cut.plays)}
+        tile={
+          tileSrc ? (
+            // Object URL from the engine; next/image adds nothing here.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={tileSrc} alt="" className="size-full" />
+          ) : null
         }
       />
 
-      <div className="grid gap-2">
-        <Button
-          size="lg"
-          data-testid="download-zip"
-          disabled={!canDownload}
-          loading={zipping}
-          loadingText={t.preparingZip}
-          onClick={() => void downloadZip()}
-        >
-          {t.downloadZip}
-        </Button>
-        <Button
-          variant="secondary"
-          disabled={!canDownload}
-          data-testid="download-ico"
-          onClick={() => void downloadIco()}
-          className="w-full"
-        >
-          {t.downloadIco}
-        </Button>
+      <div className={group}>
+        <div className="order-1 grid gap-4 lg:order-2">
+          {mode === 'image' ? (
+            <div>
+              <FilePicker
+                inputId={inputId}
+                multiple={false}
+                onFiles={pickFile}
+                onWarmUp={() => void loadEngine().catch(() => {})}
+                label={file ? t.pickAnother : t.pickImage}
+                title={t.imageHintDesktop}
+                mobileTitle={file ? t.pickAnother : t.pickImage}
+                hint={t.imageHint}
+              />
+              <PrivacyNote className="mt-2" />
+            </div>
+          ) : (
+            <FaviconControls
+              mode={mode}
+              part="main"
+              options={options}
+              onChange={change}
+              afterInput={<PrivacyNote className="mt-2" />}
+            />
+          )}
+        </div>
+
+        <div className="order-2 lg:order-1">
+          <FaviconModeTabs mode={mode} onChange={switchMode} />
+        </div>
+
+        <div className="order-5 lg:order-3">
+          <FaviconControls mode={mode} part="style" options={options} onChange={change} />
+        </div>
       </div>
 
-      <FaviconControls mode={mode} part="style" options={options} onChange={change} />
+      <div className={group}>
+        {failure && (
+          <div className="order-3 lg:order-1">
+            <ErrorBanner
+              message={failure.message}
+              action={
+                failure.engine
+                  ? { label: toolCopy.reload, onClick: () => window.location.reload() }
+                  : undefined
+              }
+            />
+          </div>
+        )}
 
-      <SnippetBlock snippet={pkg?.snippet ?? null} />
+        <div className="order-3 lg:order-2">
+          <FaviconPreview
+            previews={pkg?.previews ?? null}
+            busy={busy}
+            empty={source === null}
+            emptyText={
+              mode === 'text'
+                ? t.previewEmptyText
+                : mode === 'emoji'
+                  ? t.previewEmptyEmoji
+                  : undefined
+            }
+            popKey={cutDone ? donePlays : 0}
+          />
+        </div>
 
-      <AdSlot position="below-results" />
+        <div className="order-4 grid gap-2 lg:order-3 lg:grid-cols-[auto_auto] lg:justify-start">
+          <Button
+            size="lg"
+            data-testid="download-zip"
+            disabled={!canDownload}
+            loading={zipping}
+            loadingText={t.preparingZip}
+            onClick={() => void downloadZip()}
+          >
+            {t.downloadZip}
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canDownload}
+            data-testid="download-ico"
+            onClick={() => void downloadIco()}
+            className="w-full"
+          >
+            {t.downloadIco}
+          </Button>
+        </div>
+
+        <div className="order-6 lg:order-4">
+          <SnippetBlock snippet={pkg?.snippet ?? null} />
+        </div>
+      </div>
+
+      <div className="order-7 lg:col-span-2">
+        <AdSlot position="below-results" />
+      </div>
 
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announce}

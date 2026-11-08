@@ -16,12 +16,15 @@ export function TargetSizeChips({
   custom,
   onChange,
   disabled,
+  hideLabel,
 }: {
   targetKB: number;
   custom: boolean;
   /** `custom` true when the value came from the Custom field. */
   onChange: (kb: number, custom: boolean) => void;
   disabled?: boolean;
+  /** Hide the "Target size" label (still its accessible name). Hero card shows its own step label instead. */
+  hideLabel?: boolean;
 }) {
   const isPreset = (SIZE_PRESETS as readonly number[]).includes(targetKB);
   const selected = custom || !isPreset ? 'custom' : String(targetKB);
@@ -29,6 +32,7 @@ export function TargetSizeChips({
     <div className="grid gap-3">
       <ChipGroup
         label="Target size"
+        hideLabel={hideLabel}
         options={OPTIONS}
         value={selected}
         disabled={disabled}
