@@ -83,5 +83,5 @@ export const content: ToolContent = {
     'png-to-webp',
     'png-to-ico',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

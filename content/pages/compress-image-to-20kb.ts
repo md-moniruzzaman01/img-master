@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 20 KB',
   cardDescription: 'Signatures, tiny ID photos and strict portals.',
-  title: 'Compress Image to 20KB Online Free – No Upload | Img Samurai',
+  title: 'Compress Image to 20KB Online – No Upload | Img Samurai',
   description:
     'Shrink a photo or a signature to under 20 KB in seconds. Edges and faces stay as clear as the size allows, and nothing leaves your phone. Free, no signup.',
   h1: 'Compress image to 20 KB',
@@ -115,5 +115,5 @@ export const content: ToolContent = {
     'resize-image',
     'png-to-jpg',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

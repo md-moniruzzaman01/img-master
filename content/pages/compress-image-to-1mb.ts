@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 1 MB',
   cardDescription: 'Big phone photos for portals with a 1 MB cap and email.',
-  title: 'Compress Image to 1MB Online – Free, No Upload | Img Samurai',
+  title: 'Compress Image to 1MB Online – No Upload | Img Samurai',
   description:
     'Shrink big phone or camera photos to under 1 MB for email, forms and sharing. Quality stays high, nothing is uploaded, and it is free with no signup.',
   h1: 'Compress image to 1 MB',
@@ -104,5 +104,5 @@ export const content: ToolContent = {
     'jpg-to-webp',
     'image-converter',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

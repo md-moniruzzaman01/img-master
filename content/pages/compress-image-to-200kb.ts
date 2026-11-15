@@ -113,5 +113,5 @@ export const content: ToolContent = {
     'png-to-jpg',
     'jpg-to-webp',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

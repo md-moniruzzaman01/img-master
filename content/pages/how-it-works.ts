@@ -67,5 +67,5 @@ export const howItWorksContent: InfoPageContent = {
       a: 'The browser draws the picture again and saves only the pixels. Hidden details from the camera, such as GPS location, the phone model and the date taken, are not copied into the new file.',
     },
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

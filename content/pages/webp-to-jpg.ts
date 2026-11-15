@@ -96,5 +96,5 @@ export const content: ToolContent = {
     'compress-image-to-50kb',
     'jpg-to-webp',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

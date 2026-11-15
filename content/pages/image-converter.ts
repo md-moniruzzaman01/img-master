@@ -98,5 +98,5 @@ export const content: ToolContent = {
     'webp-to-png',
     'compress-image',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

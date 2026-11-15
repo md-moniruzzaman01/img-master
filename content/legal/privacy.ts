@@ -91,5 +91,5 @@ export const privacyContent: LegalContent = {
   description: `How ${name} handles your data: images are processed in your browser and never uploaded. What we store on your device, analytics, ads and contact.`,
   h1: 'Privacy policy',
   sections,
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

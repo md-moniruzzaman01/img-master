@@ -41,12 +41,12 @@ describe('tool registry', () => {
 });
 
 describe('navigation helpers', () => {
-  it('builds breadcrumbs that end with the page short name', async () => {
-    const { getBreadcrumbs, getToolContent } = await import('@/lib/tools');
+  it('builds breadcrumbs that end with the keyword name', async () => {
+    const { getBreadcrumbs } = await import('@/lib/tools');
     const crumbs = getBreadcrumbs('compress-image-to-50kb');
     expect(crumbs[0]).toEqual({ label: 'Home', href: '/' });
     expect(crumbs[1]).toEqual({ label: 'Compress', href: '/compress-image' });
-    expect(crumbs.at(-1)).toEqual({ label: getToolContent('compress-image-to-50kb')!.shortName });
+    expect(crumbs.at(-1)).toEqual({ label: 'Compress Image to 50KB' });
     expect(getBreadcrumbs('compress-image')).toHaveLength(2);
   });
 

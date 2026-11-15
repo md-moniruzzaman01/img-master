@@ -97,7 +97,7 @@ export function limitGraphemes(text: string, max: number, keep: 'first' | 'last'
 /* ── Remembered options ──────────────────────────────────────────── */
 
 export function storageKey(tool: ToolDefinition): string {
-  return `img-master:options:${tool.slug}`;
+  return `img-samurai:options:${tool.slug}`;
 }
 
 export function readStoredRaw(tool: ToolDefinition): string | null {

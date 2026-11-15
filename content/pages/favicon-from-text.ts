@@ -80,5 +80,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['favicon-generator', 'favicon-from-emoji', 'png-to-ico', 'image-converter'],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

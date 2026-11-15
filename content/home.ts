@@ -6,12 +6,12 @@ import type { HomeContent } from '@/lib/types';
 export const homeContent: HomeContent = {
   title: 'Img Samurai – Free Image Tools for Your Phone',
   description:
-    'Compress photos to an exact size like 50 KB, convert JPG, PNG and WebP, and make favicons. Runs in your browser, so nothing is uploaded. Free, no signup.',
+    'Free image tools: compress photos to an exact size like 50 KB, convert JPG, PNG and WebP, and make favicons. Runs in your browser, so nothing is uploaded.',
   eyebrow: 'Free image tools',
   h1: 'Cut any image down to size.',
   h1Accent: 'size.',
   subtitle:
-    'Pick a size, drop your photo and download the result. It runs on your phone or laptop, and your image never leaves your device.',
+    'Free image tools to compress, convert and make favicons. It runs on your device, and your image never leaves it.',
   // "Results in about a second" is not used: in our own tests a 12 MP phone photo
   // took about 3 seconds (median) on emulated phones (reports/data/compress-matrix.ndjson).
   trustItems: ['Works in your browser', 'Built for phones first', 'No sign-up, no watermark'],

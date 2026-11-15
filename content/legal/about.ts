@@ -8,7 +8,7 @@ export const aboutContent: LegalContent = {
   slug: 'about',
   title: `About Us | ${name}`,
   description: `${name} is a set of free image tools that run in your browser. Learn who makes it, why it exists, and how it keeps your photos on your device.`,
-  h1: 'One clean cut.',
+  h1: `About ${name}`,
   eyebrow: 'About',
   intro: [
     'Ittō ryōdan (一刀両断) means cutting something in two with a single stroke. In Japanese it also means making a decision cleanly, without hesitation. That is what we wanted from image tools.',

@@ -29,5 +29,5 @@ export const contactContent: LegalContent = {
       ],
     },
   ],
-  updatedAt: '2026-10-23',
+  updatedAt: '2026-11-15',
 };

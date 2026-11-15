@@ -6,7 +6,8 @@ import { homeContent } from '@/content/home';
 import { legalContent } from '@/content/legal';
 import { howItWorksContent } from '@/content/pages/how-it-works';
 import { toolsIndexContent } from '@/content/pages/tools-index';
-import { homeJsonLd, infoPageJsonLd, toolJsonLd, toolsIndexJsonLd } from '@/lib/seo/jsonld';
+import { homeJsonLd, infoPageJsonLd, keywordCrumbName, toolJsonLd, toolsIndexJsonLd } from '@/lib/seo/jsonld';
+import { headingGroups } from '@/lib/seo/og-card';
 import {
   absoluteUrl,
   buildInfoMetadata,
@@ -128,6 +129,7 @@ describe('JSON-LD', () => {
     const visible = getBreadcrumbs(slug);
     const items = crumbs.itemListElement as { name: string; item: string; position: number }[];
     expect(items.map((i) => i.name)).toEqual(visible.map((c) => c.label));
+    expect(items.at(-1)!.name).toBe(keywordCrumbName(getLiveToolPage(slug).content.primaryKeyword));
     expect(items.at(-1)!.item).toBe(`${origin}/${slug}`);
 
     // FAQPage matches the visible FAQs exactly (as plain text).
@@ -250,5 +252,27 @@ describe('info pages: metadata and JSON-LD', () => {
       `${origin}/webp-to-jpg`,
       `${origin}/compress-image`,
     ]);
+  });
+});
+
+describe('OG heading groups (SEO-06)', () => {
+  const lines = (h: string, a?: string) =>
+    headingGroups(h, a).map((g) => g.map((w) => w.text).join(' '));
+
+  it('keeps "to X" together so "to" is never alone', () => {
+    expect(lines('Convert WebP to JPG', 'JPG')).toEqual(['Convert', 'WebP', 'to JPG']);
+    expect(lines('PNG to ICO converter', 'ICO')).toEqual(['PNG', 'to ICO', 'converter']);
+    expect(lines('Compress image to 50 KB', '50 KB')).toEqual(['Compress', 'image', 'to 50 KB']);
+    expect(lines('Compress image to 1 MB', '1 MB')).toEqual(['Compress', 'image', 'to 1 MB']);
+  });
+
+  it('marks only accent words', () => {
+    const g = headingGroups('Convert JPG to PNG', 'PNG').flat();
+    expect(g.filter((w) => w.accent).map((w) => w.text)).toEqual(['PNG']);
+  });
+
+  it('names the last breadcrumb with the keyword phrase', () => {
+    expect(keywordCrumbName('compress image to 50kb')).toBe('Compress Image to 50KB');
+    expect(keywordCrumbName('webp to jpg')).toBe('WebP to JPG');
   });
 });

@@ -81,5 +81,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['png-to-jpg', 'webp-to-png', 'image-converter', 'compress-image', 'jpg-to-webp'],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

@@ -7,7 +7,7 @@ export const toolsIndexContent: InfoPageContent = {
   title: 'All Image Tools – Compress, Convert, Resize | Img Samurai',
   description:
     'Every free Img Samurai tool on one page: compress to an exact size, convert JPG, PNG and WebP, resize, and make favicons. All run in your browser.',
-  h1: 'Every tool',
+  h1: 'All free image tools',
   subtitle: '{count} tools. Each does one job well, and none of them uploads your images.',
   sections: [
     {
@@ -21,7 +21,7 @@ export const toolsIndexContent: InfoPageContent = {
       ],
     },
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };
 
 /** Fill the {count} placeholder, e.g. fillCount(toolsIndexContent.subtitle, getLiveToolCount()). */

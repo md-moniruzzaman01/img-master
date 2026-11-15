@@ -69,15 +69,36 @@ function LogoMark({ size }: { size: number }) {
   );
 }
 
-/** Split the heading so the accent (an exact substring) can be drawn in crimson. */
-function headingParts(heading: string, accent?: string): { text: string; accent: boolean }[] {
+type Word = { text: string; accent: boolean };
+
+/**
+ * Split the heading into word groups that must not break across lines.
+ * Words are marked as accent when they sit inside the accent substring.
+ * "to" is always kept with the next word ("to JPG"), and a number is kept
+ * with its unit ("to 50 KB"), so "to" is never alone on a line.
+ */
+export function headingGroups(heading: string, accent?: string): Word[][] {
   const at = accent ? heading.indexOf(accent) : -1;
-  if (!accent || at < 0) return [{ text: heading, accent: false }];
-  return [
-    { text: heading.slice(0, at), accent: false },
-    { text: accent, accent: true },
-    { text: heading.slice(at + accent.length), accent: false },
-  ].filter((p) => p.text.length > 0);
+  const end = at >= 0 && accent ? at + accent.length : -1;
+  const words: Word[] = [];
+  const re = /\S+/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(heading)) !== null) {
+    words.push({ text: m[0], accent: at >= 0 && m.index >= at && m.index + m[0].length <= end });
+  }
+  const isUnit = (w?: Word) => w !== undefined && /^(KB|MB)$/.test(w.text);
+  const groups: Word[][] = [];
+  for (let i = 0; i < words.length; i++) {
+    const group = [words[i]!];
+    if (words[i]!.text.toLowerCase() === 'to' && i + 1 < words.length) {
+      group.push(words[++i]!);
+      if (isUnit(words[i + 1])) group.push(words[++i]!);
+    } else if (isUnit(words[i + 1])) {
+      group.push(words[++i]!);
+    }
+    groups.push(group);
+  }
+  return groups;
 }
 
 export function OgCard({
@@ -140,16 +161,21 @@ export function OgCard({
             letterSpacing: -1,
           }}
         >
-          {headingParts(heading, accent).map((p, i) => (
-            <span
-              key={i}
-              style={{
-                color: p.accent ? OG_COLORS.shu : OG_COLORS.ink,
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {p.text}
-            </span>
+          {headingGroups(heading, accent).map((g, i) => (
+            <div key={i} style={{ display: 'flex', flexWrap: 'nowrap', marginRight: '0.28em' }}>
+              {g.map((w, j) => (
+                <span
+                  key={j}
+                  style={{
+                    color: w.accent ? OG_COLORS.shu : OG_COLORS.ink,
+                    marginRight: j < g.length - 1 ? '0.28em' : 0,
+                    whiteSpace: 'pre',
+                  }}
+                >
+                  {w.text}
+                </span>
+              ))}
+            </div>
           ))}
         </div>
         <div

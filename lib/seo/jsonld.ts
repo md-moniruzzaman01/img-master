@@ -68,6 +68,8 @@ export function homeJsonLd(): object[] {
   ];
 }
 
+export { keywordCrumbName } from '@/lib/tools/crumb-name';
+
 /** Tool page: WebApplication + BreadcrumbList (same crumbs as the page) + FAQPage. */
 export function toolJsonLd(tool: ToolDefinition, content: ToolContent): object[] {
   const url = absoluteUrl(`/${tool.slug}`);
@@ -95,7 +97,7 @@ export function toolJsonLd(tool: ToolDefinition, content: ToolContent): object[]
     itemListElement: crumbs.map((c, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      name: c.label,
+            name: c.label,
       item: c.href ? absoluteUrl(c.href) : url,
     })),
   };

@@ -9,6 +9,7 @@ import type {
   ToolDefinition,
   ToolNavGroup,
 } from '../types';
+import { keywordCrumbName } from './crumb-name';
 import { getToolGlyph } from './glyphs';
 import { categoryLabels, categoryOrder, tools } from './registry';
 
@@ -116,8 +117,8 @@ export function getSizeLinks(): { label: string; href: string; targetKB: number 
 }
 
 /**
- * Breadcrumb trail for a tool page: Home › {Category hub} › {shortName}.
- * A hub page is Home › {shortName}. Used by the Breadcrumbs component AND the
+ * Breadcrumb trail for a tool page: Home › {Category hub} › {keyword name, e.g. Compress Image to 50KB}.
+ * A hub page is Home › {keyword name}. Used by the Breadcrumbs component AND the
  * BreadcrumbList JSON-LD, so both always match.
  */
 export function getBreadcrumbs(slug: string): Crumb[] {
@@ -129,7 +130,7 @@ export function getBreadcrumbs(slug: string): Crumb[] {
   if (hub && hub.slug !== slug) {
     crumbs.push({ label: categoryLabels[tool.category], href: `/${hub.slug}` });
   }
-  crumbs.push({ label: content.shortName });
+  crumbs.push({ label: keywordCrumbName(content.primaryKeyword) });
   return crumbs;
 }
 

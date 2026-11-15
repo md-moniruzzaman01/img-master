@@ -111,5 +111,5 @@ export const content: ToolContent = {
     'resize-image',
     'png-to-jpg',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

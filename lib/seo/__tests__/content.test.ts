@@ -288,7 +288,7 @@ describe('home and legal content', () => {
   it('about has its eyebrow, intro and three values', () => {
     const a = legalContent.about;
     expect(a.eyebrow).toBe('About');
-    expect(a.h1).toBe('One clean cut.');
+    expect(a.h1).toBe('About Img Samurai');
     expect(a.intro?.length).toBeGreaterThan(0);
     expect(a.values).toHaveLength(3);
     for (const re of UNPROVEN)
@@ -365,7 +365,7 @@ describe('info pages (how it works, every tool)', () => {
       expect(t).not.toMatch(/\{count\}|\b\d+ tools\b/);
   });
 
-  it('every-tool H1 is "Every tool"', () => {
-    expect(toolsIndexContent.h1).toBe('Every tool');
+  it('every-tool H1 is descriptive', () => {
+    expect(toolsIndexContent.h1).toBe('All free image tools');
   });
 });

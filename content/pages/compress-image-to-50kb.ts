@@ -15,7 +15,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 50 KB',
   cardDescription: 'Job applications, exam and admission forms.',
-  title: 'Compress Image to 50KB Online Free – No Upload | Img Samurai',
+  title: 'Compress Image to 50KB Online – No Upload | Img Samurai',
   description:
     'Reduce any photo to under 50 KB on your phone. We keep the sharpest version that fits, faces stay clear, and your image never leaves your device. Free.',
   h1: 'Compress image to 50 KB',
@@ -117,5 +117,5 @@ export const content: ToolContent = {
     'resize-image',
     'webp-to-jpg',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

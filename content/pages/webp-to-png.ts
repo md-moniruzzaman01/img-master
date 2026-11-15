@@ -79,5 +79,5 @@ export const content: ToolContent = {
     },
   ],
   related: ['webp-to-jpg', 'png-to-webp', 'image-converter', 'jpg-to-png', 'compress-image'],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

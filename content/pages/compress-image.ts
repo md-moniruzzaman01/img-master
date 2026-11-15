@@ -123,5 +123,5 @@ export const content: ToolContent = {
     'image-converter',
     'resize-image',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

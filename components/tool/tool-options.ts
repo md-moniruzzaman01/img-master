@@ -106,7 +106,7 @@ function rememberedKeys(tool: ToolDefinition): (keyof ToolOptions)[] {
 }
 
 export function storageKey(tool: ToolDefinition): string {
-  return `img-master:options:${tool.slug}`;
+  return `img-samurai:options:${tool.slug}`;
 }
 
 export function readStoredRaw(tool: ToolDefinition): string | null {

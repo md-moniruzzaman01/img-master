@@ -112,5 +112,5 @@ export const content: ToolContent = {
     'image-converter',
     'favicon-generator',
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };
