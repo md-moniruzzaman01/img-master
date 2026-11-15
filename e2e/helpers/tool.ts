@@ -49,6 +49,8 @@ export const TOOL_SLUGS: string[] = [
   ...SIZE_PAGES.map((p) => p.slug),
   'image-converter',
   ...CONVERTER_PAGES.map((p) => p.slug),
+  'heic-to-jpg',
+  'heic-to-png',
 ];
 /** Phase 4 favicon pages (different island: data-testid=favicon-shell, no result cards except png-to-ico). */
 export const FAVICON_SLUGS = [
