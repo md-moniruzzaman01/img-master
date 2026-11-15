@@ -245,6 +245,44 @@ function detectAlpha(src: DrawSource): boolean {
   }
 }
 
+/**
+ * HEIC fallback (libheif, lazy chunk). libheif applies the HEIC rotation and
+ * mirror transforms itself, so no EXIF orientation is applied here.
+ */
+async function decodeHeicWithLibheif(
+  file: Blob,
+  maxPixels: number,
+  notes: EngineNote[],
+): Promise<Decoded> {
+  const { decodeHeicRgba, HEIC_MAX_DECODE_PIXELS, HEIC_MAX_DECODE_PIXELS_LOW_MEMORY } =
+    await import('./heic');
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const hardCap =
+    maxPixels < 16_000_000 ? HEIC_MAX_DECODE_PIXELS_LOW_MEMORY : HEIC_MAX_DECODE_PIXELS;
+  const px = await decodeHeicRgba(bytes, maxPixels, hardCap);
+  const canvas = createCanvas(px.width, px.height);
+  try {
+    const ctx = context2d(canvas);
+    ctx.putImageData(new ImageData(px.data as Uint8ClampedArray<ArrayBuffer>, px.width, px.height), 0, 0);
+  } catch (e) {
+    releaseCanvas(canvas);
+    throw e;
+  }
+  if (px.width !== px.fullWidth || px.height !== px.fullHeight) notes.push('downscaled-for-memory');
+  return {
+    source: canvas,
+    width: px.width,
+    height: px.height,
+    fullWidth: px.fullWidth,
+    fullHeight: px.fullHeight,
+    kind: 'heic',
+    hasAlpha: px.hasAlpha,
+    animated: false,
+    notes,
+    release: () => releaseCanvas(canvas),
+  };
+}
+
 export async function decodeImage(file: Blob, maxPixels: number): Promise<Decoded> {
   const head = new Uint8Array(await file.slice(0, HEAD_BYTES).arrayBuffer());
   const kind = sniffFormat(head);
@@ -266,9 +304,11 @@ export async function decodeImage(file: Blob, maxPixels: number): Promise<Decode
     source = await bitmapFrom(file, resizeWidth);
   } catch (e) {
     if (isOutOfMemory(e)) throw e;
+    // No native HEIC decoder (Chrome, Firefox, Edge): use libheif, loaded only now.
+    if (kind === 'heic') return decodeHeicWithLibheif(file, maxPixels, notes);
     const known = kind !== 'unknown';
     const looksLikeImage = known || file.type.startsWith('image/');
-    if (kind === 'heic' || kind === 'avif' || !looksLikeImage) {
+    if (kind === 'avif' || !looksLikeImage) {
       throw new EngineError('UNSUPPORTED_FORMAT', 'This browser cannot open this file type');
     }
     throw new EngineError('DECODE_FAILED', 'The image could not be opened. It may be damaged.');

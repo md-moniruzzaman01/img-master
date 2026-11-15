@@ -30,6 +30,13 @@ export const howItWorksContent: InfoPageContent = {
       ],
     },
     {
+      heading: 'How HEIC photos are opened',
+      paragraphs: [
+        'The [HEIC to JPG](/heic-to-jpg) and [HEIC to PNG](/heic-to-png) pages open iPhone photos in any modern browser. Every tool opens HEIC. The browser tries to read the photo itself first, as Safari does. If it cannot, a small HEIC reader loads the first time you pick a HEIC photo. It comes from our own site, not from another server, and it runs inside your browser, so the photo still never leaves your device.',
+        'The HEIC reader is libheif, an open-source library under the LGPL-3.0 licence (source: github.com/strukturag/libheif), running as WebAssembly through libheif-js.',
+      ],
+    },
+    {
       heading: 'Many files at once',
       paragraphs: [
         `You can pick up to ${siteConfig.maxFiles} images in one batch. The results are listed in the order you picked them. Each file can be saved on its own, or you can tap **Download all** to get one ZIP file. The ZIP is also made on your device.`,
@@ -42,7 +49,7 @@ export const howItWorksContent: InfoPageContent = {
       list: [
         'Images over 16.7 megapixels are made smaller first, to protect your phone from running out of memory. The result shows a note when this happens.',
         'Animated GIF and WebP files keep only their first frame.',
-        'HEIC photos from an iPhone open only in browsers that can read HEIC, such as Safari.',
+        'HEIC photos from an iPhone open on every tool in any browser. The first time, a small HEIC reader may load, which takes a few seconds. Above about 50 megapixels the photo is refused, and on phones with little memory the limit is lower.',
         'PDF files are not supported. The tools work with images only.',
         'If a very small target cannot be reached without ruining the picture, the tool says so and suggests a larger size, instead of giving you a bad file.',
         'Large photos take longer on older phones, because your own device does the work.',
@@ -67,5 +74,5 @@ export const howItWorksContent: InfoPageContent = {
       a: 'The browser draws the picture again and saves only the pixels. Hidden details from the camera, such as GPS location, the phone model and the date taken, are not copied into the new file.',
     },
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

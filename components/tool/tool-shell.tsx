@@ -36,6 +36,16 @@ import { ErrorBanner } from './error-banner';
 import { FilePicker } from './file-picker';
 import { targetText, uniqueNames } from './format';
 import { FormatSelect } from './format-select';
+import {
+  HEIC_ACCEPT,
+  createDecodeWatch,
+  decodeLabel,
+  heicErrorText,
+  isHeicFile,
+  isHeicTool,
+  isHubConverterTool,
+  type DecodeWait,
+} from './heic';
 import { HERO_FILES_EVENT, HERO_PICK_EVENT, HERO_TOOL_ID } from './hero-bus';
 import { PrivacyNote } from './privacy-note';
 import { ProgressBar } from './progress-bar';
@@ -142,6 +152,7 @@ function ImageTool({
   variant?: 'page' | 'hero';
 }) {
   const slug = tool.slug;
+  const heicPage = isHeicTool(tool);
   const kind = tool.kind;
   const hero = variant === 'hero';
   const verb: Verb = kind === 'convert' ? 'convert' : kind === 'resize' ? 'resize' : 'compress';
@@ -171,6 +182,8 @@ function ImageTool({
   // Resize: a file was picked while the size fields were not valid yet.
   const [waiting, setWaiting] = useState(false);
   const [announce, setAnnounce] = useState('');
+  // HEIC pages: the decode stage, and whether it has gone on long enough to explain.
+  const [decodeWait, setDecodeWait] = useState<DecodeWait>('none');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [zipping, setZipping] = useState(false);
   const [sampleLoading, setSampleLoading] = useState(false);
@@ -182,6 +195,7 @@ function ImageTool({
   const urlsRef = useRef<string[]>([]);
   const savedRef = useRef(false);
   const timerRef = useRef<number | undefined>(undefined);
+  const decodeWatchRef = useRef<ReturnType<typeof createDecodeWatch> | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const revokeAll = useCallback(() => {
@@ -198,6 +212,7 @@ function ImageTool({
       runId.current += 1;
       handle.current?.cancel();
       window.clearTimeout(timer.current);
+      decodeWatchRef.current?.reset();
       revokeAll();
     };
   }, [revokeAll]);
@@ -281,10 +296,12 @@ function ImageTool({
       setItems((prev) => prev.map((it, k) => (k === i ? { ...it, ...patch } : it)));
     const results: (EngineResult | null)[] = files.map(() => null);
     let lastError: ResultItem['error'];
+    let lastFile: File | undefined;
 
     for (const it of initial) {
       if (it.error) {
         lastError = it.error;
+        lastFile = it.file;
         track('tool_error', { tool: slug, code: it.error.code });
       }
     }
@@ -307,12 +324,20 @@ function ImageTool({
       if (initial[i].status === 'failed') continue;
       update(i, { status: 'processing' });
       setProgress({ index: i, ratio: 0 });
+      const heic = isHeicFile(files[i]);
+      decodeWatchRef.current?.reset();
+      const watch = heic ? createDecodeWatch(setDecodeWait) : null;
+      decodeWatchRef.current = watch;
+      watch?.stage('decode');
       const handle = startJob(engine, files[i], o, (p) => {
-        if (id === runIdRef.current) setProgress({ index: i, ratio: p.ratio });
+        if (id !== runIdRef.current) return;
+        watch?.stage(p.stage);
+        setProgress({ index: i, ratio: p.ratio });
       });
       handleRef.current = handle;
       try {
         const r = await handle.promise;
+        watch?.reset();
         if (id !== runIdRef.current) return;
         const url = URL.createObjectURL(r.blob);
         urlsRef.current.push(url);
@@ -333,7 +358,9 @@ function ImageTool({
           ? e.code
           : 'UNKNOWN';
         const error = { code, detail: isEngineError(e) ? e.detail : undefined };
+        watch?.reset();
         lastError = error;
+        lastFile = files[i];
         update(i, { status: 'failed', error });
         track('tool_error', { tool: slug, code });
         if (code === 'ENCODE_UNSUPPORTED') setNotice('webp');
@@ -359,7 +386,7 @@ function ImageTool({
             ? copy.resizeDoneLive(ok[0].width, ok[0].height, ok[0].outputBytes)
             : copy.doneSingle(ok[0].outputBytes, ok[0].inputBytes)
           : lastError
-            ? errorText(lastError, o)
+            ? errorText(lastError, o, lastFile)
             : copy.noneWorked,
       );
     } else {
@@ -466,7 +493,15 @@ function ImageTool({
     updateOptions(kind === 'convert' ? { convertTo: 'jpeg' } : { sizeFormat: 'jpeg' }, true);
   }
 
-  function errorText(error: NonNullable<ResultItem['error']>, o: ToolOptions): string {
+  function errorText(
+    error: NonNullable<ResultItem['error']>,
+    o: ToolOptions,
+    file?: File,
+  ): string {
+    if (heicPage && file) {
+      const text = heicErrorText(error.code, file);
+      if (text) return text;
+    }
     if (error.code === 'TARGET_UNREACHABLE') {
       const next = nextTarget(o.targetKB, error.detail?.smallestBytes);
       const base = copy.unreachable(o.targetKB, next, o.keepDimensions);
@@ -602,7 +637,7 @@ function ImageTool({
 
   // ── Option controls per tool kind ───────────────────────────────────
   const sizeMode = usesTarget(options);
-  const isHubConverter = kind === 'convert' && tool.preset.from === 'any';
+  const isHubConverter = isHubConverterTool(tool);
 
   const targetChips = (
     <TargetSizeChips
@@ -719,10 +754,17 @@ function ImageTool({
     ) : null;
 
   const m = items.length;
+  const decoding = running && heicPage && decodeWait !== 'none';
   const statusLine = running ? (
     <ProgressBar
-      label={copy.processing(verb, Math.min(progress.index + 1, m), m)}
+      label={
+        decoding
+          ? decodeLabel(Math.min(progress.index + 1, m), m)
+          : copy.processing(verb, Math.min(progress.index + 1, m), m)
+      }
       value={m ? (progress.index + progress.ratio) / m : 0}
+      note={decoding && decodeWait === 'slow' ? copy.heic.firstTime : null}
+      reserveNote={heicPage}
     />
   ) : state === 'error' ? (
     <p className="flex items-center gap-2 font-semibold text-accent-strong">
@@ -740,7 +782,7 @@ function ImageTool({
   const statusSlot =
     m > 1 ? (
       <>
-        <div className="min-h-11">{statusLine}</div>
+        <div className={heicPage ? 'min-h-[82px]' : 'min-h-11'}>{statusLine}</div>
         <div className="mt-3 min-h-[52px]">
           {!running && multi && (
             <Button
@@ -755,6 +797,9 @@ function ImageTool({
           )}
         </div>
       </>
+    ) : heicPage ? (
+      // Holds the room for the "first time only" line, so the cards below stay put.
+      <div className="min-h-[82px]">{statusLine}</div>
     ) : (
       statusLine
     );
@@ -781,7 +826,11 @@ function ImageTool({
       case 'cutting':
         return {
           ...copy.stage.cutting,
-          line: copy.stage.cuttingLine(usesTarget(runOpts) ? targetText(runOpts.targetKB) : undefined),
+          line: decoding
+            ? decodeWait === 'slow'
+              ? copy.heic.firstTime
+              : copy.heic.opening
+            : copy.stage.cuttingLine(usesTarget(runOpts) ? targetText(runOpts.targetKB) : undefined),
         };
       case 'done':
         return { ...copy.stage.done, line: copy.stage.doneLine(success.length, totalIn, totalOut) };
@@ -860,9 +909,9 @@ function ImageTool({
         {needsApply && (
           <div
             role="status"
-            className="flex flex-col gap-3 rounded-card border border-shu bg-paper p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-card border border-shu bg-paper p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
           >
-            <p className="text-ink">{copy.optionsChanged}</p>
+            <p className="text-ink sm:min-w-[16rem] sm:flex-1">{copy.optionsChanged}</p>
             <Button onClick={() => void run(sourceRef.current, options, 'rerun')}>
               {copy.applyTo(items.length)}
             </Button>
@@ -876,11 +925,32 @@ function ImageTool({
             disabled={running}
             onFiles={handleFiles}
             onWarmUp={() => void loadEngine().catch(() => {})}
-            label={kind === 'convert' ? copy.pickerButtonFormat('images') : copy.pickerButton}
-            title={kind === 'convert' ? copy.dropHereFormat('images') : copy.dropHere}
-            mobileTitle={copy.tapToChoose}
-            hint={copy.pickerHintDesktop(siteConfig.maxFiles)}
-            mobileHint={copy.pickerHintMobile(siteConfig.maxFiles)}
+            accept={heicPage ? HEIC_ACCEPT : undefined}
+            label={
+              heicPage
+                ? copy.heic.pickerButton
+                : kind === 'convert'
+                  ? copy.pickerButtonFormat('images')
+                  : copy.pickerButton
+            }
+            title={
+              heicPage
+                ? copy.heic.dropHere
+                : kind === 'convert'
+                  ? copy.dropHereFormat('images')
+                  : copy.dropHere
+            }
+            mobileTitle={heicPage ? copy.heic.tapToChoose : copy.tapToChoose}
+            hint={
+              heicPage
+                ? copy.heic.hintDesktop(siteConfig.maxFiles)
+                : copy.pickerHintDesktop(siteConfig.maxFiles)
+            }
+            mobileHint={
+              heicPage
+                ? copy.heic.hintMobile(siteConfig.maxFiles)
+                : copy.pickerHintMobile(siteConfig.maxFiles)
+            }
             step={hero ? '2' : undefined}
             variant={hero ? 'hero' : 'page'}
           />
@@ -918,7 +988,7 @@ function ImageTool({
                         item={it}
                         fileName={nameOf.get(it.id)}
                         noteText={noteText}
-                        errorText={it.error ? errorText(it.error, runOpts) : undefined}
+                        errorText={it.error ? errorText(it.error, runOpts, it.file) : undefined}
                         actions={suggestionsFor(it, runOpts)}
                         onAction={onSuggestion}
                         onDownload={() => onDownloaded('single')}

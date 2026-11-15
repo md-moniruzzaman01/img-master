@@ -57,6 +57,7 @@ export const aboutContent: LegalContent = {
       paragraphs: [
         'Every tool runs inside your web browser. Your device opens the image, compresses or converts it, and gives you the new file. Images are never uploaded, because there is no server that receives them. [How it works](/how-it-works) explains each step.',
         'Each new file is saved without hidden photo data, such as GPS location. The tools are free, with no signup and no watermark.',
+        'The HEIC reader is libheif, an open-source library under the LGPL-3.0 licence. Its source is at github.com/strukturag/libheif, and we use libheif-js, the JavaScript and WebAssembly build of it.',
       ],
     },
     {
@@ -66,5 +67,5 @@ export const aboutContent: LegalContent = {
       ],
     },
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

@@ -30,7 +30,7 @@ export const content: ToolContent = {
     {
       heading: 'Formats this image converter supports',
       paragraphs: [
-        'This image converter opens JPG, PNG, WebP, GIF and BMP files. Other formats work if your browser can open them; for example, Safari can read HEIC photos from an iPhone. For an animated GIF, only the first frame is converted.',
+        'This image converter opens JPG, PNG, WebP, GIF and BMP files, and iPhone HEIC photos too. In browsers other than Safari, a small HEIC reader loads from our own site the first time, which takes a few seconds. For an animated GIF, only the first frame is converted.',
         'You can save as JPG, PNG or WebP. For JPG and WebP, a quality slider (90 by default) lets you trade file size for detail. PNG keeps every pixel, so it has no quality setting.',
       ],
     },
@@ -60,6 +60,8 @@ export const content: ToolContent = {
         rows: [
           ['[WebP to JPG](/webp-to-jpg)', 'Makes WebP images open and upload anywhere'],
           ['[WebP to PNG](/webp-to-png)', 'Keeps transparent backgrounds from WebP files'],
+          ['[HEIC to JPG](/heic-to-jpg)', 'Makes iPhone photos open on Windows and Android'],
+          ['[HEIC to PNG](/heic-to-png)', 'Saves iPhone photos as lossless PNG files'],
           ['[PNG to WebP](/png-to-webp)', 'Makes PNG graphics lighter for websites'],
           ['[JPG to WebP](/jpg-to-webp)', 'Makes photos lighter for websites'],
           ['[PNG to JPG](/png-to-jpg)', 'Turns large PNGs and screenshots into small JPGs'],
@@ -83,7 +85,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Can I convert HEIC photos?',
-      a: 'Only if your browser can open them. Safari on iPhone, iPad and Mac usually can. In other browsers, a HEIC file may show an error saying it cannot be opened.',
+      a: 'Yes. HEIC photos open here in any browser. In browsers other than Safari, a small HEIC reader loads from our own site the first time, and your photo is still never uploaded. If you only want a plain JPG or PNG, the HEIC to JPG and HEIC to PNG pages in the table above are set up for that.',
     },
     {
       q: 'Are my images uploaded for conversion?',
@@ -94,9 +96,9 @@ export const content: ToolContent = {
     'webp-to-jpg',
     'png-to-jpg',
     'jpg-to-webp',
-    'png-to-webp',
+    'heic-to-jpg',
     'webp-to-png',
     'compress-image',
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

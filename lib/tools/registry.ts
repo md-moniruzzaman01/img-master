@@ -57,16 +57,9 @@ export const tools: readonly ToolDefinition[] = [
   conv('jpg-to-webp', 'jpeg', 'webp'),
   conv('png-to-jpg', 'png', 'jpeg'),
   conv('jpg-to-png', 'jpeg', 'png'),
-  // Phase 2: needs a HEIC decoder (owner must approve the dependency).
-  // `from: 'any'` because HEIC isn't an ImageFormat we encode.
-  {
-    slug: 'heic-to-jpg',
-    kind: 'convert',
-    category: 'convert',
-    status: 'draft',
-    phase: 2,
-    preset: { from: 'any', to: 'jpeg', quality: 0.9 },
-  },
+  // HEIC (iPhone photos). Decoded by libheif-js in the worker (owner approved 2026-11-16).
+  conv('heic-to-jpg', 'heic', 'jpeg'),
+  conv('heic-to-png', 'heic', 'png'),
 
   // ── Favicon (PRODUCT.md §3.4; product phase 1, built in KICKOFF Phase 4) ──
   {
@@ -120,12 +113,13 @@ function conv(
   slug: string,
   from: NonNullable<ToolDefinition['preset']['from']>,
   to: NonNullable<ToolDefinition['preset']['to']>,
+  status: ToolDefinition['status'] = 'live',
 ): ToolDefinition {
   return {
     slug,
     kind: 'convert',
     category: 'convert',
-    status: 'live',
+    status,
     phase: 1,
     preset: { from, to, quality: 0.9 },
   };

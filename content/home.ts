@@ -23,7 +23,7 @@ export const homeContent: HomeContent = {
   convert: {
     heading: 'Convert between formats',
     intro:
-      'For when a site does not take WebP, or you need to keep a transparent background. Pick the pair.',
+      'For when a site does not take WebP or iPhone HEIC photos, or you need to keep a transparent background. Pick the pair.',
   },
   compare: {
     heading: 'See the cut before you trust it',
@@ -85,5 +85,5 @@ export const homeContent: HomeContent = {
     text: 'We’ll cut it to 50 KB. Pick another size above if you need to.',
     button: 'Choose an image',
   },
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

@@ -61,3 +61,6 @@ ref/
 
 # Brand preview screenshots (regenerate with node scripts/brand/preview.mjs)
 scripts/brand/preview/
+
+# Local QA screenshots (regenerate with scripts/qa-shots/shoot.mjs)
+scripts/qa-shots/

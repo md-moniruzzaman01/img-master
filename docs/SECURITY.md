@@ -12,7 +12,7 @@ Owned by the lead. Last review: 2026-10-23 (whole codebase; static site, no back
 
 | Header | Value / reason |
 |---|---|
-| Content-Security-Policy | `default-src 'self'`; scripts and styles self + inline; `img-src 'self' data: blob:` (thumbnails); `worker-src 'self' blob:` (Next starts the worker from a blob URL); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'none'`; `frame-ancestors 'none'` |
+| Content-Security-Policy | `default-src 'self'`; scripts and styles self + inline (`'wasm-unsafe-eval'` only, so the HEIC WebAssembly decoder can compile); `img-src 'self' data: blob:` (thumbnails); `worker-src 'self' blob:` (Next starts the worker from a blob URL); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'none'`; `frame-ancestors 'none'` |
 | X-Frame-Options | `DENY` (older browsers; CSP covers newer ones) |
 | X-Content-Type-Options | `nosniff` |
 | Referrer-Policy | `strict-origin-when-cross-origin` |

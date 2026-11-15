@@ -78,6 +78,6 @@ export const content: ToolContent = {
       a: 'No. There is no signup and no daily limit. Open the page, pick your images and download the PNG files. They are made in your browser and never leave your device.',
     },
   ],
-  related: ['webp-to-jpg', 'png-to-webp', 'image-converter', 'jpg-to-png', 'compress-image'],
-  updatedAt: '2026-11-15',
+  related: ['webp-to-jpg', 'png-to-webp', 'image-converter', 'jpg-to-png', 'compress-image', 'heic-to-png'],
+  updatedAt: '2026-11-16',
 };

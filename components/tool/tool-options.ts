@@ -87,7 +87,7 @@ export function defaultOptions(tool: ToolDefinition): ToolOptions {
 }
 
 /** Which options are remembered for each kind of tool. */
-function rememberedKeys(tool: ToolDefinition): (keyof ToolOptions)[] {
+export function rememberedKeysFor(tool: ToolDefinition): (keyof ToolOptions)[] {
   switch (tool.kind) {
     case 'compress-to-size':
       // The page's own size always wins on a size page (PRODUCT.md §5.1).
@@ -137,7 +137,7 @@ export function mergeStored(
   }
   if (!data || typeof data !== 'object') return base;
   const out: ToolOptions = { ...base };
-  for (const key of rememberedKeys(tool)) {
+  for (const key of rememberedKeysFor(tool)) {
     const v = data[key];
     switch (key) {
       case 'mode':
@@ -190,7 +190,7 @@ export function mergeStored(
 
 export function saveOptions(tool: ToolDefinition, o: ToolOptions): void {
   const data: Partial<Record<keyof ToolOptions, unknown>> = {};
-  for (const key of rememberedKeys(tool)) data[key] = o[key];
+  for (const key of rememberedKeysFor(tool)) data[key] = o[key];
   try {
     window.localStorage.setItem(storageKey(tool), JSON.stringify(data));
   } catch {

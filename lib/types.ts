@@ -34,7 +34,7 @@ export interface ToolDefinition {
   hub?: boolean;
   preset: {
     targetKB?: number; // compress-to-size (decimal KB; the 1MB page uses 1000)
-    from?: ImageFormat | 'any'; // convert
+    from?: ImageFormat | 'heic' | 'any'; // convert ('heic' = HEIC/HEIF photos, decoded by libheif-js)
     to?: ImageFormat; // convert, compress-to-size output
     quality?: number; // 0–1
   };

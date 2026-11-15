@@ -3,6 +3,7 @@ const CRUMB_WORDS: Record<string, string> = {
   png: 'PNG',
   ico: 'ICO',
   webp: 'WebP',
+  heic: 'HEIC',
   to: 'to',
 };
 

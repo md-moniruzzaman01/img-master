@@ -81,7 +81,7 @@ export const content: ToolContent = {
     'compress-image-to-100kb',
     'image-converter',
     'png-to-webp',
-    'png-to-ico',
+    'heic-to-jpg',
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

@@ -80,6 +80,6 @@ export const content: ToolContent = {
       a: `Yes. There is no cost, no watermark and no signup. You can convert up to ${siteConfig.maxFiles} photos per batch, as many times as you need.`,
     },
   ],
-  related: ['png-to-jpg', 'webp-to-png', 'image-converter', 'compress-image', 'jpg-to-webp'],
-  updatedAt: '2026-11-15',
+  related: ['png-to-jpg', 'webp-to-png', 'image-converter', 'compress-image', 'jpg-to-webp', 'heic-to-png'],
+  updatedAt: '2026-11-16',
 };

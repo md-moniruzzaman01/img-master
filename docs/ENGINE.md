@@ -151,8 +151,9 @@ If `encodeWebp` is false, WebP outputs fail with `ENCODE_UNSUPPORTED` and the UI
 ## 4. Decode (`decode.ts`)
 
 1. Reject non-images early by checking magic bytes (JPEG `FF D8 FF`, PNG `89 50 4E 47`, WebP `RIFF....WEBP`, GIF `GIF8`, BMP `BM`, HEIC/AVIF `ftyp` box). Unknown signatures still get one decode attempt.
+   HEIC: try the browser (`createImageBitmap`) first; if that fails, lazy-load libheif-js (WebAssembly, `lib/image-engine/heic.ts`) and decode the primary image. Hard cap 50 MP (25 MP on low-memory devices), larger-than-`maxPixels` images are box-downscaled. EXIF/GPS are dropped like every other converter.
 2. `createImageBitmap(file, { imageOrientation: 'from-image' })` so phone photos aren't sideways.
-3. If decode fails: `UNSUPPORTED_FORMAT` for known-but-unsupported types (HEIC outside Safari), otherwise `DECODE_FAILED`.
+3. If decode fails: `UNSUPPORTED_FORMAT` for known-but-unsupported types (for example a HEIC variant libheif has no codec for), otherwise `DECODE_FAILED`.
 4. If `width × height > maxPixels`, downscale to fit before anything else and add note `downscaled-for-memory`. Use `createImageBitmap` with `resizeWidth`/`resizeHeight` and `resizeQuality: 'high'` where supported, otherwise a stepped canvas downscale.
 5. Detect alpha cheaply: for PNG/WebP/GIF inputs, draw a 64×64 sample and check for any alpha < 255.
 6. Always `close()` bitmaps when done.

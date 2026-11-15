@@ -52,7 +52,7 @@ const sections: RichSection[] = [
   {
     heading: 'Your images',
     paragraphs: [
-      'When you choose an image, your browser reads it and processes it on your phone or computer. It is not uploaded to us or to any other service.',
+      'When you choose an image, your browser reads it and processes it on your phone or computer. It is not uploaded to us or to any other service. To open iPhone HEIC photos, some browsers load a small HEIC reader the first time. It comes from our own site, not from another server, and the photo still never leaves your device.',
       'When you close or reload the page, the images and results are cleared from it. Files you downloaded stay on your device until you delete them. New files are saved without hidden photo data, such as GPS location.',
     ],
   },
@@ -91,5 +91,5 @@ export const privacyContent: LegalContent = {
   description: `How ${name} handles your data: images are processed in your browser and never uploaded. What we store on your device, analytics, ads and contact.`,
   h1: 'Privacy policy',
   sections,
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

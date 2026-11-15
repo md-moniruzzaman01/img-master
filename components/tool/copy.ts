@@ -99,6 +99,22 @@ export const copy = {
   },
   tip: 'Tip',
 
+  // HEIC pages (invented unless noted; short plain English)
+  heic: {
+    pickerButton: 'Choose HEIC photos',
+    dropHere: 'Drop HEIC photos here',
+    tapToChoose: 'Tap to choose HEIC photos',
+    hintDesktop: (max: number) => `or paste with Ctrl+V · HEIC or HEIF · up to ${max} files`,
+    hintMobile: (max: number) => `HEIC or HEIF · up to ${max} photos`,
+    opening: 'Opening your HEIC photo…',
+    openingMany: (n: number, m: number) => `Opening HEIC photo ${n} of ${m}…`,
+    firstTime: 'First time only: loading the HEIC reader. This can take a few seconds.',
+    unsupported:
+      "This HEIC file uses a format we can't open yet. Try sharing it from your iPhone as 'Most Compatible' (JPG).",
+    decodeFailed: "We couldn't read this file. It may be damaged.",
+    notHeic: "This isn't a HEIC photo. Choose a .heic or .heif file.",
+  },
+
   // Banners
   cutting: (verb: Verb, m: number) =>
     m === 1

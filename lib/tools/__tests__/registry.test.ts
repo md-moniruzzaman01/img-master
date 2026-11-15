@@ -19,8 +19,10 @@ describe('tool registry', () => {
     expect(() => assertLiveToolsHaveContent()).not.toThrow();
   });
 
-  it('has the 19 live pages (Phase 1 plus favicon tools and resize)', () => {
-    expect(getLiveTools()).toHaveLength(19);
+  it('has the 21 live pages (Phase 1, favicon tools, resize and the two HEIC pages)', () => {
+    expect(getLiveTools()).toHaveLength(21);
+    expect(getTool('heic-to-jpg')?.status).toBe('live');
+    expect(getTool('heic-to-png')?.status).toBe('live');
     expect(getTool('favicon-generator')?.status).toBe('live');
     expect(getTool('compress-image-to-1mb')?.preset.targetKB).toBe(1000);
   });

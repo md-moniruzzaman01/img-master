@@ -6,7 +6,7 @@ import type { InfoPageContent } from '@/lib/types';
 export const toolsIndexContent: InfoPageContent = {
   title: 'All Image Tools – Compress, Convert, Resize | Img Samurai',
   description:
-    'Every free Img Samurai tool on one page: compress to an exact size, convert JPG, PNG and WebP, resize, and make favicons. All run in your browser.',
+    'Every free Img Samurai tool on one page: compress to an exact size, convert JPG, PNG, WebP and HEIC, resize, and make favicons. All run in your browser.',
   h1: 'All free image tools',
   subtitle: '{count} tools. Each does one job well, and none of them uploads your images.',
   sections: [
@@ -15,13 +15,13 @@ export const toolsIndexContent: InfoPageContent = {
       paragraphs: ['Start from what you have to do:'],
       list: [
         'A form or website gives you a file size limit, such as 50 KB: open the size page that matches the limit, or set your own size in the [image compressor](/compress-image).',
-        'A site does not accept your file type: use the converter for that pair, for example WebP to JPG.',
+        'A site does not accept your file type: use the converter for that pair, for example WebP to JPG, or HEIC to JPG for iPhone photos.',
         'You need an exact width and height in pixels: use Resize image.',
         'You are building a website and need a tab icon: use the Favicon generator.',
       ],
     },
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };
 
 /** Fill the {count} placeholder, e.g. fillCount(toolsIndexContent.subtitle, getLiveToolCount()). */

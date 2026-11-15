@@ -11,6 +11,8 @@ import { content as compressImageTo1mb } from './compress-image-to-1mb';
 import { content as imageConverter } from './image-converter';
 import { content as webpToJpg } from './webp-to-jpg';
 import { content as webpToPng } from './webp-to-png';
+import { content as heicToJpg } from './heic-to-jpg';
+import { content as heicToPng } from './heic-to-png';
 import { content as pngToWebp } from './png-to-webp';
 import { content as jpgToWebp } from './jpg-to-webp';
 import { content as pngToJpg } from './png-to-jpg';
@@ -32,6 +34,8 @@ export const toolContent: Readonly<Partial<Record<string, ToolContent>>> = {
   'image-converter': imageConverter,
   'webp-to-jpg': webpToJpg,
   'webp-to-png': webpToPng,
+  'heic-to-jpg': heicToJpg,
+  'heic-to-png': heicToPng,
   'png-to-webp': pngToWebp,
   'jpg-to-webp': jpgToWebp,
   'png-to-jpg': pngToJpg,

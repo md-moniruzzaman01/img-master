@@ -20,7 +20,13 @@ export function sizeLabel(kb: number): string {
   return kb >= 1000 && kb % 100 === 0 ? `${kb / 1000} MB` : `${kb} KB`;
 }
 
-const FORMAT: Record<string, string> = { jpg: 'JPG', jpeg: 'JPG', png: 'PNG', webp: 'WebP' };
+const FORMAT: Record<string, string> = {
+  jpg: 'JPG',
+  jpeg: 'JPG',
+  png: 'PNG',
+  webp: 'WebP',
+  heic: 'HEIC',
+};
 
 /** "webp-to-jpg" → ["WebP", "JPG"]; undefined for the hub. */
 export function formatPair(slug: string): [string, string] | undefined {

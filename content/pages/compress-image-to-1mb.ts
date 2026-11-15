@@ -63,13 +63,13 @@ export const content: ToolContent = {
       heading: 'Very large photos and iPhone HEIC files',
       paragraphs: [
         'Photos over 16.7 megapixels are reduced in size before compression, to protect your phone from running out of memory. The result tells you when this happens.',
-        'iPhones often save photos as HEIC. Safari can open HEIC files, so on an iPhone you can pick them here and get a JPG under 1 MB. Other browsers may not be able to read HEIC yet.',
+        'iPhones often save photos as HEIC. You can pick HEIC photos here in any browser and get a JPG under 1 MB. In browsers other than Safari, a small HEIC reader loads from our own site the first time, which takes a few seconds. If you only need a plain JPG at full size, use [HEIC to JPG](/heic-to-jpg).',
       ],
     },
   ],
   tips: [
     'Keep the original photo. The smaller copy is for sending; the original is your backup for printing.',
-    'If a site needs something much smaller, try [Compress to 500 KB](/compress-image-to-500kb), or set a custom size in the [general compressor](/compress-image).',
+    'If a site needs something much smaller, try [Compress to 500 KB](/compress-image-to-500kb), or set a custom size in the general image compressor.',
   ],
   faqs: [
     {
@@ -86,7 +86,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Can I compress an iPhone photo to 1 MB?',
-      a: 'Yes. In Safari on iPhone, you can pick photos straight from your library, including HEIC photos. The result is a JPG under 1 MB that opens almost everywhere.',
+      a: 'Yes. Pick photos straight from your library, including HEIC photos, in Safari or any other browser. The result is a JPG under 1 MB that opens almost everywhere.',
     },
     {
       q: 'Why not make the file even smaller?',
@@ -104,5 +104,5 @@ export const content: ToolContent = {
     'jpg-to-webp',
     'image-converter',
   ],
-  updatedAt: '2026-11-15',
+  updatedAt: '2026-11-16',
 };

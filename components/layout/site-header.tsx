@@ -324,7 +324,11 @@ function MobileMenu({ groups }: { groups: ToolNavGroup[] }) {
           )}
           {pairs.length > 0 && (
             <MobileGroup glyph={categoryGlyphs.convert} label={t.convert}>
-              {pairs.slice(0, 3).map((p) => (
+              {/* New HEIC pages first, then the other pairs. */}
+              {[...pairs]
+                .sort((x, y) => Number(y.slug.startsWith('heic')) - Number(x.slug.startsWith('heic')))
+                .slice(0, 5)
+                .map((p) => (
                 <li key={p.slug}>
                   <Link href={p.href} className={chip}>
                     {p.pair[0]} → {p.pair[1]}

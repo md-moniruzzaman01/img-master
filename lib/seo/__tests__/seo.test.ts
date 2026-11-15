@@ -261,6 +261,8 @@ describe('OG heading groups (SEO-06)', () => {
 
   it('keeps "to X" together so "to" is never alone', () => {
     expect(lines('Convert WebP to JPG', 'JPG')).toEqual(['Convert', 'WebP', 'to JPG']);
+    expect(lines('Convert HEIC to JPG', 'JPG')).toEqual(['Convert', 'HEIC', 'to JPG']);
+    expect(lines('Convert HEIC to PNG', 'PNG')).toEqual(['Convert', 'HEIC', 'to PNG']);
     expect(lines('PNG to ICO converter', 'ICO')).toEqual(['PNG', 'to ICO', 'converter']);
     expect(lines('Compress image to 50 KB', '50 KB')).toEqual(['Compress', 'image', 'to 50 KB']);
     expect(lines('Compress image to 1 MB', '1 MB')).toEqual(['Compress', 'image', 'to 1 MB']);
@@ -274,5 +276,6 @@ describe('OG heading groups (SEO-06)', () => {
   it('names the last breadcrumb with the keyword phrase', () => {
     expect(keywordCrumbName('compress image to 50kb')).toBe('Compress Image to 50KB');
     expect(keywordCrumbName('webp to jpg')).toBe('WebP to JPG');
+    expect(keywordCrumbName('heic to jpg')).toBe('HEIC to JPG');
   });
 });

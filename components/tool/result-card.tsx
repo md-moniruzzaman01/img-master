@@ -8,6 +8,7 @@ import { cx } from '@/components/ui/cx';
 import { AlertIcon, CompareIcon, InfoIcon } from '@/components/ui/icons';
 import { Compare } from './compare';
 import { copy, errorMessage, WARNING_NOTES } from './copy';
+import { isHeicFile } from './heic';
 import { FORMAT_LABEL, FORMAT_MIME, formatBytes } from './format';
 import { ShareButton } from './share-button';
 
@@ -99,6 +100,8 @@ export function ResultCard({
   const { status, result: r, file } = item;
   const busy = status === 'queued' || status === 'processing';
   const transparent = r && r.format !== 'jpeg';
+  // Most browsers can't draw a HEIC original, so there is nothing to compare against.
+  const heicOriginal = isHeicFile(file);
   const name = fileName ?? r?.fileName ?? file.name;
   const ref = useRef<HTMLElement>(null);
 
@@ -153,11 +156,12 @@ export function ResultCard({
       data-error={item.error?.code}
       aria-busy={busy || undefined}
       className={cx(
-        'min-w-0 rounded-card border bg-card p-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6',
+        '@container min-w-0 rounded-card border bg-card p-4',
         status === 'failed' ? 'border-shu' : 'border-line',
       )}
     >
-      <div className="flex gap-3 md:col-start-1">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 @[680px]:grid-cols-[minmax(0,1fr)_auto] @[680px]:items-center">
+      <div className="flex min-w-0 gap-3 @[680px]:col-start-1">
         <div
           className={cx(
             'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-line',
@@ -246,12 +250,12 @@ export function ResultCard({
         // A note is usually two lines on phones, one on wider screens.
         <p aria-hidden="true" className="mt-3 type-small">
           &nbsp;
-          <br className="sm:hidden" />
+          <br className="@[480px]:hidden" />
           &nbsp;
         </p>
       )}
       {notes.length > 0 && (
-        <div className="mt-3 grid gap-1 md:col-start-1">
+        <div className="mt-3 grid gap-1 @[680px]:col-start-1">
           {notes.map(({ n, text, warn }) => (
             <p
               key={n}
@@ -272,24 +276,26 @@ export function ResultCard({
       )}
 
       {busy && (
-        <div aria-hidden="true" className="mt-4 md:col-start-2 md:row-start-1 md:row-span-2 md:mt-0">
+        <div aria-hidden="true" className="mt-4 @[680px]:col-start-2 @[680px]:row-start-1 @[680px]:row-span-2 @[680px]:mt-0">
           {/* Compare + Download row. */}
-          <div className="h-12 md:w-72" />
+          <div className="h-12 @[680px]:w-72" />
         </div>
       )}
 
       {status === 'success' && r && item.url && (
-        <div className="mt-4 grid grid-cols-2 gap-2 md:col-start-2 md:row-start-1 md:row-span-2 md:mt-0 md:flex">
-          <Button variant="secondary" data-testid="compare" onClick={openCompare} className="md:order-1">
-            <CompareIcon size={18} aria-hidden="true" />
-            {copy.compare}
-          </Button>
+        <div className="mt-4 grid grid-cols-2 gap-2 @[680px]:col-start-2 @[680px]:row-start-1 @[680px]:row-span-2 @[680px]:mt-0 @[680px]:flex">
+          {!heicOriginal && (
+            <Button variant="secondary" data-testid="compare" onClick={openCompare} className="@[680px]:order-1">
+              <CompareIcon size={18} aria-hidden="true" />
+              {copy.compare}
+            </Button>
+          )}
           <a
             href={item.url}
             download={name}
             data-testid="download"
             onClick={onDownload}
-            className={buttonClasses('solid', 'md', 'whitespace-nowrap !px-3 md:order-2 md:!px-5')}
+            className={buttonClasses('solid', 'md', cx('whitespace-nowrap !px-3 @[680px]:order-2 @[680px]:!px-5', heicOriginal && 'col-span-2 @[680px]:col-span-1'))}
           >
             {copy.download(r.outputBytes)}
           </a>
@@ -300,7 +306,7 @@ export function ResultCard({
                 new File([r.blob], name, { type: FORMAT_MIME[r.format] ?? r.blob.type }),
               ]}
               onShared={onShared}
-              className="col-span-2 w-full md:order-3 md:col-span-1 md:w-auto"
+              className="col-span-2 w-full @[680px]:order-3 @[680px]:col-span-1 @[680px]:w-auto"
             />
           )}
           <Compare
@@ -314,7 +320,7 @@ export function ResultCard({
       )}
 
       {status === 'failed' && actions && actions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2 md:col-start-1">
+        <div className="mt-3 flex flex-wrap gap-2 @[680px]:col-start-1">
           {actions.map((a) => (
             <Button key={a.id} variant="secondary" onClick={() => onAction?.(a.id)}>
               {a.label}
@@ -322,6 +328,7 @@ export function ResultCard({
           ))}
         </div>
       )}
+      </div>
     </article>
   );
 }
