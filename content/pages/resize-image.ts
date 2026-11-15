@@ -15,7 +15,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Resize image',
   cardDescription: 'Exact pixels or a percentage, ratio locked.',
-  title: 'Resize Image Online – Exact Pixels, No Upload | Img Master',
+  title: 'Resize Image Online – Exact Pixels, No Upload | Img Samurai',
   description:
     'Resize images to an exact width and height in pixels, or by a percentage, with the ratio kept. JPG, PNG and WebP. Free, runs in your browser, no upload.',
   h1: 'Resize image',

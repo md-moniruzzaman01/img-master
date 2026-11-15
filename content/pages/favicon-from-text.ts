@@ -12,7 +12,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Favicon from text',
   cardDescription: 'Make a favicon from one to three letters.',
-  title: 'Favicon from Text – Free, No Upload | Img Master',
+  title: 'Favicon from Text – Free, No Upload | Img Samurai',
   description:
     'Type one to three letters, pick a typeface, colors and a shape, and get a full favicon set with ICO and PNG files. Free, works on your phone, no upload.',
   h1: 'Favicon from text',

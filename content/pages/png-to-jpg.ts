@@ -13,7 +13,7 @@ export const content: ToolContent = {
   ],
   shortName: 'PNG to JPG',
   cardDescription: 'Smaller JPG files from PNGs and screenshots.',
-  title: 'Convert PNG to JPG Online – Free, No Upload | Img Master',
+  title: 'Convert PNG to JPG Online – Free, No Upload | Img Samurai',
   description:
     'Change PNG screenshots and images into smaller JPG files that every form accepts. Pick a background color for transparent areas. Free, no upload.',
   h1: 'Convert PNG to JPG',

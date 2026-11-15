@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 100 KB',
   cardDescription: 'Application photos and scans that need more detail.',
-  title: 'Compress Image to 100KB Online – No Upload | Img Master',
+  title: 'Compress Image to 100KB Online – No Upload | Img Samurai',
   description:
     'Make any photo or document scan smaller than 100 KB on your phone. Text stays readable, hidden photo data is removed, and nothing is uploaded. Free.',
   h1: 'Compress image to 100 KB',
@@ -93,7 +93,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Can I compress a PDF to 100 KB here?',
-      a: 'No. Img Master works with images such as JPG, PNG and WebP. For a PDF you need a different tool. Another option is to take a screenshot of the page and compress that image.',
+      a: 'No. Img Samurai works with images such as JPG, PNG and WebP. For a PDF you need a different tool. Another option is to take a screenshot of the page and compress that image.',
     },
     {
       q: 'Why is the file 97 KB and not exactly 100 KB?',

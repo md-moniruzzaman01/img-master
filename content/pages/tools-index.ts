@@ -4,9 +4,9 @@
 import type { InfoPageContent } from '@/lib/types';
 
 export const toolsIndexContent: InfoPageContent = {
-  title: 'All Image Tools – Compress, Convert, Resize | Img Master',
+  title: 'All Image Tools – Compress, Convert, Resize | Img Samurai',
   description:
-    'Every free Img Master tool on one page: compress to an exact size, convert JPG, PNG and WebP, resize, and make favicons. All run in your browser.',
+    'Every free Img Samurai tool on one page: compress to an exact size, convert JPG, PNG and WebP, resize, and make favicons. All run in your browser.',
   h1: 'Every tool',
   subtitle: '{count} tools. Each does one job well, and none of them uploads your images.',
   sections: [

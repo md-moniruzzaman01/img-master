@@ -13,7 +13,7 @@ export const content: ToolContent = {
   ],
   shortName: 'WebP to JPG',
   cardDescription: 'For forms and old apps.',
-  title: 'Convert WebP to JPG Online – Free, No Upload | Img Master',
+  title: 'Convert WebP to JPG Online – Free, No Upload | Img Samurai',
   description:
     'Change WebP images into JPG files that open in older apps and upload to most forms. Works on your phone, many files at once, nothing uploaded. Free.',
   h1: 'Convert WebP to JPG',

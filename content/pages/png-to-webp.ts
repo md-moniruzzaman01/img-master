@@ -12,7 +12,7 @@ export const content: ToolContent = {
   ],
   shortName: 'PNG to WebP',
   cardDescription: 'Usually smaller, still transparent.',
-  title: 'Convert PNG to WebP Online – Free, No Upload | Img Master',
+  title: 'Convert PNG to WebP Online – Free, No Upload | Img Samurai',
   description: `Convert PNG images to lighter WebP files for faster websites, with transparent backgrounds kept. Batch up to ${siteConfig.maxFiles}, save as ZIP. Free, no upload.`,
   h1: 'Convert PNG to WebP',
   h1Accent: 'WebP',

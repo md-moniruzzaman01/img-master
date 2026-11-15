@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 1 MB',
   cardDescription: 'Big phone photos for portals with a 1 MB cap and email.',
-  title: 'Compress Image to 1MB Online – Free, No Upload | Img Master',
+  title: 'Compress Image to 1MB Online – Free, No Upload | Img Samurai',
   description:
     'Shrink big phone or camera photos to under 1 MB for email, forms and sharing. Quality stays high, nothing is uploaded, and it is free with no signup.',
   h1: 'Compress image to 1 MB',
@@ -82,7 +82,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is 1 MB the same as 1024 KB?',
-      a: 'Not always. Some websites use 1 MB = 1,000 KB and others use 1,024 KB. Img Master stays under 1,000,000 bytes, which fits both, so you do not need to worry about the difference.',
+      a: 'Not always. Some websites use 1 MB = 1,000 KB and others use 1,024 KB. Img Samurai stays under 1,000,000 bytes, which fits both, so you do not need to worry about the difference.',
     },
     {
       q: 'Can I compress an iPhone photo to 1 MB?',
@@ -94,7 +94,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Does my photo get uploaded to make it smaller?',
-      a: 'No. Your browser does the work, so the photo never leaves your device. It is not sent to Img Master or anyone else.',
+      a: 'No. Your browser does the work, so the photo never leaves your device. It is not sent to Img Samurai or anyone else.',
     },
   ],
   related: [

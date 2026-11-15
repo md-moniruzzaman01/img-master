@@ -1,4 +1,4 @@
-# Img Master — getting users and earning money
+# Img Samurai — getting users and earning money
 
 This file is mostly the **owner's plan**. Agents build only the features listed in section 4.
 
@@ -39,7 +39,7 @@ In Bangladesh many people pay a computer shop to fill online forms, and the shop
 
 ### 2.4 Developer audience (favicon and WebP tools)
 
-- List Img Master on AlternativeTo as an alternative to TinyPNG, iLoveIMG and favicon generators.
+- List Img Samurai on AlternativeTo as an alternative to TinyPNG, iLoveIMG and favicon generators.
 - Write one honest technical post on dev.to or Hashnode: "How to compress an image to an exact KB size in the browser" (explain the binary search and worker setup). Developer posts earn real backlinks.
 - Optional: publish the ICO writer or the target-size search as a small open-source package on GitHub that links back to the site.
 - A "Show HN" or Product Hunt launch for the favicon tool once it's polished.
@@ -68,7 +68,7 @@ Bangla and Hindi searches for the same tasks have far less competition. Add them
 | Analytics events | 1 | Through one `track()` in `lib/analytics.ts`, behind an env flag, no file names or image data. Events: `tool_start {tool, files}`, `tool_success {tool, target?, outcome}`, `tool_error {tool, code}`, `download {tool, kind: 'single' \| 'zip'}`, `share {tool}` |
 | Remember last options | 1 | `localStorage` with try/catch |
 | PWA (install + offline) | 2 | Hand-written service worker caching the app shell and engine; no plugin |
-| "Share Img Master" link after a success | 2 | Small text link, never a popup |
+| "Share Img Samurai" link after a success | 2 | Small text link, never a popup |
 
 **Analytics choice (owner decides):** Cloudflare Web Analytics is free and cookie-free but only counts page views. To see tool events (which tools succeed or fail), use a privacy-friendly tool that supports custom events, such as Plausible or Umami. Because everything goes through `track()`, switching providers is a one-file change.
 

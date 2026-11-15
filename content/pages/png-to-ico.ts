@@ -12,7 +12,7 @@ export const content: ToolContent = {
   ],
   shortName: 'PNG to ICO',
   cardDescription: 'Multi-size .ico files for Windows and old browsers.',
-  title: 'PNG to ICO Converter – Free, No Upload | Img Master',
+  title: 'PNG to ICO Converter – Free, No Upload | Img Samurai',
   description:
     'Convert a PNG to ICO with 16, 32 and 48 px icons (plus 256 px for large PNGs). Use it as favicon.ico. Free, runs in your browser, no upload.',
   h1: 'PNG to ICO converter',

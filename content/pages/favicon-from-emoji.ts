@@ -11,7 +11,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Favicon from emoji',
   cardDescription: 'Turn one emoji into a website icon, with an SVG too.',
-  title: 'Favicon from Emoji – Free, No Upload | Img Master',
+  title: 'Favicon from Emoji – Free, No Upload | Img Samurai',
   description:
     'Pick one emoji and turn it into a website favicon with ICO, PNG and SVG files. Choose a background and shape, then download. Free, no upload.',
   h1: 'Favicon from emoji',

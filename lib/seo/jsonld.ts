@@ -11,6 +11,16 @@ type JsonLd = Record<string, unknown>;
 
 const CONTEXT = 'https://schema.org';
 
+/**
+ * Other ways people write the brand: without the space ("ImgSamurai") and as
+ * the bare domain ("imgsamurai.com"). Derived from site-config so a rename
+ * still needs only that file.
+ */
+export const BRAND_ALTERNATE_NAMES: readonly string[] = [
+  siteConfig.name.replace(/\s+/g, ''),
+  new URL(siteConfig.url).hostname.replace(/^www\./, ''),
+];
+
 /** Logo used by Organization and as the publisher logo (512×512 PNG). */
 export const LOGO_PATH = '/og/logo.png';
 
@@ -27,6 +37,7 @@ function organization(): JsonLd {
     '@type': 'Organization',
     '@id': organizationId(),
     name: siteConfig.name,
+    alternateName: [...BRAND_ALTERNATE_NAMES],
     url: absoluteUrl('/'),
     logo: absoluteUrl(LOGO_PATH),
     email: siteConfig.contactEmail,
@@ -47,6 +58,7 @@ export function homeJsonLd(): object[] {
       '@type': 'WebSite',
       '@id': websiteId(),
       name: siteConfig.name,
+      alternateName: [...BRAND_ALTERNATE_NAMES],
       url: absoluteUrl('/'),
       description: homeContent.description,
       inLanguage: 'en',

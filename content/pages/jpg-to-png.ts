@@ -12,7 +12,7 @@ export const content: ToolContent = {
   ],
   shortName: 'JPG to PNG',
   cardDescription: 'Lossless copy for editing.',
-  title: 'Convert JPG to PNG Online – Free, No Upload | Img Master',
+  title: 'Convert JPG to PNG Online – Free, No Upload | Img Samurai',
   description:
     'Save JPG photos as PNG files for apps, editors and forms that need PNG. No further quality loss, works on any phone, nothing is uploaded. Free.',
   h1: 'Convert JPG to PNG',

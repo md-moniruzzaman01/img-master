@@ -1,4 +1,4 @@
-# Img Master — SEO and content
+# Img Samurai — SEO and content
 
 ## 1. How this kind of site ranks (and how long it takes)
 
@@ -61,7 +61,7 @@ export interface ToolContent {
   secondaryKeywords: string[];            // 3–8 real variants
   shortName: string;                      // menus and cards, ≤ 18 chars ("To 50KB")
   cardDescription: string;                // ≤ 70 chars
-  title: string;                          // ≤ 60 chars including " | Img Master"
+  title: string;                          // ≤ 60 chars including " | Img Samurai"
   description: string;                    // 120–155 chars
   h1: string;
   subtitle: string;                       // ≤ 100 chars, shown above the tool
@@ -79,7 +79,7 @@ export interface ToolContent {
 | Element | Rule | Example (`compress-image-to-50kb`) |
 |---|---|---|
 | URL | `/` + lowercase keyword with hyphens, no trailing slash | `/compress-image-to-50kb` |
-| Title | `{Primary keyword, title case} Online – Free, No Upload \| Img Master`, ≤ 60 chars. Shorten the middle part if needed, never the keyword. | Compress Image to 50KB Online – Free, No Upload \| Img Master |
+| Title | `{Primary keyword, title case} Online – Free, No Upload \| Img Samurai`, ≤ 60 chars. Shorten the middle part if needed, never the keyword. | Compress Image to 50KB Online – Free, No Upload \| Img Samurai |
 | Meta description | 120–155 chars: result + speed + privacy + free. Unique per page. | Reduce any photo to under 50KB in seconds. Works on your phone, keeps faces clear, and your image never leaves your device. Free, no signup. |
 | H1 | The primary keyword, plain | Compress Image to 50KB |
 | Subtitle | One sentence with the benefit and one secondary keyword | Get a clear JPG under 50KB for online forms in seconds, right on your phone. |
@@ -105,7 +105,7 @@ Pick the ones that genuinely fit each page. Don't force all of them.
 | 12 MP phone photo (3.1 MB) | 48 KB | 1180 × 885 |
 | Scanned signature (420 KB) | 31 KB | 900 × 300 |
 
-Caption: "Measured with Img Master on {date} using sample photos." These numbers are real, unique to our site and useful. Never invent them; if benchmarks aren't ready, leave the table out and add a `// TODO(benchmarks)` comment.
+Caption: "Measured with Img Samurai on {date} using sample photos." These numbers are real, unique to our site and useful. Never invent them; if benchmarks aren't ready, leave the table out and add a `// TODO(benchmarks)` comment.
 
 ### FAQs
 
@@ -175,7 +175,7 @@ Try Next's built-in `ImageResponse` from `next/og` in `app/[slug]/opengraph-imag
 
 ## 6. Trust pages (E-E-A-T)
 
-- **About:** who runs Img Master (owner name and company from `site-config`), why it exists, how it works (in the browser, nothing uploaded), contact email.
+- **About:** who runs Img Samurai (owner name and company from `site-config`), why it exists, how it works (in the browser, nothing uploaded), contact email.
 - **Privacy:** matches reality: no image uploads, which analytics (if any) and what it collects, ads and cookies when ads are turned on, how to contact.
 - **Terms:** short, plain, "provided as is".
 - **Contact:** an email link (no form, there's no backend).

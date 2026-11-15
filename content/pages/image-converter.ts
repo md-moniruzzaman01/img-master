@@ -13,7 +13,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Image converter',
   cardDescription: 'Convert images to JPG, PNG or WebP in your browser.',
-  title: 'Image Converter Online – JPG, PNG, WebP | Img Master',
+  title: 'Image Converter Online – JPG, PNG, WebP | Img Samurai',
   description:
     'Convert images to JPG, PNG or WebP in seconds. Pick any common format, choose the output and download. Free, works on phones, no upload needed.',
   h1: 'Image converter',
@@ -55,7 +55,7 @@ export const content: ToolContent = {
         'These pages start with the right formats already set, so there is nothing to choose.',
       ],
       table: {
-        caption: 'Converter pages on Img Master',
+        caption: 'Converter pages on Img Samurai',
         headers: ['Tool', 'What it does'],
         rows: [
           ['[WebP to JPG](/webp-to-jpg)', 'Makes WebP images open and upload anywhere'],

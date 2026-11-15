@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
 import { getLiveToolPage, getLiveTools } from '@/lib/tools';
 import { OG_SIZE, OgCard } from '@/lib/seo/og-card';
 
-export const alt = 'Img Master: free image tool that runs in your browser';
+export const alt = 'Img Samurai: free image tool that runs in your browser';
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 export const dynamic = 'force-static';

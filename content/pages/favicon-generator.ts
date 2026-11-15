@@ -13,7 +13,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Favicon generator',
   cardDescription: 'Full icon set, ICO and HTML in one download.',
-  title: 'Favicon Generator – Free, No Upload | Img Master',
+  title: 'Favicon Generator – Free, No Upload | Img Samurai',
   description:
     'Turn a logo or picture into a full favicon pack: ICO, PNG sizes, Apple icon and manifest. Preview it first. Free, runs in your browser, no upload.',
   h1: 'Favicon generator',
@@ -52,7 +52,7 @@ export const content: ToolContent = {
         'Start from the kind of source you have. The text and emoji tools give you the same full set as this page, and only emoji icons add an SVG file. PNG to ICO makes just the one .ico file.',
       ],
       table: {
-        caption: 'Favicon tools on Img Master',
+        caption: 'Favicon tools on Img Samurai',
         headers: ['Tool', 'Start from'],
         rows: [
           [

@@ -15,7 +15,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 50 KB',
   cardDescription: 'Job applications, exam and admission forms.',
-  title: 'Compress Image to 50KB Online – Free, No Upload | Img Master',
+  title: 'Compress Image to 50KB Online Free – No Upload | Img Samurai',
   description:
     'Reduce any photo to under 50 KB on your phone. We keep the sharpest version that fits, faces stay clear, and your image never leaves your device. Free.',
   h1: 'Compress image to 50 KB',
@@ -75,7 +75,7 @@ export const content: ToolContent = {
       heading: 'The form still says the file is too big',
       paragraphs: [
         'There are two ways to count a kilobyte. Some sites use 1,000 bytes and others use 1,024 bytes. A file of 50,500 bytes is 49.3 KB on one site and 50.5 KB on another, so it can pass one check and fail the next.',
-        'Img Master keeps every result under the limit in both systems, so a file from this page should pass either way. If a form still rejects it, look at its other rules. It may also ask for exact pixel dimensions, a minimum size, or a JPG file only.',
+        'Img Samurai keeps every result under the limit in both systems, so a file from this page should pass either way. If a form still rejects it, look at its other rules. It may also ask for exact pixel dimensions, a minimum size, or a JPG file only.',
       ],
     },
   ],

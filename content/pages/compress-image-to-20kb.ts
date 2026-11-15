@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 20 KB',
   cardDescription: 'Signatures, tiny ID photos and strict portals.',
-  title: 'Compress Image to 20KB Online – Free, No Upload | Img Master',
+  title: 'Compress Image to 20KB Online Free – No Upload | Img Samurai',
   description:
     'Shrink a photo or a signature to under 20 KB in seconds. Edges and faces stay as clear as the size allows, and nothing leaves your phone. Free, no signup.',
   h1: 'Compress image to 20 KB',
@@ -97,7 +97,7 @@ export const content: ToolContent = {
     },
     {
       q: 'The form says my file is bigger than 20 KB. Why?',
-      a: 'Some websites count 1 KB as 1,000 bytes and others as 1,024 bytes. Img Master keeps the file under 20 KB both ways, so this should not happen. If it does, make sure you chose the downloaded file and not the original photo.',
+      a: 'Some websites count 1 KB as 1,000 bytes and others as 1,024 bytes. Img Samurai keeps the file under 20 KB both ways, so this should not happen. If it does, make sure you chose the downloaded file and not the original photo.',
     },
     {
       q: 'Can I compress a PNG signature to 20 KB?',

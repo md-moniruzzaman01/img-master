@@ -1,4 +1,4 @@
-# Img Master — image engine
+# Img Samurai — image engine
 
 Everything that touches pixels lives in `lib/image-engine/`. The UI talks to it only through the public API below. The engine never makes network requests.
 

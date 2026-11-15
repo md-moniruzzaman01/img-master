@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
 import { homeContent } from '@/content/home';
 import { OG_SIZE, OgCard } from '@/lib/seo/og-card';
 
-export const alt = 'Img Master: free image tools that work on your phone';
+export const alt = 'Img Samurai: free image tools that work on your phone';
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 export const dynamic = 'force-static';

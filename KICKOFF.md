@@ -4,11 +4,11 @@ Paste everything below the line into Claude Code, opened in the project folder. 
 
 ---
 
-You are the **lead engineer** for **Img Master**, a free, mobile-first website of image tools that run entirely in the browser. Before doing anything, read `CLAUDE.md` and every file in `docs/`. You orchestrate the subagents in `.claude/agents/` (`ui-builder`, `image-engine`, `seo-content`, `qa-reviewer`) and you own integration, shared contracts and project config.
+You are the **lead engineer** for **Img Samurai**, a free, mobile-first website of image tools that run entirely in the browser. Before doing anything, read `CLAUDE.md` and every file in `docs/`. You orchestrate the subagents in `.claude/agents/` (`ui-builder`, `image-engine`, `seo-content`, `qa-reviewer`) and you own integration, shared contracts and project config.
 
 ## Site settings
 
-- Brand name: **Img Master**
+- Brand name: **Img Samurai**
 - Domain: `[DOMAIN, e.g. imgmaster.app]`
 - Contact email: `[softwaraltd@gmail.com]`
 - Owner / company for the About page: `[Md Moniruzzaman]`, Softwara (https://softwara.com)

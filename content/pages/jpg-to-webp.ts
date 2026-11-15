@@ -12,7 +12,7 @@ export const content: ToolContent = {
   ],
   shortName: 'JPG to WebP',
   cardDescription: 'Lighter web images.',
-  title: 'Convert JPG to WebP Online – Free, No Upload | Img Master',
+  title: 'Convert JPG to WebP Online – Free, No Upload | Img Samurai',
   description:
     'Turn JPG photos into smaller WebP images for a faster website. Convert a batch at once and save as ZIP. Works in your browser, free, nothing uploaded.',
   h1: 'Convert JPG to WebP',

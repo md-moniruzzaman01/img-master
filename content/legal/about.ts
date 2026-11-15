@@ -33,6 +33,13 @@ export const aboutContent: LegalContent = {
   ],
   sections: [
     {
+      heading: 'Why “Samurai”?',
+      paragraphs: [
+        'A samurai’s sword makes one exact cut, fast, and the samurai stays close to what they protect. We want the same from our tools.',
+        'Each tool cuts your image to the size you need, quickly, with no extra steps. And your image stays with you the whole time: it is made on your device and never sent to us.',
+      ],
+    },
+    {
       heading: `Who runs ${name}`,
       paragraphs: [
         `${name} is built and run by ${owner.name} through [${owner.company}](${owner.companyUrl}), a small software studio in Dhaka.`,
@@ -59,5 +66,5 @@ export const aboutContent: LegalContent = {
       ],
     },
   ],
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

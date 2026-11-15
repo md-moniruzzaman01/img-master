@@ -1,4 +1,4 @@
-You are a senior QA engineer doing a final pre-deployment audit of this Next.js image tools website (Img Master / PicSlice). Go through EVERY item below. Fix any issue you find. Do NOT skip anything.
+You are a senior QA engineer doing a final pre-deployment audit of this Next.js image tools website (Img Samurai / PicSlice). Go through EVERY item below. Fix any issue you find. Do NOT skip anything.
 
 ## ⚙️ CHANGE FIRST (before auditing)
 - Set the batch file limit to **20** everywhere it appears (currently 10):
@@ -79,7 +79,7 @@ For each tool, verify:
 ## 4. SEO — check every page
 
 For each live tool page, verify:
-- [ ] `<title>` matches formula: `{Keyword} Online – Free, No Upload | Img Master` (≤60 chars)
+- [ ] `<title>` matches formula: `{Keyword} Online – Free, No Upload | Img Samurai` (≤60 chars)
 - [ ] `<meta name="description">` is 120–155 chars, unique per page
 - [ ] `<h1>` contains the primary keyword, appears above the tool
 - [ ] Breadcrumb renders above H1 and links correctly

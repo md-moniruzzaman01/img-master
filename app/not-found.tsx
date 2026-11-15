@@ -5,7 +5,7 @@ import { buttonClasses } from '@/components/ui/button-styles';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = buildPageMetadata({
-  title: 'Page not found | Img Master',
+  title: 'Page not found | Img Samurai',
   description: "This page doesn't exist. Pick one of the free image tools instead.",
   path: '/404',
   noindex: true,

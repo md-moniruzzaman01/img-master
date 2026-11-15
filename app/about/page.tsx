@@ -60,7 +60,7 @@ export default function AboutPage() {
       {/* Built by card + rest of sections */}
       <Container size="text">
         <div className="mt-10 flex items-center gap-4 rounded-card border border-line bg-card p-5">
-          <BrandSeal className="!size-12 !text-2xl flex-shrink-0" />
+          <BrandSeal className="!size-12 flex-shrink-0" />
           <div>
             <p className="font-display font-extrabold text-lg text-ink">
               Built by {siteConfig.owner.company} in Dhaka

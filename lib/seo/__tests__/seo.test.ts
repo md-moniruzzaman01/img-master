@@ -61,7 +61,7 @@ describe('metadata builders', () => {
   it.each(live.map((p) => [p.tool.slug, p] as const))('%s: full tool metadata', (slug, p) => {
     const m = buildToolMetadata(p.tool, p.content);
     expect(m.title).toEqual({ absolute: p.content.title });
-    expect(String((m.title as { absolute: string }).absolute).match(/Img Master/g)).toHaveLength(1);
+    expect(String((m.title as { absolute: string }).absolute).match(/Img Samurai/g)).toHaveLength(1);
     expect(m.description).toBe(p.content.description);
     expect(m.alternates?.canonical).toBe(`${origin}/${slug}`);
     expect(m.robots).toEqual({ index: true, follow: true });
@@ -77,7 +77,7 @@ describe('metadata builders', () => {
 
   it('page metadata supports noindex and drops the canonical', () => {
     const m = buildPageMetadata({
-      title: 'Not found | Img Master',
+      title: 'Not found | Img Samurai',
       description: 'x',
       path: '/404',
       noindex: true,
@@ -106,6 +106,11 @@ describe('JSON-LD', () => {
       'WebSite',
       'Organization',
     ]);
+    for (const d of data as Record<string, unknown>[]) {
+      expect(d.name).toBe('Img Samurai');
+      expect(d.url).toBe(origin);
+      expect(d.alternateName).toEqual(['ImgSamurai', 'imgsamurai.com']);
+    }
   });
 
   it.each(live.map((p) => [p.tool.slug, p] as const))('%s: valid tool JSON-LD', (slug, p) => {
@@ -151,7 +156,7 @@ describe('sitemap and robots', () => {
   });
 
   it('uses one home URL form in the sitemap, canonical and og:url (QA-07)', () => {
-    const m = buildPageMetadata({ title: 'Home | Img Master', description: 'x', path: '/' });
+    const m = buildPageMetadata({ title: 'Home | Img Samurai', description: 'x', path: '/' });
     expect(urls).toContain(origin);
     expect(urls).not.toContain(`${origin}/`);
     expect(m.alternates?.canonical).toBe(origin);
@@ -159,7 +164,7 @@ describe('sitemap and robots', () => {
   });
 
   it('gives site pages the shared Open Graph and Twitter image (QA-05)', () => {
-    const m = buildPageMetadata({ title: 'About | Img Master', description: 'x', path: '/about' });
+    const m = buildPageMetadata({ title: 'About | Img Samurai', description: 'x', path: '/about' });
     const og = (m.openGraph as { images?: { url: string }[] }).images ?? [];
     const tw = (m.twitter as { images?: { url: string }[] }).images ?? [];
     expect(og[0]?.url).toBe(`${origin}/opengraph-image`);

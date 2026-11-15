@@ -586,7 +586,7 @@ function ImageTool({
       urlsRef.current.push(url);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `img-master-${slug}.zip`;
+      a.download = `img-samurai-${slug}.zip`;
       document.body.append(a);
       a.click();
       a.remove();

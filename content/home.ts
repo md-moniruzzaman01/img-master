@@ -4,7 +4,7 @@
 import type { HomeContent } from '@/lib/types';
 
 export const homeContent: HomeContent = {
-  title: 'Img Master – Free Image Tools for Your Phone',
+  title: 'Img Samurai – Free Image Tools for Your Phone',
   description:
     'Compress photos to an exact size like 50 KB, convert JPG, PNG and WebP, and make favicons. Runs in your browser, so nothing is uploaded. Free, no signup.',
   eyebrow: 'Free image tools',
@@ -85,5 +85,5 @@ export const homeContent: HomeContent = {
     text: 'We’ll cut it to 50 KB. Pick another size above if you need to.',
     button: 'Choose an image',
   },
-  updatedAt: '2026-10-25',
+  updatedAt: '2026-11-15',
 };

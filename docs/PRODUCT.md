@@ -1,8 +1,8 @@
-# Img Master — product spec
+# Img Samurai — product spec
 
 ## 1. What we are building
 
-**Img Master** is a set of free image tools that work on a phone in a few taps: shrink a photo to an exact size (20KB, 50KB, 100KB…), convert between JPG, PNG and WebP, and generate favicons.
+**Img Samurai** is a set of free image tools that work on a phone in a few taps: shrink a photo to an exact size (20KB, 50KB, 100KB…), convert between JPG, PNG and WebP, and generate favicons.
 
 **Tagline:** Shrink, convert and make icons on your phone. Free, instant, private.
 

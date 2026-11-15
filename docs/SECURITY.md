@@ -1,4 +1,4 @@
-# Img Master — security notes
+# Img Samurai — security notes
 
 Owned by the lead. Last review: 2026-10-23 (whole codebase; static site, no backend).
 

@@ -1,4 +1,4 @@
-# Img Master — design system and components
+# Img Samurai — design system and components
 
 Brand: **"Ink Samurai"** (owner redesign, 2026-10-24; spec `docs/superpowers/specs/2026-10-24-samurai-ink-redesign-design.md`). Ancient Japan meets modern utility: warm paper, ink black, one crimson, a touch of gold, and one character, a sumi-e ink samurai who cuts your image down to size.
 
@@ -71,7 +71,7 @@ Inline SVG components in `components/ui/icons.tsx`, 20 or 24px, 1.75 stroke, `cu
 
 ```
 ┌────────────────────────────────────┐
-│ [画] Img Master          🔈   ☰    │  SiteHeader 52px, white, not sticky
+│ [侍] Img Samurai          🔈   ☰    │  SiteHeader 52px, white, not sticky
 ├────────────────────────────────────┤
 │ Compress Image to 50KB             │  H1, Noto Serif, steel
 │ One subtitle sentence, muted       │
@@ -101,7 +101,7 @@ Samurai moods (ToolShell state → stage): idle → on guard, breathing; process
 
 1. Hero: H1 and subtitle from `content/home.ts`, three gold-bordered category chips (Compress, Convert, Favicon) linking to the hubs, and the ronin scene: red sun, ink-wash hills, dark rock and the back-view ronin, who rolls up his sleeves every few seconds (paused off-screen and in hidden tabs). The scene is below the text on mobile, to the right on `lg`.
 2. Tool grid by category: white bordered cards, serif name, one line, small crimson arrow, whole card is the link.
-3. "How Img Master works" and FAQs.
+3. "How Img Samurai works" and FAQs.
 
 ### 3.3 Legal and info pages
 
@@ -138,9 +138,9 @@ Same tool card and samurai stage. When the user picks a new image (image mode) o
 
 | Component | Notes |
 |---|---|
-| `SiteHeader` | White, 1px bottom border, ≤ 52px, not sticky. Logo left: crimson 画 seal (`BrandSeal`, decorative) + "Img Master" in Noto Serif bold, steel. Right: sound toggle, then the hamburger (mobile). Desktop active link gets a short crimson brush underline (`NavLink`, `aria-current`). Mobile: one hamburger opening a menu of all live tools + About/Privacy/Terms/Contact, links in the static HTML. Desktop: 4–5 text links (Compress, Convert, Favicon, About). Skip link to `#main`. |
+| `SiteHeader` | White, 1px bottom border, ≤ 52px, not sticky. Logo left: crimson 侍 seal (`BrandSeal`, inline SVG, decorative; master paths in `scripts/brand/mark.mjs`) + "Img Samurai" in Noto Serif bold, steel. Right: sound toggle, then the hamburger (mobile). Desktop active link gets a short crimson brush underline (`NavLink`, `aria-current`). Mobile: one hamburger opening a menu of all live tools + About/Privacy/Terms/Contact, links in the static HTML. Desktop: 4–5 text links (Compress, Convert, Favicon, About). Skip link to `#main`. |
 | Mobile menu | All live tools grouped by category, from the registry; works without JS; keyboard accessible. |
-| `SiteFooter` | Two lines max on mobile: "© {year} Img Master · Built by Softwara" and Privacy · Terms · Contact. No tool lists, tagline or social icons. |
+| `SiteFooter` | Two lines max on mobile: "© {year} Img Samurai · Built by Softwara" and Privacy · Terms · Contact. No tool lists, tagline or social icons. |
 | `Breadcrumbs` | Home › Category › Tool. Matches the BreadcrumbList JSON-LD. |
 | `Container` | Width + gutters. |
 

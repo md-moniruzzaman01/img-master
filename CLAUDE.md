@@ -1,6 +1,6 @@
-# Img Master — project rules
+# Img Samurai — project rules
 
-Img Master is a free, mobile-first website of image tools that run 100% in the visitor's browser. Nothing is uploaded. The site gets visitors from Google through many specific landing pages ("compress image to 50KB", "webp to jpg") that all share one image engine.
+Img Samurai is a free, mobile-first website of image tools that run 100% in the visitor's browser. Nothing is uploaded. The site gets visitors from Google through many specific landing pages ("compress image to 50KB", "webp to jpg") that all share one image engine.
 
 Read these before starting any task:
 

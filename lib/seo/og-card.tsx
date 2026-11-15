@@ -1,7 +1,11 @@
 // Shared Open Graph card design (1200×630), "Ink Samurai" palette: washi paper
 // background, ink heading with an optional crimson accent, a crimson sun.
 // Rendered by next/og ImageResponse at build time. Owned by seo-content.
-// No kanji here: the default next/og font has no Japanese glyphs.
+// The default next/og font has no Japanese glyphs, so the 侍 seal is not drawn
+// as text. Instead the brand mark is the site logo (public/og/logo.png, owned by
+// ui-builder), read at build time, so the card always matches the current logo.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { siteConfig } from '@/lib/site-config';
 
 export const OG_SIZE = { width: 1200, height: 630 } as const;
@@ -15,8 +19,30 @@ export const OG_COLORS = {
   white: '#FFFFFF',
 } as const;
 
-/** Small logo mark: a crimson rounded square with a simple "picture" glyph. */
+let logoCache: string | null | undefined;
+
+/** The site logo as a data URI, or null when the file can't be read. */
+function logoDataUri(): string | null {
+  if (logoCache !== undefined) return logoCache;
+  try {
+    const buf = readFileSync(join(process.cwd(), 'public', 'og', 'logo.png'));
+    logoCache = `data:image/png;base64,${buf.toString('base64')}`;
+  } catch {
+    logoCache = null;
+  }
+  return logoCache;
+}
+
+/**
+ * Brand mark: the site logo. Falls back to a crimson rounded square with a
+ * simple "picture" glyph if the logo file is missing.
+ */
 function LogoMark({ size }: { size: number }) {
+  const logo = logoDataUri();
+  if (logo) {
+    // eslint-disable-next-line @next/next/no-img-element -- rendered by next/og, not the browser
+    return <img src={logo} width={size} height={size} alt="" />;
+  }
   return (
     <div
       style={{

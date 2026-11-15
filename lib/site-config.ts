@@ -9,14 +9,11 @@ function readAnalyticsProvider(): AnalyticsProvider {
 }
 
 export const siteConfig = {
-  name: 'Img Master',
+  name: 'Img Samurai',
   tagline: 'Shrink, convert and make icons on your phone. Free, instant, private.',
 
-  /**
-   * PLACEHOLDER: the real domain isn't chosen yet. Set it here (apex, https,
-   * no trailing slash) before launch. Canonicals, sitemap and OG tags use it.
-   */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://img-master.example',
+  /** Live domain (apex, https, no trailing slash). Canonicals, sitemap and OG tags use it. */
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://imgsamurai.com',
 
   contactEmail: 'softwaraltd@gmail.com',
   owner: {

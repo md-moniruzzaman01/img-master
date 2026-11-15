@@ -15,7 +15,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 200 KB',
   cardDescription: 'Email attachments and scanned documents.',
-  title: 'Compress Image to 200KB Online – No Upload | Img Master',
+  title: 'Compress Image to 200KB Online – No Upload | Img Samurai',
   description:
     'Bring a large photo or full-page scan under 200 KB while keeping fine detail. Runs in your phone browser, nothing is uploaded, free and no signup.',
   h1: 'Compress image to 200 KB',
@@ -99,7 +99,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Do I need to install an app?',
-      a: 'No. Img Master runs in your web browser on Android, iPhone or a computer. There is nothing to install and no account to create.',
+      a: 'No. Img Samurai runs in your web browser on Android, iPhone or a computer. There is nothing to install and no account to create.',
     },
     {
       q: 'What happens to the location data in my photo?',

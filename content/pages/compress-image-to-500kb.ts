@@ -15,7 +15,7 @@ export const content: ToolContent = {
   ],
   shortName: 'To 500 KB',
   cardDescription: 'Websites and sharing, with high detail kept.',
-  title: 'Compress Image to 500KB Online – No Upload | Img Master',
+  title: 'Compress Image to 500KB Online – No Upload | Img Samurai',
   description:
     'Get high-quality photos under 500 KB for websites, listings and email. Keep the original dimensions if you like. Free, private, runs in your browser.',
   h1: 'Compress image to 500 KB',

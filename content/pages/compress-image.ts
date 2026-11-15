@@ -14,7 +14,7 @@ export const content: ToolContent = {
   ],
   shortName: 'Image compressor',
   cardDescription: 'Any size limit, or a quality slider.',
-  title: 'Image Compressor Online – Free, No Upload | Img Master',
+  title: 'Image Compressor Online – Free, No Upload | Img Samurai',
   description:
     'Reduce image file size by picking a target like 50 KB or a quality level. Works with JPG, PNG and WebP on any phone. Free, private, no signup.',
   h1: 'Image compressor',
@@ -42,7 +42,7 @@ export const content: ToolContent = {
         'Each of these pages opens with its size already selected, so you can bookmark the one you use most.',
       ],
       table: {
-        caption: 'Compress-to-size pages on Img Master',
+        caption: 'Compress-to-size pages on Img Samurai',
         headers: ['Tool', 'Result', 'Often used for'],
         rows: [
           [

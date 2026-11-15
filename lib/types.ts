@@ -1,4 +1,4 @@
-// Shared contracts for Img Master. Owned by the lead.
+// Shared contracts for Img Samurai. Owned by the lead.
 // Subagents propose changes in their reports; only the lead edits this file.
 // Sources: docs/SEO.md §3 (tools and content) and docs/ENGINE.md §2 (engine).
 
@@ -125,7 +125,7 @@ export interface ToolContent {
   secondaryKeywords: string[]; // 3–8 real variants
   shortName: string; // menus and cards, ≤ 18 chars ("To 50KB")
   cardDescription: string; // ≤ 70 chars
-  title: string; // ≤ 60 chars including " | Img Master"
+  title: string; // ≤ 60 chars including " | Img Samurai"
   description: string; // 120–155 chars
   h1: string;
   /** Exact substring of h1 drawn in crimson, e.g. "50 KB" in "Compress image to 50 KB". */

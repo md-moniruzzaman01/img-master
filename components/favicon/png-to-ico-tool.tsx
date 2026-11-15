@@ -220,7 +220,7 @@ export function PngToIcoTool({ tool }: { tool: ToolDefinition }) {
       const zip = await engine.zip(
         success.map((it) => ({ name: outName(it), blob: it.result.blob })),
       );
-      saveBlob(zip, `img-master-${slug}.zip`);
+      saveBlob(zip, `img-samurai-${slug}.zip`);
       onDownloaded('zip');
     } catch {
       setToast({ id: ++toastSeq, text: toolCopy.zipFailed, tone: 'info' });

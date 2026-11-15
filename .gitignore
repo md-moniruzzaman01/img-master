@@ -58,3 +58,6 @@ ref/
 
 # owner's Figma screen exports (reference only; regenerate from Figma)
 /docs/figma-export/
+
+# Brand preview screenshots (regenerate with node scripts/brand/preview.mjs)
+scripts/brand/preview/

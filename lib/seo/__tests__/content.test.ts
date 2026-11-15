@@ -60,7 +60,7 @@ describe('tool page content', () => {
 
   it.each(pages)('%s: title, description and short fields fit their limits', (slug, c) => {
     expect(c.title.length, `${slug} title`).toBeLessThanOrEqual(60);
-    expect(c.title.endsWith(' | Img Master'), `${slug} title brand`).toBe(true);
+    expect(c.title.endsWith(' | Img Samurai'), `${slug} title brand`).toBe(true);
     expect(c.description.length, `${slug} description`).toBeGreaterThanOrEqual(120);
     expect(c.description.length, `${slug} description`).toBeLessThanOrEqual(155);
     expect(c.shortName.length, `${slug} shortName`).toBeLessThanOrEqual(18);
@@ -300,7 +300,7 @@ describe('home and legal content', () => {
     (slug, c) => {
       expect(c.slug).toBe(slug);
       expect(c.title.length).toBeLessThanOrEqual(60);
-      expect(c.title.endsWith(' | Img Master')).toBe(true);
+      expect(c.title.endsWith(' | Img Samurai')).toBe(true);
       expect(c.description.length).toBeGreaterThanOrEqual(120);
       expect(c.description.length).toBeLessThanOrEqual(155);
       expect(c.sections.length).toBeGreaterThan(0);
@@ -322,7 +322,7 @@ describe('home and legal content', () => {
 describe('info pages (how it works, every tool)', () => {
   it.each(infoPages)('%s: title, description, subtitle and date', (path, c) => {
     expect(c.title.length, `${path} title`).toBeLessThanOrEqual(60);
-    expect(c.title.endsWith(' | Img Master'), `${path} title brand`).toBe(true);
+    expect(c.title.endsWith(' | Img Samurai'), `${path} title brand`).toBe(true);
     expect(c.description.length, `${path} description`).toBeGreaterThanOrEqual(120);
     expect(c.description.length, `${path} description`).toBeLessThanOrEqual(155);
     expect(c.subtitle.length, `${path} subtitle`).toBeLessThanOrEqual(140);

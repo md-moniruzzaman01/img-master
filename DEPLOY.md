@@ -1,6 +1,6 @@
-# Deploy Img Master to Cloudflare
+# Deploy Img Samurai to Cloudflare
 
-Img Master is a fully static site. `npm run build` writes every page to `out/`, and Cloudflare serves those files. There is no server code, no database and no secrets.
+Img Samurai is a fully static site. `npm run build` writes every page to `out/`, and Cloudflare serves those files. There is no server code, no database and no secrets.
 
 The setup uses **Cloudflare Workers static assets**, configured in `wrangler.jsonc`:
 
@@ -16,20 +16,20 @@ Static asset requests on Workers are free.
 ## 0. Before the first deploy
 
 1. **Choose the domain** and add it to Cloudflare (Websites → Add a site). Use Cloudflare's nameservers at your registrar. Wait until the zone shows **Active**.
-2. **Decide on the canonical host.** We use the apex (`https://yourdomain.com`), and `www` redirects to it (SEO.md §148).
+2. **Decide on the canonical host.** We use the apex (`https://imgsamurai.com`), and `www` redirects to it (SEO.md §148).
 3. **Check that the build passes locally:**
 
    ```sh
    npm ci
    npm run lint && npm run typecheck && npm run test
-   NEXT_PUBLIC_SITE_URL=https://yourdomain.com npm run build
+   NEXT_PUBLIC_SITE_URL=https://imgsamurai.com npm run build
    npm run test:e2e
    npm run lhci
    ```
 
    Then check that `out/sitemap.xml` and `out/robots.txt` use your real domain and not `img-master.example`.
 
-> **`NEXT_PUBLIC_SITE_URL` is required.** Without it, canonical links, the sitemap, `robots.txt`, Open Graph tags and JSON-LD all point to the placeholder `https://img-master.example`. It is read at **build** time, so set it wherever the build runs. You can also change the fallback in `lib/site-config.ts` once the domain is final.
+> **`NEXT_PUBLIC_SITE_URL` is optional.** The fallback in `lib/site-config.ts` is the live domain `https://imgsamurai.com`, which canonical links, the sitemap, `robots.txt`, Open Graph tags and JSON-LD all use. Set the variable only to build for another host (for example a preview). It is read at **build** time.
 
 ---
 
@@ -53,7 +53,7 @@ Pick **one** option. Option A is recommended because every push to `main` deploy
 
    | Name | Value |
    |---|---|
-   | `NEXT_PUBLIC_SITE_URL` | `https://yourdomain.com` (apex, https, no trailing slash) |
+   | `NEXT_PUBLIC_SITE_URL` | `https://imgsamurai.com` (apex, https, no trailing slash) |
    | `NODE_VERSION` | `22` (the project needs Node ≥ 20.9) |
 
 4. Save and deploy. The first build gives you a `*.workers.dev` preview URL. Open it on your phone and test a tool before you attach the domain.
@@ -63,7 +63,7 @@ Builds for other branches give preview URLs, which is useful for testing a branc
 ### Option B: Manual deploy from your computer
 
 ```sh
-NEXT_PUBLIC_SITE_URL=https://yourdomain.com npm run build
+NEXT_PUBLIC_SITE_URL=https://imgsamurai.com npm run build
 npx wrangler login        # once, opens the browser
 npx wrangler deploy       # uploads out/ using wrangler.jsonc
 ```
@@ -71,13 +71,13 @@ npx wrangler deploy       # uploads out/ using wrangler.jsonc
 `npx` downloads Wrangler temporarily. It is not a project dependency. Adding it to `package.json` needs the owner's approval (CLAUDE.md rule 7).
 
 In PowerShell, set the variable like this instead:
-`$env:NEXT_PUBLIC_SITE_URL="https://yourdomain.com"; npm run build`
+`$env:NEXT_PUBLIC_SITE_URL="https://imgsamurai.com"; npm run build`
 
 ---
 
 ## 2. Custom domain, `www` redirect and HTTPS
 
-1. **Attach the apex:** Workers & Pages → `img-master` → **Settings → Domains & Routes → Add → Custom domain** → `yourdomain.com`. Cloudflare creates the DNS record and the certificate.
+1. **Attach the apex:** Workers & Pages → `img-master` → **Settings → Domains & Routes → Add → Custom domain** → `imgsamurai.com`. Cloudflare creates the DNS record and the certificate.
 2. **Redirect `www` to the apex:**
    - DNS → add record: type `AAAA`, name `www`, content `100::`, **Proxied** (orange cloud). This placeholder lets Cloudflare catch the request.
    - Rules → **Redirect Rules** → Create from template **"Redirect from WWW to root"**. Use a 301 and keep the query string.
@@ -95,21 +95,21 @@ Run these after every first deploy to a new domain (replace the domain):
 
 ```sh
 # Pages and redirects
-curl -sI https://yourdomain.com/                    # 200
-curl -sI https://yourdomain.com/compress-image      # 200
-curl -sI https://yourdomain.com/compress-image/     # 307/308 to /compress-image
-curl -sI https://www.yourdomain.com/                # 301 to https://yourdomain.com/
-curl -sI http://yourdomain.com/                     # redirect to https
-curl -sI https://yourdomain.com/no-such-page        # 404
+curl -sI https://imgsamurai.com/                    # 200
+curl -sI https://imgsamurai.com/compress-image      # 200
+curl -sI https://imgsamurai.com/compress-image/     # 307/308 to /compress-image
+curl -sI https://www.imgsamurai.com/                # 301 to https://imgsamurai.com/
+curl -sI http://imgsamurai.com/                     # redirect to https
+curl -sI https://imgsamurai.com/no-such-page        # 404
 
 # Headers from public/_headers
-curl -sI https://yourdomain.com/ | grep -iE "content-security-policy|x-frame-options|strict-transport"
-curl -sI https://yourdomain.com/compress-image/opengraph-image | grep -i content-type   # image/png
+curl -sI https://imgsamurai.com/ | grep -iE "content-security-policy|x-frame-options|strict-transport"
+curl -sI https://imgsamurai.com/compress-image/opengraph-image | grep -i content-type   # image/png
 
 # Real domain everywhere
-curl -s https://yourdomain.com/robots.txt
-curl -s https://yourdomain.com/sitemap.xml | grep -c "<loc>https://yourdomain.com"     # 26
-curl -s https://yourdomain.com/ | grep -c "img-master.example"                        # 0
+curl -s https://imgsamurai.com/robots.txt
+curl -s https://imgsamurai.com/sitemap.xml | grep -c "<loc>https://imgsamurai.com"     # 26
+curl -s https://imgsamurai.com/ | grep -c "img-master.example"                        # 0
 ```
 
 Then, on your phone:
@@ -124,9 +124,9 @@ Then, on your phone:
 
 ### Google Search Console
 
-1. Go to <https://search.google.com/search-console> → **Add property** → **Domain** → `yourdomain.com`.
+1. Go to <https://search.google.com/search-console> → **Add property** → **Domain** → `imgsamurai.com`.
 2. Google shows a `TXT` record. Add it in Cloudflare DNS (type `TXT`, name `@`), then click **Verify**. Cloudflare may also offer to add it automatically.
-3. **Sitemaps** → submit `https://yourdomain.com/sitemap.xml`.
+3. **Sitemaps** → submit `https://imgsamurai.com/sitemap.xml`.
 4. **URL inspection** → request indexing for `/` and the main tool pages (`/compress-image`, `/compress-image-to-50kb`, `/image-converter`, `/favicon-generator`).
 
 ### Bing Webmaster Tools

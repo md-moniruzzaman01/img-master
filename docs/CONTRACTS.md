@@ -1,4 +1,4 @@
-# Img Master — integration contracts (Phase 1)
+# Img Samurai — integration contracts (Phase 1)
 
 Owned by the lead. These are the names and props the routes in `app/` use. Types live in `lib/types.ts`; data helpers live in `lib/tools/index.ts`. Change requests go to the lead.
 
@@ -84,7 +84,7 @@ ToolShell must render the FilePicker in its initial (server-rendered) HTML so th
 | `homeContent` | `content/home.ts` | `HomeContent` |
 | `legalContent` | `content/legal/index.ts` | `Readonly<Record<LegalSlug, LegalContent>>` |
 
-Titles in content are complete (they already end with " | Img Master"); metadata builders must not add the brand twice.
+Titles in content are complete (they already end with " | Img Samurai"); metadata builders must not add the brand twice.
 
 ## 4. Engine (image-engine)
 

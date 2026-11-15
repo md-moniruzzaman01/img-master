@@ -1,5 +1,5 @@
 // Metadata builders (docs/SEO.md §5, docs/CONTRACTS.md §3). Owned by seo-content.
-// Titles in content are complete ("… | Img Master"), so nothing here adds the
+// Titles in content are complete ("… | Img Samurai"), so nothing here adds the
 // brand again. Every page sets its own full openGraph and twitter objects,
 // because Next.js merges these fields shallowly between segments.
 import type { Metadata } from 'next';
@@ -65,7 +65,7 @@ export const SHARED_OG_IMAGE = {
   width: 1200,
   height: 630,
   type: 'image/png',
-  alt: 'Img Master: free image tools that work on your phone',
+  alt: 'Img Samurai: free image tools that work on your phone',
 } as const;
 
 /** Home, legal and other site pages. Pass the complete title. */

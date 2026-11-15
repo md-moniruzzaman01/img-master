@@ -201,7 +201,7 @@ export function buildReadme(
   return `Your favicon package
 ====================
 
-Made with Img Master. Your image never left your device.
+Made with Img Samurai (imgsamurai.com). Your image never left your device.
 
 Files
 -----

@@ -4,9 +4,9 @@ import { siteConfig } from '@/lib/site-config';
 import type { InfoPageContent } from '@/lib/types';
 
 export const howItWorksContent: InfoPageContent = {
-  title: 'How It Works – Image Tools With No Upload | Img Master',
+  title: 'How It Works – Image Tools With No Upload | Img Samurai',
   description:
-    'See how Img Master compresses and converts images inside your browser: read, search, shrink only if needed. Nothing is uploaded, and batches save as a ZIP.',
+    'See how Img Samurai compresses and converts images in your browser: read, search, shrink only if needed. Nothing is uploaded, and batches save as a ZIP.',
   h1: 'How it works',
   subtitle:
     'Every tool runs inside your browser. Here is what happens to your image, step by step, and where the limits are.',

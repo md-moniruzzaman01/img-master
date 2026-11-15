@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { SearchItem, ToolCardData, ToolNavGroup } from '@/lib/types';
 import { categoryGlyphs } from '@/lib/tools/glyphs';
-import { siteConfig } from '@/lib/site-config';
 import { SearchLauncher } from '@/components/search/search-launcher';
 import { SoundToggle } from '@/components/sound/sound-toggle';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -11,7 +10,7 @@ import { buttonClasses } from '@/components/ui/button-styles';
 import { cx } from '@/components/ui/cx';
 import { iconButtonClasses } from '@/components/ui/icon-button';
 import { ArrowRightIcon, ChevronDownIcon, MenuIcon, SearchIcon, XIcon } from '@/components/ui/icons';
-import { BrandSeal } from './brand-seal';
+import { BrandName, BrandSeal } from './brand-seal';
 import { navCopy as t } from './copy';
 import { HeaderMenus } from './header-menus';
 import { groupOf, isTabTool, pairTools, sizeLabel, sizeTools, standaloneTools } from './nav-data';
@@ -294,7 +293,7 @@ function MobileMenu({ groups }: { groups: ToolNavGroup[] }) {
             className="inline-flex min-h-12 items-center gap-3 font-display text-[1.375rem] font-extrabold text-ink no-underline"
           >
             <BrandSeal />
-            {siteConfig.name}
+            <BrandName />
           </Link>
         </div>
         <form action="/tools" role="search" className="mt-2">
@@ -406,7 +405,7 @@ export function SiteHeader({
           className="-ml-1 mr-auto inline-flex min-h-12 items-center gap-3 rounded-control px-1 font-display text-[1.375rem] font-extrabold whitespace-nowrap text-ink no-underline lg:mr-4 lg:text-2xl"
         >
           <BrandSeal />
-          {siteConfig.name}
+          <BrandName />
         </Link>
 
         <nav aria-label="Main" className="hidden lg:block">

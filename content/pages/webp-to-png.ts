@@ -11,7 +11,7 @@ export const content: ToolContent = {
   ],
   shortName: 'WebP to PNG',
   cardDescription: 'Keep transparency, edit anywhere.',
-  title: 'Convert WebP to PNG Online – Free, No Upload | Img Master',
+  title: 'Convert WebP to PNG Online – Free, No Upload | Img Samurai',
   description:
     'Turn WebP images into PNG files and keep transparent backgrounds intact. Good for logos, icons and editing. Runs on your phone, no upload, free.',
   h1: 'Convert WebP to PNG',

@@ -3,6 +3,7 @@
 //               right: HeroScene with motto.
 // Mobile: eyebrow, H1, subtitle, children, HeroScene (crop), trust row.
 import { HeroScene } from '@/components/home/hero-scene';
+import { siteConfig } from '@/lib/site-config';
 
 interface HomeHeroProps {
   h1: string;
@@ -53,7 +54,7 @@ export function HomeHero({
 
         {/* Trust row */}
         {trustItems && trustItems.length > 0 && (
-          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1" aria-label="Why choose Img Master">
+          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1" aria-label={`Why choose ${siteConfig.name}`}>
             {trustItems.map((item, i) => (
               <li key={item} className="flex items-center gap-1.5 type-small text-muted">
                 <TrustIcon index={i} />

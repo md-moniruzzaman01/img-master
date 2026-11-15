@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ToolNavGroup } from '@/lib/types';
 import { siteConfig } from '@/lib/site-config';
-import { BrandSeal } from './brand-seal';
+import { BrandName, BrandSeal } from './brand-seal';
 import { navCopy as t } from './copy';
 import { groupOf, isTabTool, sizeLabel, sizeTools } from './nav-data';
 
@@ -50,7 +50,7 @@ function Column({ label, links }: { label: string; links: { label: string; href:
 
 /**
  * Dark footer with the ink mountain edge (spec §6). Desktop: blurb and four
- * columns (Compress / Convert / More tools / Img Master). Phones: name and a
+ * columns (Compress / Convert / More tools / site name). Phones: name and a
  * few links (Figma mobile-home-04).
  */
 export function SiteFooter({ groups }: { groups: ToolNavGroup[] }) {
@@ -89,7 +89,7 @@ export function SiteFooter({ groups }: { groups: ToolNavGroup[] }) {
                 <span className="hidden lg:inline-flex">
                   <BrandSeal />
                 </span>
-                {siteConfig.name}
+                <BrandName accentClass="text-shu" />
               </p>
               <p className="mt-5 hidden max-w-[20rem] type-body text-on-band-muted lg:block">
                 {t.footerBlurb}

@@ -1,4 +1,4 @@
-# Img Master — Claude Code starter kit
+# Img Samurai (imgsamurai.com) — Claude Code starter kit
 
 This kit tells Claude Code exactly what to build, how, and in what order, using one lead session and four specialist subagents working in parallel.
 
