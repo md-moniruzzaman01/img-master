@@ -323,7 +323,7 @@ test('png-to-ico: JPG input shows the failed card; mixed batch is partial; Downl
   );
   expect(statuses).toEqual(['success', 'failed', 'success', 'failed']);
   const { bytes, name } = await downloadVia(page, page.getByTestId('download-all'));
-  expect(name).toBe('img-master-png-to-ico.zip');
+  expect(name).toBe('img-samurai-png-to-ico.zip');
   expect(Object.keys(unzip(bytes)).sort()).toEqual(['a.ico', 'b.ico']);
   const dl = await downloadVia(page, cards(page).first().getByTestId('download'));
   expect(dl.name).toBe('a.ico');

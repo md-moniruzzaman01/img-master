@@ -31,14 +31,15 @@ async function setPx(page: Page, w: string, h: string) {
   await H(page).fill(h);
 }
 const keepRatio = (p: Page) => p.getByRole('switch', { name: /Keep ratio/ });
-const settle = (p: Page) => p.waitForTimeout(700); // 250 ms debounce plus start
 
 async function waitCardsDone(page: Page) {
   await expect(shell(page)).toHaveAttribute('data-state', /^(done|partial|error)$/, {
     timeout: 60_000,
   });
   await expect(
-    page.locator('[data-testid=result-card][data-status=queued], [data-testid=result-card][data-status=processing]'),
+    page.locator(
+      '[data-testid=result-card][data-status=queued], [data-testid=result-card][data-status=processing]',
+    ),
   ).toHaveCount(0);
 }
 
@@ -190,7 +191,9 @@ test('transparency: -> JPG flattens to white with a note; Same keeps alpha', asy
   expect(dec.corner[2]).toBeGreaterThan(245);
 
   await page.getByRole('radio', { name: 'Same as original', exact: true }).click();
-  await expect.poll(async () => (await cardData(cards(page).first())).format, { timeout: 30_000 }).toBe('png');
+  await expect
+    .poll(async () => (await cardData(cards(page).first())).format, { timeout: 30_000 })
+    .toBe('png');
   await waitCardsDone(page);
   const s = await downloadVia(page, page.getByTestId('download').first());
   expect(sniff(s.bytes)).toBe('png');
@@ -245,7 +248,9 @@ test('validation: file picked while invalid starts after pixels are fixed', asyn
   await page.getByTestId('file-input').setInputFiles(fixture('photo-2mp.jpg'));
   await page.waitForTimeout(500);
   await expect(cards(page)).toHaveCount(0);
-  await expect(page.getByTestId('resize-controls')).toContainText('Your image will start when this is fixed.');
+  await expect(page.getByTestId('resize-controls')).toContainText(
+    'Your image will start when this is fixed.',
+  );
   await W(page).fill('320');
   await waitCardsDone(page);
   const d = await cardData(cards(page).first());
@@ -278,7 +283,7 @@ test('batch: several files -> ZIP with right names', async ({ page }) => {
   ]);
   await expect(cards(page)).toHaveCount(3);
   const { bytes, name } = await downloadVia(page, page.getByTestId('download-all'));
-  expect(name).toBe('img-master-resize-image.zip');
+  expect(name).toBe('img-samurai-resize-image.zip');
   expect(sniff(bytes)).toBe('zip');
   const zip = unzipSync(new Uint8Array(bytes));
   expect(Object.keys(zip).sort()).toEqual(['a-100x75.jpg', 'b-100x75.jpg', 'logo-100x100.png']);
@@ -334,7 +339,10 @@ test('engine cap: an impossible size shows "Largest size for this image"', async
   await expect(page.getByTestId('download')).toHaveCount(0);
 });
 
-test('privacy: a resize run makes only same-origin requests (no POST/PUT/PATCH, no bodies)', async ({ page, context }) => {
+test('privacy: a resize run makes only same-origin requests (no POST/PUT/PATCH, no bodies)', async ({
+  page,
+  context,
+}) => {
   const net = recordNetwork(context);
   await gotoTool(page, SLUG);
   await setPx(page, '500', '');
@@ -343,7 +351,12 @@ test('privacy: a resize run makes only same-origin requests (no POST/PUT/PATCH, 
   const origin = new URL(page.url()).origin;
   const bad = net.filter(
     (n) =>
-      !(n.origin === origin || n.origin === 'blob:' || n.origin === 'data:' || n.origin === 'about:') ||
+      !(
+        n.origin === origin ||
+        n.origin === 'blob:' ||
+        n.origin === 'data:' ||
+        n.origin === 'about:'
+      ) ||
       !['GET', 'HEAD'].includes(n.method) ||
       n.bodyBytes > 0,
   );

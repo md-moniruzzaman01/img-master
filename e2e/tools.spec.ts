@@ -324,7 +324,7 @@ test('batch of 20 files: 20 cards, ZIP has 20 right-named files', async ({ page 
   await expect(page.getByTestId('download')).toHaveCount(20);
   await expect(page.getByTestId('download-all')).toBeVisible();
   const { bytes, name } = await downloadVia(page, page.getByTestId('download-all'));
-  expect(name).toBe('img-master-compress-image-to-100kb.zip');
+  expect(name).toBe('img-samurai-compress-image-to-100kb.zip');
   expect(sniff(bytes)).toBe('zip');
   const zip = unzipSync(new Uint8Array(bytes));
   const expected = [

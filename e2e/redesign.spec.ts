@@ -16,7 +16,7 @@ test.beforeAll(ensureFixtures);
 
 const ALL_TOOLS = [...TOOL_SLUGS, ...FAVICON_SLUGS];
 const HEADER_MAX = 68;
-const INFO = ['/about', '/privacy', '/terms', '/contact'];
+
 // Header carries these three; Terms and Contact live in the footer (two-line footer, DESIGN.md §4.1).
 const HEADER_INFO = ['/how-it-works', '/about', '/privacy'];
 
@@ -109,7 +109,9 @@ test('desktop 1280: no menu button; Compress, Convert, Resize, Favicon, How it w
   // Top-level items: Compress / Convert / Favicon open mega menus (<summary>), Resize and How it works are links.
   const tops = nav.locator(':scope > ul > li');
   const labels = await tops.evaluateAll((lis) =>
-    lis.map((li) => (li.querySelector('summary, a')?.textContent ?? '').replace(/\s+/g, ' ').trim()),
+    lis.map((li) =>
+      (li.querySelector('summary, a')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    ),
   );
   expect(labels).toEqual(['Compress', 'Convert', 'Resize', 'Favicon', 'How it works']);
   for (const li of await tops.all()) {
@@ -135,7 +137,7 @@ for (const path of ['/', '/compress-image-to-50kb', '/png-to-ico', '/about']) {
     await expect(footer).toHaveCount(1);
     const year = new Date().getFullYear();
     const txt = (await footer.innerText()).replace(/\s+/g, ' ').trim();
-    expect(txt).toContain(`© ${year} Img Master · Built by Softwara`);
+    expect(txt).toContain(`© ${year} Img Samurai · Built by Softwara`);
     const visible = await footer.locator('a[href^="/"]').evaluateAll((as) =>
       as
         .filter((a) => {
@@ -149,7 +151,10 @@ for (const path of ['/', '/compress-image-to-50kb', '/png-to-ico', '/about']) {
     const html = await (await page.request.get(path)).text();
     expect(/<footer[\s\S]*?<\/footer>/.exec(html)![0]).toContain('href="/contact"');
     for (const a of await footer.locator('a:visible').all())
-      expect((await a.boundingBox())!.height, `footer link ${await a.innerText()}`).toBeGreaterThanOrEqual(47.5);
+      expect(
+        (await a.boundingBox())!.height,
+        `footer link ${await a.innerText()}`,
+      ).toBeGreaterThanOrEqual(47.5);
   });
 }
 
@@ -262,7 +267,10 @@ async function colourScan(page: Page, allowExtra: string[] = []) {
       if (!tokens.has(c) && !translucent && !bg.has(c))
         bg.set(c, e.tagName + '.' + String(e.className).slice(0, 50));
       // The only shadow in the design is the soft float shadow on menus and dialogs.
-      if (cs.boxShadow !== 'none' && !e.closest('[data-menu-panel], dialog, [role=dialog], [data-float]'))
+      if (
+        cs.boxShadow !== 'none' &&
+        !e.closest('[data-menu-panel], dialog, [role=dialog], [data-float]')
+      )
         shadows.push(e.tagName + '.' + String(e.className).slice(0, 40) + ' ' + cs.boxShadow);
     }
     return { bg: [...bg.entries()], shadows };

@@ -8,7 +8,7 @@ import { tools } from '../lib/tools/registry';
 
 test.skip(({ browserName }) => browserName !== 'chromium', 'file-system crawl; runs once');
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://img-master.example').replace(/\/$/, '');
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://imgsamurai.com').replace(/\/$/, '');
 // Derived from the real registry so the expectations track what is actually live.
 const LIVE_TOOLS = tools.filter((t) => t.status === 'live').map((t) => t.slug);
 const DRAFT_SLUGS = tools.filter((t) => t.status !== 'live').map((t) => t.slug);
@@ -175,9 +175,9 @@ test('every page: one H1, title, description, canonical, robots', () => {
     if (!p.title) problems.push(`${p.path}: no title`);
     if (p.title.length > 60)
       problems.push(`${p.path}: title ${p.title.length} chars > 60: "${p.title}"`);
-    if (!/ \| Img Master$/.test(p.title) && p.path !== '/')
+    if (!/ \| Img Samurai$/.test(p.title) && p.path !== '/')
       problems.push(`${p.path}: title lacks brand suffix: "${p.title}"`);
-    if ((p.title.match(/Img Master/g) ?? []).length > 1 && p.path !== '/')
+    if ((p.title.match(/Img Samurai/g) ?? []).length > 1 && p.path !== '/')
       problems.push(`${p.path}: brand twice in title`);
     const d = p.description.length;
     const isTool = LIVE_TOOLS.includes(p.path.slice(1));
@@ -334,6 +334,13 @@ test('JSON-LD parses and matches visible content (tool pages)', () => {
         problems.push(
           `${p.path}: breadcrumb mismatch visible=[${visibleCrumbs}] json=[${jsonCrumbs}]`,
         );
+      // Last crumb (visible) must equal the last BreadcrumbList name and be the primary keyword phrase.
+      const lastVisible = visibleCrumbs.at(-1);
+      const lastName = bc.itemListElement.at(-1)?.name;
+      if (lastVisible !== lastName)
+        problems.push(`${p.path}: last crumb visible="${lastVisible}" json="${lastName}"`);
+      if (lastName && /^to\s/i.test(lastName))
+        problems.push(`${p.path}: last crumb "${lastName}" is not a descriptive keyword phrase`);
       const last = bc.itemListElement.at(-1);
       if (last && last.item !== p.canonical)
         problems.push(`${p.path}: last breadcrumb item != canonical`);
@@ -541,14 +548,12 @@ test('content similarity between sibling tool pages (< 30%)', () => {
   for (const r of results) logMetric('similarity.ndjson', r);
   const over = results.filter((r) => r.contain > 0.3 || r.jaccard > 0.3);
   const worst = [...results].sort((x, y) => y.contain - x.contain).slice(0, 8);
-  test
-    .info()
-    .annotations.push({
-      type: 'worst-pairs',
-      description: JSON.stringify(
-        worst.map((w) => [w.a, w.b, +w.contain.toFixed(3), +w.jaccard.toFixed(3)]),
-      ),
-    });
+  test.info().annotations.push({
+    type: 'worst-pairs',
+    description: JSON.stringify(
+      worst.map((w) => [w.a, w.b, +w.contain.toFixed(3), +w.jaccard.toFixed(3)]),
+    ),
+  });
   expect(
     over.map(
       (r) =>
@@ -606,12 +611,10 @@ test('banned claims: scan all visible text (flags for review)', () => {
     }
   }
   for (const r of review) logMetric('review-claims.ndjson', { review: r });
-  test
-    .info()
-    .annotations.push({
-      type: 'needs-human-review',
-      description: `${review.length} mentions of passport/visa/official/requirement`,
-    });
+  test.info().annotations.push({
+    type: 'needs-human-review',
+    description: `${review.length} mentions of passport/visa/official/requirement`,
+  });
   for (const h of hits) logMetric('banned-claims.ndjson', { hit: h });
   expect(hits, `\n${hits.join('\n')}`).toEqual([]);
 });
@@ -620,9 +623,9 @@ test('numbers in content: no invented benchmark table before reports/benchmarks.
   const hasBench = existsSync(join(OUT_DIR, '..', 'reports', 'benchmarks.json'));
   const problems: string[] = [];
   for (const p of toolPages) {
-    if (!hasBench && /<table/.test(p.mainHtml) && /Measured with Img Master/i.test(p.mainHtml)) {
+    if (!hasBench && /<table/.test(p.mainHtml) && /Measured with Img Samurai/i.test(p.mainHtml)) {
       problems.push(
-        `${p.path}: has a "Measured with Img Master" table but there is no reports/benchmarks.json`,
+        `${p.path}: has a "Measured with Img Samurai" table but there is no reports/benchmarks.json`,
       );
     }
   }
@@ -662,7 +665,9 @@ test('privacy and legal pages: contact email present, "Last updated" date shown'
     if (!/Last updated/i.test(p.below)) problems.push(`${p.path}: no "Last updated"`);
   const priv = pages.find((x) => x.path === '/privacy')!;
   if (
-    !/nothing is uploaded|never (sent|uploaded)|not uploaded|stay on your device|never leave your device/i.test(priv.below)
+    !/nothing is uploaded|never (sent|uploaded)|not uploaded|stay on your device|never leave your device/i.test(
+      priv.below,
+    )
   )
     problems.push('/privacy does not state that images are not uploaded');
   const about = pages.find((x) => x.path === '/about')!;

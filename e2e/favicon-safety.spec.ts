@@ -82,7 +82,7 @@ test('hostile emoji field and tampered localStorage are neutralised', async ({ p
 
   await page.evaluate(() => {
     localStorage.setItem(
-      'img-master:options:favicon-from-text',
+      'img-samurai:options:favicon-from-text',
       JSON.stringify({
         text: {
           text: '</text><script>window.__pwn=1</script>',
