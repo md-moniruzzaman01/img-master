@@ -32,7 +32,7 @@ export const content: ToolContent = {
       heading: 'When to convert HEIC to PNG',
       paragraphs: [
         'Convert HEIC to PNG when you plan to edit the photo. PNG is lossless. The pixels are saved exactly as they are, so saving again and again does not add new compression marks the way JPG can.',
-        'It also helps when an app, a design tool or a website accepts PNG but cannot read HEIC.',
+        'This HEIC to PNG converter is made for that job. It also helps when an app, a design tool or a website accepts PNG but cannot read HEIC.',
       ],
       list: [
         'Photo editors and design apps',
@@ -95,7 +95,7 @@ export const content: ToolContent = {
     },
     {
       q: 'Is my photo uploaded when I change HEIC to PNG?',
-      a: 'No. Your browser does the work, and the photo never leaves your device. The HEIC reader comes from our own site and runs in the same tab.',
+      a: 'No. This HEIC to PNG converter works in your browser, and the photo never leaves your device. The HEIC reader comes from our own site and runs in the same tab.',
     },
     {
       q: 'What is HEIF, and is it the same as HEIC?',

@@ -161,7 +161,7 @@ export function ResultCard({
       )}
     >
       <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 @[680px]:grid-cols-[minmax(0,1fr)_auto] @[680px]:items-center">
-      <div className="flex min-w-0 gap-3 @[680px]:col-start-1">
+      <div className="flex min-w-0 gap-3 min-[380px]:max-[419px]:gap-2.5 @[680px]:col-start-1">
         <div
           className={cx(
             'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-line',

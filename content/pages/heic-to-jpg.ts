@@ -44,7 +44,7 @@ export const content: ToolContent = {
     {
       heading: 'Open HEIC file on Windows without installing anything',
       paragraphs: [
-        'If you copied photos from an iPhone to a Windows computer and they will not open, you do not need a new program. Open this page in Chrome, Edge or Firefox, choose the photos, and save the JPG copies. They open in the normal photo viewer, in Word and in an email.',
+        'If you copied photos from an iPhone to a Windows computer and they will not open, you do not need a new program. Open this HEIC to JPG converter in Chrome, Edge or Firefox, choose the photos, and save the JPG copies. They open in the normal photo viewer, in Word and in an email.',
         'The original HEIC file stays where it is. You get a new JPG next to it, with the same name and a .jpg ending.',
       ],
     },
@@ -88,11 +88,11 @@ export const content: ToolContent = {
     },
     {
       q: 'Is HEIC to JPG conversion safe, and does it upload my photo?',
-      a: 'It is safe because nothing is uploaded. The photo is opened and saved inside your browser, and it never leaves your device. The small HEIC reader loads from our own site.',
+      a: 'It is safe because nothing is uploaded. This HEIC to JPG converter works in your browser. The photo is opened and saved inside your browser, and it never leaves your device. The small HEIC reader loads from our own site.',
     },
     {
       q: 'Is HEIC to JPEG the same as HEIC to JPG?',
-      a: 'Yes. JPG and JPEG are two names for one format. If a form asks for JPEG, a .jpg file is accepted.',
+      a: 'Yes. HEIC to JPEG gives the same result as HEIC to JPG, because JPG and JPEG are two names for one format. If a form asks for JPEG, a .jpg file is accepted.',
     },
     {
       q: 'How do I make my iPhone save JPG instead of HEIC?',
